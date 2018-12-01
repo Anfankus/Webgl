@@ -313,8 +313,6 @@ class ButterFly {
             _gl.clearDepth(1.0);
         }
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrixs));
-        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.cameraMatrixLoc, false, flatten(gl.cameraMatrix));
-        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.projectionMatrixLoc, false, flatten(gl.projectionMatrix));
 
         //body
         _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers.positions.butterfly.body);
@@ -606,8 +604,6 @@ class Insect {
             _gl.clearDepth(1.0);
         }
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrixs));
-        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.cameraMatrixLoc, false, flatten(gl.cameraMatrix));
-        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.projectionMatrixLoc, false, flatten(gl.projectionMatrix));
 
         //body
         for (let i in this.body) {
@@ -650,11 +646,6 @@ class GL {
     public insect: Insect;
     public buffers: any;
     public buffers1: any;
-
-    public projectionMatrix: any;
-    public cameraMatrix: any;
-    public aspect: number;
-
     constructor() {
         let canvas = document.getElementById("gl-canvas");
         this.gl = WebGLUtils.setupWebGL(canvas);
@@ -662,7 +653,6 @@ class GL {
         this.gl.viewport(0, 0, canvas.width, canvas.height);
         this.gl.clearColor(1.0, 1.0, 1.0, 1.0);
         this.gl.enable(this.gl.DEPTH_TEST);
-        this.aspect = canvas.width / canvas.height;
 
         let shaderPro = initShaders(this.gl, "vertex-shader", "fragment-shader");
         this.programInfo = {
@@ -673,9 +663,6 @@ class GL {
             },
             uniformLocations: {
                 modelViewMatrix: this.gl.getUniformLocation(shaderPro, 'uModelViewMatrix'),
-                cameraMatrixLoc: this.gl.getUniformLocation(shaderPro, 'uCameraMatrix'),
-                projectionMatrixLoc: this.gl.getUniformLocation(shaderPro, 'uProjectionMatrix'),
-
             },
         };
         this.buffers = {
@@ -695,20 +682,6 @@ class GL {
         this.butterfly.initBuffer(this);
         this.insect = new Insect();
         this.insect.initBuffer(this);
-
-        this.view(3.0, 0.3, 4.0, 0.0, 0.0, 1.0, 45.0);
-    }
-
-    //视图
-    public view(far = 3.0, near = 0.3, radius = 4.0, theta = 0.0, phi = 0.0, aspect = 1.0, fovy = 45.0) {
-        const at = vec3(0.0, 0.0, 0.0);
-        const up = vec3(0.0, 1.0, 0.0);
-        eye = vec3(radius * Math.sin(theta) * Math.cos(phi),
-            radius * Math.sin(theta) * Math.sin(phi),
-            radius * Math.cos(theta));
-        this.cameraMatrix = lookAt(eye, at, up);
-        this.projectionMatrix = perspective(fovy, aspect, near, far);
-
     }
 }
 enum transType {
