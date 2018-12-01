@@ -45,24 +45,41 @@ class FlatWing {
 
     }
 }
-class Wing{
-    public vertices:Array<number>;
-    constructor(){
-        const thickness=0.01;
-        const frag_thickness=10;
-        const each_thickness=thickness/frag_thickness;
-        const frag_wings=90;
-        
-        let firstWing=new FlatWing(0);
-        let rotateM=rotateY(-thickness);
+class Wing {
+    public vertices: Array<number>;
+    public flats: Array<Array<number>>;
+    constructor(size = 0.5, thicknessFrag = 20) {
+        this.vertices = new Array<number>();
+        this.flats = new Array<Array<number>>(2);
 
-        for(let i=-thickness;i<thickness;i+=each_thickness){
+        let angle = 5;
+        let eachAngle = 2 * angle / thicknessFrag;
 
+        let baseWing = new FlatWing(size)
+
+        let rotate = Util.rotateY(-angle);
+        let last = Util.MatsMult(baseWing.vertices, rotate, 3, true);
+        this.flats[0] = last;
+
+        let rotateM = Util.rotateY(eachAngle);
+        for (let i = -angle; i < angle; i += eachAngle) {
+            let newVer = [];
+            for (let j = 0; j < baseWing.vertices.length; j += 3) {
+                this.vertices.push(last[j], last[j + 1], last[j + 2])
+                for (let k = 0; k < 3; k++) {
+                    let newEle = rotateM[3 * k] * last[j] + rotateM[3 * k + 1] * last[j + 1] + rotateM[3 * k + 2] * last[j + 2];
+                    newVer.push(newEle);
+                    this.vertices.push(newEle);
+                }
+            }
+            last = newVer;
         }
-
+        this.flats[1] = last;
     }
-    private getSize(maxSize:number,maxThickness:number,angle:number){
-
+    private static getSize(maxSize: number, maxThickness: number, angle: number) {
+        let cos = Math.cos(angle);
+        let sin = Math.sin(angle);
+        return 2 * cos / (maxSize * ((Math.sqrt(sin / maxThickness) + Math.sqrt(cos / maxSize))));
     }
 }
 
@@ -102,7 +119,8 @@ class Ellipsoid {
 class ButterFly {
     public body: Ellipsoid;
     public eyes: Array<Ellipsoid>;
-    public wings: Array<FlatWing>;
+    public flatWings: Array<Array<number>>;
+    public Wing: Wing;
     public lines;
 
     public direction: Array<number>;
@@ -131,32 +149,24 @@ class ButterFly {
             new Ellipsoid(0.02, 0.02, [-0.15, 0.6, 0], '0x000000f0')
 
         ];
-        this.wings = [
-            new FlatWing(0.9),
-            new FlatWing(0.85, 0.002, 32, 0, '0x1e90ff'),
-            new FlatWing(0.85, -0.002, 32, 0, '0x1e90ff'),
-            new FlatWing(0.5, 0.004, 200, 1),
-            new FlatWing(0.5, -0.004, 200, 1)
-
-        ];
-        this.wings[1].setCenterColor('0xfffffff0');
-        this.wings[2].setCenterColor('0xfffffff0');
-
+        this.Wing = new Wing(0.95);
+        this.flatWings = this.Wing.flats;
         this.lines = [
             -0.008, 0.3, 0, -0.15, 0.6, 0,
             0.008, 0.3, 0, 0.15, 0.6, 0
         ];
-        let LinesOnWings = [1, 2];
-        for (let j of LinesOnWings) {
-            let centerPoint = [
-                ...this.wings[j].vertices.slice(0, 2),
-                this.wings[j].vertices[2] * 1.5
-            ];
-            for (let i = 0; i < this.wings[j].vertices.length; i += 3) {
-                this.lines.push(...centerPoint);
-                this.lines.push(...this.wings[j].vertices.slice(i, i + 2), centerPoint[2]);
-            }
-        }
+        // let LinesOnWings = [1, 2];
+        // for (let j of LinesOnWings) {
+        //     let centerPoint = [
+        //         ...this.flatWings[j].slice(0, 2),
+        //         this.flatWings[j][2] * 1.5
+        //     ];
+        //     for (let i = 0; i < this.flatWings[j].length; i += 3) {
+        //         this.lines.push(...centerPoint);
+        //         this.lines.push(...this.flatWings[j].slice(i, i + 2), centerPoint[2]);
+        //     }
+        // }
+
 
         this.modelMatrixs = mat4();
         this.baseMatrixs = mat4();
@@ -188,26 +198,26 @@ class ButterFly {
 
         }
 
-        //wings
-        gl.buffers.positions.butterfly.wings = [];
-        gl.buffers.colors.butterfly.wings = [];
-        for (let i in this.wings) {
-            let tempPBuf = _gl.createBuffer();
-            gl.buffers.positions.butterfly.wings.push(tempPBuf);
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, tempPBuf);
-            _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.wings[i].vertices), _gl.STATIC_DRAW);
+        //FlatWings
+        gl.buffers.positions.butterfly.wings = [_gl.createBuffer(), _gl.createBuffer()];
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers.positions.butterfly.wings[0]);
+        _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.Wing.flats[0]), _gl.STATIC_DRAW);
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers.positions.butterfly.wings[1]);
+        _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.Wing.flats[1]), _gl.STATIC_DRAW);
 
-            let tempCBuf = _gl.createBuffer();
-            gl.buffers.colors.butterfly.wings.push(tempCBuf);
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, tempCBuf);
-            _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.wings[i].colors), _gl.STATIC_DRAW);
-
-        }
         //lines
         let lineBuf = _gl.createBuffer();
         gl.buffers.positions.butterfly.lines = lineBuf;
         _gl.bindBuffer(_gl.ARRAY_BUFFER, lineBuf);
         _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.lines), _gl.STATIC_DRAW);
+
+        //Wing:
+        let WingBuf = _gl.createBuffer();
+        gl.buffers.positions.butterfly.Wing = WingBuf;
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, WingBuf);
+        _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.Wing.vertices), _gl.STATIC_DRAW);
+
+
     }
 
     /**
@@ -221,7 +231,7 @@ class ButterFly {
         let currentTrans;
         switch (axisType) {
             case 0:
-                transMetrix = translate(...Util.VecMat4(mat4(-1), this.basePosition));
+                transMetrix = translate(...Util.Mat4Vec(mat4(-1), this.basePosition));
                 let temp = rotate(delta, ...this.baseAxis);
                 transMetrix = mult(temp, transMetrix);
                 transMetrix = mult(translate(...this.basePosition), transMetrix);
@@ -237,7 +247,7 @@ class ButterFly {
         let ret = false;
         if (related) {
             this.modelMatrixs = mult(transMetrix, this.modelMatrixs);
-            this.direction = Util.VecMat4(transMetrix, this.direction);
+            this.direction = Util.Mat4Vec(transMetrix, this.direction);
             return ret;
         }
         else if (this.lastTrans !== currentTrans && this.lastTrans !== transType.none) {
@@ -248,10 +258,10 @@ class ButterFly {
             this.basePosition = this.position;
         }
         this.modelMatrixs = mult(transMetrix, this.baseMatrixs);
-        this.direction = Util.VecMat4(transMetrix, this.baseDirection);
-        this.position = Util.VecMat4(transMetrix, this.basePosition);
+        this.direction = Util.Mat4Vec(transMetrix, this.baseDirection);
+        this.position = Util.Mat4Vec(transMetrix, this.basePosition);
         if (axisType !== 0) {
-            this.axis = Util.VecMat4(transMetrix, this.baseAxis);
+            this.axis = Util.Mat4Vec(transMetrix, this.baseAxis);
         }
         console.log(this.axis, this.baseAxis);
         this.lastTrans = currentTrans;
@@ -304,7 +314,7 @@ class ButterFly {
             this.basePosition = this.position;
         }
         this.modelMatrixs = mult(transMetrix, this.baseMatrixs);
-        this.position = Util.VecMat4(transMetrix, this.basePosition);
+        this.position = Util.Mat4Vec(transMetrix, this.basePosition);
         this.lastTrans = currentTrans;
         console.log(this.axis, this.baseAxis);
 
@@ -312,7 +322,7 @@ class ButterFly {
     }
 
     public zoom(size: number, related: boolean) {
-        let transMetrix = translate(...Util.VecMat4(mat4(-1), this.basePosition));
+        let transMetrix = translate(...Util.Mat4Vec(mat4(-1), this.basePosition));
         let temp = mat4(size);
         temp[3][3] = 1;
 
@@ -357,24 +367,25 @@ class ButterFly {
             _gl.drawArrays(_gl.TRIANGLE_FAN, 0, this.eyes[i].vertices.length / 3)
         }
 
+        _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexColor);
         //wings
-        for (let i in this.wings) {
+        for (let i in this.flatWings) {
             _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers.positions.butterfly.wings[i]);
             _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers.colors.butterfly.wings[i]);
-            _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexColor, 4, _gl.FLOAT, false, 0, 0);
+            _gl.drawArrays(_gl.TRIANGLE_FAN, 0, this.flatWings[i].length / 3)
 
-            if (this.wings[i].flag === 1) {
-                _gl.drawArrays(_gl.LINE_LOOP, 0, this.wings[i].vertices.length / 3)
-            }
-            else {
-                _gl.drawArrays(_gl.TRIANGLE_FAN, 0, this.wings[i].vertices.length / 3)
-            }
         }
         //lines
+
         _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers.positions.butterfly.lines);
         _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
         _gl.drawArrays(_gl.LINES, 0, this.lines.length / 3)
+
+        //Wing
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers.positions.butterfly.Wing);
+        _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
+        _gl.drawArrays(_gl.TRIANGLE_STRIP, 0, this.Wing.vertices.length / 3)
+        _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexColor);
 
     }
 }
@@ -512,7 +523,7 @@ class Insect {
         let currentTrans;
         switch (axisType) {
             case 0:
-                transMetrix = translate(...Util.VecMat4(mat4(-1), this.basePosition));
+                transMetrix = translate(...Util.Mat4Vec(mat4(-1), this.basePosition));
                 let temp = rotate(delta, ...this.baseAxis);
                 transMetrix = mult(temp, transMetrix);
                 transMetrix = mult(translate(...this.basePosition), transMetrix);
@@ -528,7 +539,7 @@ class Insect {
         let ret = false;
         if (related) {
             this.modelMatrixs = mult(transMetrix, this.modelMatrixs);
-            this.direction = Util.VecMat4(transMetrix, this.direction);
+            this.direction = Util.Mat4Vec(transMetrix, this.direction);
             return ret;
         }
         else if (this.lastTrans !== currentTrans && this.lastTrans !== transType.none) {
@@ -539,10 +550,10 @@ class Insect {
             this.basePosition = this.position;
         }
         this.modelMatrixs = mult(transMetrix, this.baseMatrixs);
-        this.direction = Util.VecMat4(transMetrix, this.baseDirection);
-        this.position = Util.VecMat4(transMetrix, this.basePosition);
+        this.direction = Util.Mat4Vec(transMetrix, this.baseDirection);
+        this.position = Util.Mat4Vec(transMetrix, this.basePosition);
         if (axisType !== 0) {
-            this.axis = Util.VecMat4(transMetrix, this.baseAxis);
+            this.axis = Util.Mat4Vec(transMetrix, this.baseAxis);
         }
         console.log(this.axis, this.baseAxis);
         this.lastTrans = currentTrans;
@@ -595,7 +606,7 @@ class Insect {
             this.basePosition = this.position;
         }
         this.modelMatrixs = mult(transMetrix, this.baseMatrixs);
-        this.position = Util.VecMat4(transMetrix, this.basePosition);
+        this.position = Util.Mat4Vec(transMetrix, this.basePosition);
         this.lastTrans = currentTrans;
         console.log(this.axis, this.baseAxis);
 
@@ -603,7 +614,7 @@ class Insect {
     }
 
     public zoom(size: number, related: boolean) {
-        let transMetrix = translate(...Util.VecMat4(mat4(-1), this.basePosition));
+        let transMetrix = translate(...Util.Mat4Vec(mat4(-1), this.basePosition));
         let temp = mat4(size);
         temp[3][3] = 1;
 
@@ -710,7 +721,7 @@ enum transType {
     none, rotateX, rotateY, rotateZ, rotateMain, translateX, translateY, translateZ, translateMain, zoom
 }
 class Util {
-    public static VecMat4(Mat4, Vec) {
+    public static Mat4Vec(Mat4, Vec) {
         let tempVec = [];
         for (let i in [0, 1, 2]) {
             tempVec.push(Vec[0] * Mat4[i][0]
@@ -722,7 +733,6 @@ class Util {
         return tempVec
     }
     public static Hex2Vec4(hex: string) {
-
         let _hex = parseInt(hex);
         let ret;
         if (hex.length <= 8) {
@@ -733,4 +743,61 @@ class Util {
         }
         return ret.map(x => x / 0xFF);
     }
+    public static MatsMult(A: Array<number>, B: Array<number>, i: number, reverse = false) {
+        if (Number.isInteger(i) && Number.isInteger(A.length / i) && Number.isInteger(B.length / i)) {
+            let ret;
+            let a = 0;
+            if (reverse) {
+                let ARows = A.length / i;
+                let AColumns = i;
+                let BRows = B.length / i;
+                let BColumns = i;
+                ret = new Array<number>(ARows * BRows);
+
+                while (a < ret.length) {
+                    let row = Math.floor(a / BRows);
+                    let column = a % BRows;
+                    let each = 0;
+                    for (let index = 0; index < i; index++) {
+                        each += A[row * AColumns + index] * B[BColumns * column + index];
+                    }
+                    ret[a++] = each;
+                }
+            }
+            else {
+                let ARows = A.length / i;
+                let AColumns = i;
+                let BRows = i;
+                let BColumns = B.length / i;
+
+                ret = new Array<number>(ARows * BColumns);
+                while (a < ret.length) {
+                    let row = Math.floor(a / BColumns);
+                    let column = a % BColumns;
+                    let each = 0;
+                    for (let index = 0; index < i; index++) {
+                        each += A[row * AColumns + index] * B[BColumns * index + column];
+                    }
+                    ret[a++] = each;
+                }
+            }
+            return ret;
+        }
+        else {
+            throw '错误的矩阵大小'
+        }
+    }
+    public static radians(degrees: number) {
+        return degrees * Math.PI / 180.0;
+    }
+
+    public static rotateY(theta: number) {
+        var c = Math.cos(Util.radians(theta));
+        var s = Math.sin(Util.radians(theta));
+        var ry = new Array<number>(c, 0.0, -s,
+            0.0, 1.0, 0.0,
+            s, 0.0, c);
+        return ry;
+    }
+
 }
