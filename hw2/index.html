@@ -8,12 +8,14 @@ attribute vec4 vPosition;
 attribute vec4 vColor;
 
 uniform mat4 uModelViewMatrix;
+uniform mat4 uCameraMatrix;
+uniform mat4 uProjectionMatrix;
 
 varying vec4 fColor;
 void
 main()
 {   fColor=vColor;
-    gl_Position = uModelViewMatrix *vPosition;
+    gl_Position = uProjectionMatrix * uCameraMatrix * uModelViewMatrix * vPosition;
 }
 </script>
 
