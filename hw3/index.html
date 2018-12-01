@@ -156,7 +156,14 @@ main()
 
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+    <div id="camera">
+        <div>
+            <span>绕X轴旋转</span>
+            <input type="range" v-model="angleX" min="-180" max="180" />
+            <span>{{angleX}}</span>
+        </div>
+    </div>
+    <script src="../vue.min.js"></script>
     <script type="text/javascript" src="main.js"></script>
 
 </body>

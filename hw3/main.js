@@ -200,4 +200,12 @@ var vm1 = new Vue({
     }
 })
 
+new Vue({
+    el:'#camera',
+    data(){
+        return{
+            
+        }
+    }
+})
 
