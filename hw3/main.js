@@ -1,6 +1,6 @@
 var _gl=new GL();
 _gl.butterfly.draw(_gl);
-//_gl.insect.draw(_gl,false);
+_gl.insect.draw(_gl,false);
 
 var vm = new Vue({
     el: '#app',
@@ -204,7 +204,29 @@ new Vue({
     el:'#camera',
     data(){
         return{
-            
+            glOb:_gl,
+            theta:0,
+            phi:0,
+            radius:4
+        }
+    },
+    watch:{
+        theta(){
+            this.change();
+        },
+        phi(){
+            this.change();
+        },
+        radius(){
+            this.change();
+        }
+    },
+    methods:{
+        change(){
+            this.glOb.view(this.radius,this.theta,this.phi);
+            this.glOb.insect.draw(this.glOb);
+            this.glOb.butterfly.draw(this.glOb,false);
+
         }
     }
 })

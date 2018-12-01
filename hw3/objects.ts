@@ -729,17 +729,21 @@ class GL {
         this.insect = new Insect();
         this.insect.initBuffer(this);
 
-        this.view(3.0, 0.3, 4.0, 0.0, 0.0, 1.0, 45.0);
+        this.view(4.0, 2, 0.0);
 
     }
 
     //视图
-    public view(far = 3.0, near = 0.3, radius = 4.0, theta = 0.0, phi = 0.0, aspect = 1.0, fovy = 45.0) {
+    public view( radius, theta, phi) {
+        const far=10,near=0.1,aspect=1,fovy=45;
+
         const at = vec3(0.0, 0.0, 0.0);
         const up = vec3(0.0, 1.0, 0.0);
-        eye = vec3(radius * Math.sin(theta) * Math.cos(phi),
-            radius * Math.sin(theta) * Math.sin(phi),
-            radius * Math.cos(theta));
+
+        let eye = vec3(radius * Math.sin(Util.radians(theta)) * Math.cos(Util.radians(phi)),
+            radius * Math.sin(Util.radians(theta)) * Math.sin(Util.radians(phi)),
+            radius * Math.cos(Util.radians(theta)));
+
         this.cameraMatrix = lookAt(eye, at, up);
         this.projectionMatrix = perspective(fovy, aspect, near, far);
 

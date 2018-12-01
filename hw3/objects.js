@@ -316,6 +316,8 @@ var ButterFly = /** @class */ (function () {
             _gl.clearDepth(1.0);
         }
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrixs));
+        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.cameraMatrixLoc, false, flatten(gl.cameraMatrix));
+        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.projectionMatrixLoc, false, flatten(gl.projectionMatrix));
         //body
         _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers.positions.butterfly.body);
         _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
@@ -580,6 +582,8 @@ var Insect = /** @class */ (function () {
             _gl.clearDepth(1.0);
         }
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrixs));
+        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.cameraMatrixLoc, false, flatten(gl.cameraMatrix));
+        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.projectionMatrixLoc, false, flatten(gl.projectionMatrix));
         //body
         for (var i in this.body) {
             _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers1.positions.insect.body[i]);
@@ -619,6 +623,7 @@ var GL = /** @class */ (function () {
         this.gl.viewport(0, 0, canvas.width, canvas.height);
         this.gl.clearColor(1.0, 1.0, 1.0, 1.0);
         this.gl.enable(this.gl.DEPTH_TEST);
+        this.aspect = canvas.width / canvas.height;
         var shaderPro = initShaders(this.gl, "vertex-shader", "fragment-shader");
         this.programInfo = {
             program: shaderPro,
@@ -627,7 +632,9 @@ var GL = /** @class */ (function () {
                 vertexColor: this.gl.getAttribLocation(shaderPro, 'vColor')
             },
             uniformLocations: {
-                modelViewMatrix: this.gl.getUniformLocation(shaderPro, 'uModelViewMatrix')
+                modelViewMatrix: this.gl.getUniformLocation(shaderPro, 'uModelViewMatrix'),
+                cameraMatrixLoc: this.gl.getUniformLocation(shaderPro, 'uCameraMatrix'),
+                projectionMatrixLoc: this.gl.getUniformLocation(shaderPro, 'uProjectionMatrix')
             }
         };
         this.buffers = {
@@ -645,7 +652,17 @@ var GL = /** @class */ (function () {
         this.butterfly.initBuffer(this);
         this.insect = new Insect();
         this.insect.initBuffer(this);
+        this.view(4.0, 2, 0.0);
     }
+    //视图
+    GL.prototype.view = function (radius, theta, phi) {
+        var far = 10, near = 0.1, aspect = 1, fovy = 45;
+        var at = vec3(0.0, 0.0, 0.0);
+        var up = vec3(0.0, 1.0, 0.0);
+        var eye = vec3(radius * Math.sin(Util.radians(theta)) * Math.cos(Util.radians(phi)), radius * Math.sin(Util.radians(theta)) * Math.sin(Util.radians(phi)), radius * Math.cos(Util.radians(theta)));
+        this.cameraMatrix = lookAt(eye, at, up);
+        this.projectionMatrix = perspective(fovy, aspect, near, far);
+    };
     return GL;
 }());
 var transType;
