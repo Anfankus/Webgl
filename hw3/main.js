@@ -164,7 +164,7 @@ var vm1 = new Vue({
     }
 })
 
-let vm2 = new Vue({
+let camera = new Vue({
     el: '#camera',
     data() {
         return {
@@ -197,10 +197,10 @@ let vm2 = new Vue({
             let then=performance.now()*0.03;
             function _draw(now) {
                 now *= 0.03;
-                _gl.view(vm2.radius, now-then, vm2.phi);
+                _gl.view(camera.radius, now-then, camera.phi);
                 _gl.insect.draw(_gl);
                 _gl.butterfly.draw(_gl, false);
-                vm2.animeHandle = requestAnimationFrame(_draw);
+                camera.animeHandle = requestAnimationFrame(_draw);
             }
             this.animeHandle = requestAnimationFrame(_draw);
         },
@@ -210,3 +210,24 @@ let vm2 = new Vue({
         }
     }
 })
+
+let mousedown = false;
+document.getElementById('gl-canvas').onmousedown = function(e) {
+    mousedown = true;
+};
+document.getElementById('gl-canvas').onmouseup = function(e) {
+    mousedown = false;
+}
+document.getElementById('gl-canvas').onmousemove = function(e) {
+    if (mousedown) {
+        camera.theta = (parseFloat(camera.theta)+(e.movementX)*-0.8)%360;
+        camera.phi = (parseFloat(camera.phi)+(e.movementY)*0.8)%360;
+    }
+}
+document.getElementById('gl-canvas').onwheel=function(e){
+    console.log(e.deltaY,e.deltaY/350);
+    let temp=parseFloat(camera.radius)+ e.deltaY/350;
+    if(temp<=0||temp>10)
+    return;
+    camera.radius =temp;
+}
