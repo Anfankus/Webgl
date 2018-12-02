@@ -64,7 +64,7 @@ var FlatWing = /** @class */ (function () {
 var Wing = /** @class */ (function () {
     function Wing(size, thicknessFrag) {
         if (size === void 0) { size = 0.5; }
-        if (thicknessFrag === void 0) { thicknessFrag = 5; }
+        if (thicknessFrag === void 0) { thicknessFrag = 20; }
         this.vertices = new Array();
         this.flats = new Array(2);
         var angle = 5;
@@ -123,41 +123,65 @@ var Ellipsoid = /** @class */ (function () {
     }
     return Ellipsoid;
 }());
+var transType;
+(function (transType) {
+    transType[transType["none"] = 0] = "none";
+    transType[transType["rotateX"] = 1] = "rotateX";
+    transType[transType["rotateY"] = 2] = "rotateY";
+    transType[transType["rotateZ"] = 3] = "rotateZ";
+    transType[transType["rotateMain"] = 4] = "rotateMain";
+    transType[transType["rotateSec"] = 5] = "rotateSec";
+    transType[transType["translateX"] = 6] = "translateX";
+    transType[transType["translateY"] = 7] = "translateY";
+    transType[transType["translateZ"] = 8] = "translateZ";
+    transType[transType["translateMain"] = 9] = "translateMain";
+    transType[transType["zoom"] = 10] = "zoom";
+})(transType || (transType = {}));
 var Translatable = /** @class */ (function () {
     function Translatable() {
         this.direction = [0, 1, 0, 1];
         this.baseDirection = [0, 1, 0, 1];
         this.axisMain = [0, 0, 1, 1];
         this.baseAxisMain = [0, 0, 1, 1];
+        this.axisSecondary = [1, 0, 0, 1];
+        this.baseAxisSec = [1, 0, 0, 1];
         this.position = [0, 0, 0, 1];
         this.basePosition = [0, 0, 0, 1];
-        this.modelMatrixs = mat4();
-        this.baseMatrixs = mat4();
+        this.modelMatrix = mat4();
+        this.baseMatrix = mat4();
         this.lastTrans = transType.none;
     }
     /**
      *
      * @param delta 旋转角度
      * @param related 旋转是否相对于上次绘制
-     * @param axisType 旋转轴：1--X；2--Y；3--Z;0--自身纵轴
+     * @param axisType 旋转轴：1--X；2--Y；3--Z,4---自身横轴;0--自身纵轴
      */
     Translatable.prototype.rotate = function (delta, related, axisType) {
         if (related === void 0) { related = true; }
         if (axisType === void 0) { axisType = 0; }
-        var rotateMatrix = rotate.apply(void 0, [delta].concat(this.baseAxisMain));
+        var rotateMatrix;
         var transMatrix;
-        var currentTrans = [transType.rotateMain, transType.rotateX, transType.rotateY, transType.rotateZ][axisType];
+        var currentTrans = [transType.rotateMain, transType.rotateX, transType.rotateY, transType.rotateZ, transType.rotateSec][axisType];
         var ret = false;
         if (this.lastTrans !== currentTrans && this.lastTrans !== transType.none) {
             ret = true;
             this.baseDirection = this.direction;
-            this.baseMatrixs = this.modelMatrixs;
+            this.baseMatrix = this.modelMatrix;
             this.baseAxisMain = this.axisMain;
+            this.baseAxisSec = this.axisSecondary;
             this.basePosition = this.position;
         }
         switch (currentTrans) {
+            case transType.rotateSec:
+                transMatrix = translate.apply(void 0, Util.Mat4Vec(mat4(-1), this.basePosition));
+                rotateMatrix = rotate.apply(void 0, [delta].concat(this.baseAxisSec));
+                transMatrix = mult(rotateMatrix, transMatrix);
+                transMatrix = mult(translate.apply(void 0, this.basePosition), transMatrix);
+                break;
             case transType.rotateMain:
                 transMatrix = translate.apply(void 0, Util.Mat4Vec(mat4(-1), this.basePosition));
+                rotateMatrix = rotate.apply(void 0, [delta].concat(this.baseAxisMain));
                 transMatrix = mult(rotateMatrix, transMatrix);
                 transMatrix = mult(translate.apply(void 0, this.basePosition), transMatrix);
                 break;
@@ -172,15 +196,15 @@ var Translatable = /** @class */ (function () {
                 break;
         }
         if (related) {
-            this.modelMatrixs = mult(transMatrix, this.modelMatrixs);
+            this.modelMatrix = mult(transMatrix, this.modelMatrix);
             this.direction = Util.Mat4Vec(transMatrix, this.direction);
             return ret;
         }
-        this.modelMatrixs = mult(transMatrix, this.baseMatrixs);
+        this.modelMatrix = mult(transMatrix, this.baseMatrix);
         this.position = Util.Mat4Vec(transMatrix, this.basePosition);
         this.direction = Util.Mat4Vec(rotateMatrix, this.baseDirection);
         this.axisMain = Util.Mat4Vec(rotateMatrix, this.baseAxisMain);
-        console.log(this.axisMain, this.baseAxisMain);
+        this.axisSecondary = Util.Mat4Vec(rotateMatrix, this.baseAxisSec);
         this.lastTrans = currentTrans;
         return ret;
     };
@@ -197,8 +221,9 @@ var Translatable = /** @class */ (function () {
         if (this.lastTrans !== currentTrans && this.lastTrans !== transType.none) {
             ret = true;
             this.baseDirection = this.direction;
-            this.baseMatrixs = this.modelMatrixs;
+            this.baseMatrix = this.modelMatrix;
             this.baseAxisMain = this.axisMain;
+            this.baseAxisSec = this.axisSecondary;
             this.basePosition = this.position;
         }
         switch (currentTrans) {
@@ -225,13 +250,12 @@ var Translatable = /** @class */ (function () {
         }
         var transMatrix = translate(x_dis, y_dis, z_dis);
         if (related) {
-            this.modelMatrixs = mult(transMatrix, this.modelMatrixs);
+            this.modelMatrix = mult(transMatrix, this.modelMatrix);
             return ret;
         }
-        this.modelMatrixs = mult(transMatrix, this.baseMatrixs);
+        this.modelMatrix = mult(transMatrix, this.baseMatrix);
         this.position = Util.Mat4Vec(transMatrix, this.basePosition);
         this.lastTrans = currentTrans;
-        console.log(this.axisMain, this.baseAxisMain);
         return ret;
     };
     Translatable.prototype.zoom = function (size, related) {
@@ -242,12 +266,12 @@ var Translatable = /** @class */ (function () {
         transMatrix = mult(translate.apply(void 0, this.basePosition), transMatrix);
         var currentTrans = transType.zoom;
         if (related) {
-            this.modelMatrixs = mult(transMatrix, this.modelMatrixs);
+            this.modelMatrix = mult(transMatrix, this.modelMatrix);
         }
         else if (this.lastTrans !== currentTrans && this.lastTrans !== transType.none) {
-            this.baseMatrixs = this.modelMatrixs;
+            this.baseMatrix = this.modelMatrix;
         }
-        this.modelMatrixs = mult(transMatrix, this.baseMatrixs);
+        this.modelMatrix = mult(transMatrix, this.baseMatrix);
         this.lastTrans = currentTrans;
     };
     return Translatable;
@@ -328,7 +352,7 @@ var ButterFly = /** @class */ (function (_super) {
             _gl.clearColor(0.0, 0.0, 0.0, 1.0);
             _gl.clearDepth(1.0);
         }
-        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrixs));
+        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.cameraMatrixLoc, false, flatten(gl.cameraMatrix));
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.projectionMatrixLoc, false, flatten(gl.projectionMatrix));
         //body
@@ -353,7 +377,7 @@ var ButterFly = /** @class */ (function (_super) {
         for (var i in this.flatWings) {
             _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers.positions.butterfly.wings[i]);
             _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-            _gl.drawArrays(_gl.LINE_STRIP, 0, this.flatWings[i].length / 3);
+            _gl.drawArrays(_gl.TRIANGLE_FAN, 0, this.flatWings[i].length / 3);
         }
         //lines
         _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers.positions.butterfly.lines);
@@ -362,7 +386,7 @@ var ButterFly = /** @class */ (function (_super) {
         //Wing
         _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers.positions.butterfly.Wing);
         _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-        _gl.drawArrays(_gl.LINE_LOOP, 0, this.Wing.vertices.length / 3);
+        _gl.drawArrays(_gl.TRIANGLE_STRIP, 0, this.Wing.vertices.length / 3);
         _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexColor);
     };
     return ButterFly;
@@ -471,7 +495,7 @@ var Insect = /** @class */ (function (_super) {
             _gl.clearColor(0.0, 0.0, 0.0, 1.0);
             _gl.clearDepth(1.0);
         }
-        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrixs));
+        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.cameraMatrixLoc, false, flatten(gl.cameraMatrix));
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.projectionMatrixLoc, false, flatten(gl.projectionMatrix));
         //body
@@ -542,37 +566,21 @@ var GL = /** @class */ (function () {
         this.butterfly.initBuffer(this);
         this.insect = new Insect();
         this.insect.initBuffer(this);
-        this.view(4.0, 0, 0.0);
+        this.view(4.0, 2, 0.0);
     }
     //视图
     GL.prototype.view = function (radius, theta, phi) {
-        var far = 100, near = 0.1, aspect = 1, fovy = 45;
+        var far = 10, near = 0.1, aspect = 1, fovy = 45;
         var at = vec3(0.0, 0.0, 0.0);
         var up = vec3(0.0, 1.0, 0.0);
-        if(phi>90||phi<-90)
-        up=vec3(0.0, -1.0, 0.0);
-        var eye;
-        eye = vec3(radius * Math.sin(Util.radians(theta)) * Math.cos(Util.radians(phi)), 
-         radius * Math.sin(Util.radians(phi)),
-         radius * Math.cos(Util.radians(theta)) * Math.cos(Util.radians(phi)));
+        if (phi > 90 || phi < -90)
+            up = vec3(0.0, -1.0, 0.0);
+        eye = vec3(radius * Math.sin(Util.radians(theta)) * Math.cos(Util.radians(phi)), radius * Math.sin(Util.radians(phi)), radius * Math.cos(Util.radians(theta)) * Math.cos(Util.radians(phi)));
         this.cameraMatrix = lookAt(eye, at, up);
         this.projectionMatrix = perspective(fovy, aspect, near, far);
     };
     return GL;
 }());
-var transType;
-(function (transType) {
-    transType[transType["none"] = 0] = "none";
-    transType[transType["rotateX"] = 1] = "rotateX";
-    transType[transType["rotateY"] = 2] = "rotateY";
-    transType[transType["rotateZ"] = 3] = "rotateZ";
-    transType[transType["rotateMain"] = 4] = "rotateMain";
-    transType[transType["translateX"] = 5] = "translateX";
-    transType[transType["translateY"] = 6] = "translateY";
-    transType[transType["translateZ"] = 7] = "translateZ";
-    transType[transType["translateMain"] = 8] = "translateMain";
-    transType[transType["zoom"] = 9] = "zoom";
-})(transType || (transType = {}));
 var Util = /** @class */ (function () {
     function Util() {
     }

@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <script id="vertex-shader" type="x-shader/x-vertex">
-attribute vec4 vPosition;
+        attribute vec4 vPosition;
 attribute vec4 vColor;
 uniform mat4 uCameraMatrix;
 uniform mat4 uProjectionMatrix;
@@ -20,7 +20,7 @@ main()
 </script>
 
     <script id="fragment-shader" type="x-shader/x-fragment">
-precision mediump float;
+        precision mediump float;
 varying vec4 fColor;
 void
 main()
@@ -50,119 +50,64 @@ main()
     </canvas>
 
     <div id="app" class="app">
-        <div >
+        <div>
             <strong>蝴蝶</strong>
-            <button v-if="!animeHandle" @click="play" >播放</button>
-            <button v-else @click="stop" >停止</button>
+            <button v-if="!animeHandle" @click="play">播放</button>
+            <button v-else @click="stop">停止</button>
             <div>
-                <span>绕X轴旋转</span>
-                <input type="range" v-model="angleX" min="-180" max="180" />
-                <span>{{angleX}}</span>
+                <span>左右旋转</span>
+                <input type="range" v-model="attrib.angleMain" min="-180" max="180" />
+                <span>{{attrib.angleMain}}</span>
             </div>
             <div>
-                <span>绕Y轴旋转</span>
-                <input type="range" v-model="angleY" min="-180" max="180" />
-                <span>{{angleY}}</span>
+                <span>上下旋转</span>
+                <input type="range" v-model="attrib.angleSec" min="-180" max="180" />
+                <span>{{attrib.angleSec}}</span>
             </div>
-            <div>
-                <span>绕Z轴旋转</span>
-                <input type="range" v-model="angleZ" min="-180" max="180" />
-                <span>{{angleZ}}</span>
-            </div>
-            <div>
-                    <span>绕自身纵轴旋转</span>
-                    <input type="range" v-model="angleMain" min="-180" max="180" />
-                    <span>{{angleMain}}</span>
-                </div>
-                <div>
-                    <span>绕自身横轴旋转</span>
-                    <input type="range" v-model="angleSec" min="-180" max="180" />
-                    <span>{{angleSec}}</span>
-                </div>
 
             <hr />
             <div>
-                <span>沿X轴平移</span>
-                <input type="range" v-model="distX" min="-1" max="1" step="0.02" />
-                <span>{{distX}}</span>
-            </div>
-            <div>
-                <span>沿Y轴平移</span>
-                <input type="range" v-model="distY" min="-1" max="1" step="0.02" />
-                <span>{{distY}}</span>
-            </div>
-            <div>
-                <span>沿Z轴平移</span>
-                <input type="range" v-model="distZ" min="-1" max="1" step="0.02" />
-                <span>{{distZ}}</span>
-            </div>
-            <div>
                 <span>沿前方平移</span>
-                <input type="range" v-model="distMain" min="-1" max="1" step="0.02" />
-                <span>{{distMain}}</span>
+                <input type="range" v-model="attrib.distMain" min="-5" max="5" step="0.1" />
+                <span>{{attrib.distMain}}</span>
             </div>
             <hr />
             <div>
                 <span>缩放</span>
-                <input type="range" v-model="zoom" min="0" max="5" step="0.05"/>
-                <input  v-model="zoom"/>
+                <input type="range" v-model="zoom" min="0" max="5" step="0.05" />
+                <input v-model="zoom" />
             </div>
 
         </div>
     </div>
 
     <div id="app1" class="app">
-        <div >
+        <div>
             <strong>毛毛虫</strong>
-            <button v-if="!animeHandle" @click="play" >播放</button>
-            <button v-else @click="stop" >停止</button>
+            <button v-if="!animeHandle" @click="play">播放</button>
+            <button v-else @click="stop">停止</button>
             <div>
-                <span>绕X轴旋转</span>
-                <input type="range" v-model="angleX" min="-180" max="180" />
-                <span>{{angleX}}</span>
+                <span>左右旋转</span>
+                <input type="range" v-model="attrib.angleMain" min="-180" max="180" />
+                <span>{{attrib.angleMain}}</span>
             </div>
             <div>
-                <span>绕Y轴旋转</span>
-                <input type="range" v-model="angleY" min="-180" max="180" />
-                <span>{{angleY}}</span>
+                <span>上下旋转</span>
+                <input type="range" v-model="attrib.angleSec" min="-180" max="180" />
+                <span>{{attrib.angleSec}}</span>
             </div>
-            <div>
-                <span>绕Z轴旋转</span>
-                <input type="range" v-model="angleZ" min="-180" max="180" />
-                <span>{{angleZ}}</span>
-            </div>
-            <div>
-                    <span>绕自身旋转</span>
-                    <input type="range" v-model="angleMain" min="-180" max="180" />
-                    <span>{{angleMain}}</span>
-                </div>
-    
+
             <hr />
             <div>
-                <span>沿X轴平移</span>
-                <input type="range" v-model="distX" min="-1" max="1" step="0.02" />
-                <span>{{distX}}</span>
-            </div>
-            <div>
-                <span>沿Y轴平移</span>
-                <input type="range" v-model="distY" min="-1" max="1" step="0.02" />
-                <span>{{distY}}</span>
-            </div>
-            <div>
-                <span>沿Z轴平移</span>
-                <input type="range" v-model="distZ" min="-1" max="1" step="0.02" />
-                <span>{{distZ}}</span>
-            </div>
-            <div>
                 <span>沿前方平移</span>
-                <input type="range" v-model="distMain" min="-1" max="1" step="0.02" />
-                <span>{{distMain}}</span>
+                <input type="range" v-model="attrib.distMain" min="-5" max="5" step="0.1" />
+                <span>{{attrib.distMain}}</span>
             </div>
             <hr />
             <div>
                 <span>缩放</span>
-                <input type="range" v-model="zoom" min="0" max="5" step="0.05"/>
-                <input  v-model="zoom"/>
+                <input type="range" v-model="zoom" min="0" max="5" step="0.05" />
+                <input v-model="zoom" />
             </div>
 
         </div>
@@ -170,17 +115,17 @@ main()
     <div id="camera" class="app">
         <div>
             <strong>视图</strong>
-            <button v-if="!animeHandle" @click="play" >播放</button>
-            <button v-else @click="stop" >停止</button>
+            <button v-if="!animeHandle" @click="play">播放</button>
+            <button v-else @click="stop">停止</button>
         </div>
         <div>
             <span>左右</span>
-            <input type="range" v-model="theta" min="-180" max="180"/>
+            <input type="range" v-model="theta" min="-180" max="180" />
             <span>{{theta}}</span>
         </div>
         <div>
             <span>上下</span>
-            <input type="range" v-model="phi" min="-180" max="180"/>
+            <input type="range" v-model="phi" min="-180" max="180" />
             <span>{{phi}}</span>
         </div>
         <div>
