@@ -98,6 +98,29 @@ var vm = new Vue({
             this.glOb.insect.draw(this.glOb,false);
         }
 
+    },
+    methods:{
+        play() {
+            let x = this.glOb;
+            let then=performance.now()*0.001;
+
+            function _draw(now) {
+                debugger
+                now *= 0.001;
+                const delta = (now - then) * 25;
+                x.butterfly.rotate(delta, true, 1);
+                x.butterfly.draw(x);
+                x.insect.draw(x,false);
+                
+                then=now
+                vm.animeHandle = requestAnimationFrame(_draw);
+            }
+            this.animeHandle = requestAnimationFrame(_draw);
+        },
+        stop(){
+            cancelAnimationFrame(this.animeHandle);
+            this.animeHandle=null;
+        }
     }
 })
 
@@ -196,7 +219,27 @@ var vm1 = new Vue({
             this.glOb.insect.draw(this.glOb);
             this.glOb.butterfly.draw(this.glOb,false);
         }
+    },
+    methods:{
+        play() {
+            let x = this.glOb;
+            let then=performance.now()*0.001;
+            function _draw(now) {
+                now *= 0.001;
+                const delta = (now - then) * 25;
+                x.insect.rotate(delta, true, 1);
+                x.insect.draw(x);
+                x.butterfly.draw(x,false);
 
+                then = now;
+                vm1.animeHandle = requestAnimationFrame(_draw);
+            }
+            this.animeHandle = requestAnimationFrame(_draw);
+        },
+        stop(){
+            cancelAnimationFrame(this.animeHandle);
+            this.animeHandle=null;
+        }
     }
 })
 

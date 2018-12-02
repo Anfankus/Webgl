@@ -1,3 +1,7 @@
+﻿
+//作者：71116414张可
+//      71116411李嘉兴
+//      71116432唐寅凯
 var _gl=new GL();
 _gl.butterfly.draw(_gl);
 _gl.insect.draw(_gl,false);
@@ -15,7 +19,9 @@ var vm = new Vue({
             distZ: 0,
             distMain: 0,
             zoom:1,
-            animeHandle: null
+            animeHandle: null,
+            timef:0,
+            times:0
         }
     },
     watch: {
@@ -97,6 +103,30 @@ var vm = new Vue({
             this.glOb.insect.draw(this.glOb,false);
         }
 
+    },
+    methods: {
+        play: function () {
+            let x = this.glOb;
+            let then = 0;
+            function _draw(now) {
+                now *= 0.001;
+                const delta = (now - then) * 25;
+                x.butterfly.rotate(delta, true, 1);
+                then = now;
+                x.butterfly.draw(x);
+                x.insect.draw(x,false);
+                vm.animeHandle = requestAnimationFrame(_draw);
+            }
+            this.animeHandle = requestAnimationFrame(_draw);
+        },
+        stop:function(){
+            cancelAnimationFrame(this.animeHandle);
+            this.animeHandle=null;
+        },
+        draw: function () {
+            let x = this.glOb;
+            this.glOb.butterfly.draw(x);
+        }
     }
 })
 
