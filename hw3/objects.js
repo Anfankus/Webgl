@@ -51,7 +51,7 @@ var FlatWing = /** @class */ (function () {
 var Wing = /** @class */ (function () {
     function Wing(size, thicknessFrag) {
         if (size === void 0) { size = 0.5; }
-        if (thicknessFrag === void 0) { thicknessFrag = 20; }
+        if (thicknessFrag === void 0) { thicknessFrag = 5; }
         this.vertices = new Array();
         this.flats = new Array(2);
         var angle = 5;
@@ -340,7 +340,7 @@ var ButterFly = /** @class */ (function () {
         for (var i in this.flatWings) {
             _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers.positions.butterfly.wings[i]);
             _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-            _gl.drawArrays(_gl.TRIANGLE_FAN, 0, this.flatWings[i].length / 3);
+            _gl.drawArrays(_gl.LINE_STRIP, 0, this.flatWings[i].length / 3);
         }
         //lines
         _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers.positions.butterfly.lines);
@@ -349,7 +349,7 @@ var ButterFly = /** @class */ (function () {
         //Wing
         _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers.positions.butterfly.Wing);
         _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-        _gl.drawArrays(_gl.TRIANGLE_STRIP, 0, this.Wing.vertices.length / 3);
+        _gl.drawArrays(_gl.LINE_LOOP, 0, this.Wing.vertices.length / 3);
         _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexColor);
     };
     return ButterFly;

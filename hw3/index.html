@@ -52,6 +52,8 @@ main()
     <div id="app" class="app">
         <div >
             <strong>蝴蝶</strong>
+            <button v-if="!animeHandle" @click="play" >播放</button>
+            <button v-else @click="stop" >停止</button>
             <div>
                 <span>绕X轴旋转</span>
                 <input type="range" v-model="angleX" min="-180" max="180" />
@@ -107,6 +109,8 @@ main()
     <div id="app1" class="app">
         <div >
             <strong>毛毛虫</strong>
+            <button v-if="!animeHandle" @click="play" >播放</button>
+            <button v-else @click="stop" >停止</button>
             <div>
                 <span>绕X轴旋转</span>
                 <input type="range" v-model="angleX" min="-180" max="180" />
@@ -159,6 +163,11 @@ main()
         </div>
     </div>
     <div id="camera" class="app">
+        <div>
+            <strong>视图</strong>
+            <button v-if="!animeHandle" @click="play" >播放</button>
+            <button v-else @click="stop" >停止</button>
+        </div>
         <div>
             <span>左右</span>
             <input type="range" v-model="theta" min="-180" max="180"/>

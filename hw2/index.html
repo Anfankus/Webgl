@@ -50,6 +50,8 @@ main()
     <div id="app">
         <div >
             <strong>蝴蝶</strong>
+            <button v-if="!animeHandle" @click="play" >播放</button>
+            <button v-else @click="stop" >停止</button>
             <div>
                 <span>绕X轴旋转</span>
                 <input type="range" v-model="angleX" min="-180" max="180" />
@@ -156,7 +158,7 @@ main()
 
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+    <script type="text/javascript" src="../vue.min.js"></script>
     <script type="text/javascript" src="main.js"></script>
 
 </body>
