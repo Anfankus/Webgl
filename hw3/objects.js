@@ -1,3 +1,16 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    }
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Circle3D = /** @class */ (function () {
     function Circle3D(a, b, center, frag) {
         if (a === void 0) { a = 0.5; }
@@ -110,27 +123,153 @@ var Ellipsoid = /** @class */ (function () {
     }
     return Ellipsoid;
 }());
-var ButterFly = /** @class */ (function () {
-    function ButterFly() {
+var Translatable = /** @class */ (function () {
+    function Translatable() {
         this.direction = [0, 1, 0, 1];
         this.baseDirection = [0, 1, 0, 1];
-        this.axis = [0, 0, 1, 1];
-        this.baseAxis = [0, 0, 1, 1];
+        this.axisMain = [0, 0, 1, 1];
+        this.baseAxisMain = [0, 0, 1, 1];
         this.position = [0, 0, 0, 1];
         this.basePosition = [0, 0, 0, 1];
-        this.body = new Ellipsoid(0.07, 0.3, [0, 0, 0], [1, 0.8559, 0.73843, 1.0]);
-        this.eyes = [
+        this.modelMatrixs = mat4();
+        this.baseMatrixs = mat4();
+        this.lastTrans = transType.none;
+    }
+    /**
+     *
+     * @param delta 旋转角度
+     * @param related 旋转是否相对于上次绘制
+     * @param axisType 旋转轴：1--X；2--Y；3--Z;0--自身纵轴
+     */
+    Translatable.prototype.rotate = function (delta, related, axisType) {
+        if (related === void 0) { related = true; }
+        if (axisType === void 0) { axisType = 0; }
+        var rotateMatrix = rotate.apply(void 0, [delta].concat(this.baseAxisMain));
+        var transMatrix;
+        var currentTrans = [transType.rotateMain, transType.rotateX, transType.rotateY, transType.rotateZ][axisType];
+        var ret = false;
+        if (this.lastTrans !== currentTrans && this.lastTrans !== transType.none) {
+            ret = true;
+            this.baseDirection = this.direction;
+            this.baseMatrixs = this.modelMatrixs;
+            this.baseAxisMain = this.axisMain;
+            this.basePosition = this.position;
+        }
+        switch (currentTrans) {
+            case transType.rotateMain:
+                transMatrix = translate.apply(void 0, Util.Mat4Vec(mat4(-1), this.basePosition));
+                transMatrix = mult(rotateMatrix, transMatrix);
+                transMatrix = mult(translate.apply(void 0, this.basePosition), transMatrix);
+                break;
+            case transType.rotateX:
+                rotateMatrix = transMatrix = rotateX(delta);
+                break;
+            case transType.rotateY:
+                rotateMatrix = transMatrix = rotateY(delta);
+                break;
+            case transType.rotateZ:
+                rotateMatrix = transMatrix = rotateZ(delta);
+                break;
+        }
+        if (related) {
+            this.modelMatrixs = mult(transMatrix, this.modelMatrixs);
+            this.direction = Util.Mat4Vec(transMatrix, this.direction);
+            return ret;
+        }
+        this.modelMatrixs = mult(transMatrix, this.baseMatrixs);
+        this.position = Util.Mat4Vec(transMatrix, this.basePosition);
+        this.direction = Util.Mat4Vec(rotateMatrix, this.baseDirection);
+        this.axisMain = Util.Mat4Vec(rotateMatrix, this.baseAxisMain);
+        console.log(this.axisMain, this.baseAxisMain);
+        this.lastTrans = currentTrans;
+        return ret;
+    };
+    /**
+     *
+     * @param distance 距离
+     * @param direction 0：主方向；1：x轴方向；2：y轴方向；3：z轴方向
+     * @param related 平移是否相对于上次绘制
+     */
+    Translatable.prototype.translate = function (distance, direction, related) {
+        var x_dis, y_dis, z_dis;
+        var currentTrans = [transType.translateMain, transType.translateX, transType.translateY, transType.translateZ][direction];
+        var ret = false;
+        if (this.lastTrans !== currentTrans && this.lastTrans !== transType.none) {
+            ret = true;
+            this.baseDirection = this.direction;
+            this.baseMatrixs = this.modelMatrixs;
+            this.baseAxisMain = this.axisMain;
+            this.basePosition = this.position;
+        }
+        switch (currentTrans) {
+            case transType.translateMain:
+                var eachStep = distance / Math.sqrt(this.direction[0] * this.direction[0]
+                    + this.direction[1] * this.direction[1]
+                    + this.direction[2] * this.direction[2]);
+                x_dis = eachStep * this.direction[0];
+                y_dis = eachStep * this.direction[1];
+                z_dis = eachStep * this.direction[2];
+                break;
+            case transType.translateX:
+                x_dis = distance;
+                y_dis = z_dis = 0;
+                break;
+            case transType.translateY:
+                y_dis = distance;
+                x_dis = z_dis = 0;
+                break;
+            case transType.translateZ:
+                z_dis = distance;
+                y_dis = x_dis = 0;
+                break;
+        }
+        var transMatrix = translate(x_dis, y_dis, z_dis);
+        if (related) {
+            this.modelMatrixs = mult(transMatrix, this.modelMatrixs);
+            return ret;
+        }
+        this.modelMatrixs = mult(transMatrix, this.baseMatrixs);
+        this.position = Util.Mat4Vec(transMatrix, this.basePosition);
+        this.lastTrans = currentTrans;
+        console.log(this.axisMain, this.baseAxisMain);
+        return ret;
+    };
+    Translatable.prototype.zoom = function (size, related) {
+        var transMatrix = translate.apply(void 0, Util.Mat4Vec(mat4(-1), this.basePosition));
+        var temp = mat4(size);
+        temp[3][3] = 1;
+        transMatrix = mult(temp, transMatrix);
+        transMatrix = mult(translate.apply(void 0, this.basePosition), transMatrix);
+        var currentTrans = transType.zoom;
+        if (related) {
+            this.modelMatrixs = mult(transMatrix, this.modelMatrixs);
+        }
+        else if (this.lastTrans !== currentTrans && this.lastTrans !== transType.none) {
+            this.baseMatrixs = this.modelMatrixs;
+        }
+        this.modelMatrixs = mult(transMatrix, this.baseMatrixs);
+        this.lastTrans = currentTrans;
+    };
+    return Translatable;
+}());
+var ButterFly = /** @class */ (function (_super) {
+    __extends(ButterFly, _super);
+    function ButterFly() {
+        var _this = _super.call(this) || this;
+        _this.body = new Ellipsoid(0.07, 0.3, [0, 0, 0], [1, 0.8559, 0.73843, 1.0]);
+        _this.eyes = [
             new Ellipsoid(0.023, 0.02, [0.045, 0.2, 0], '0x000000'),
             new Ellipsoid(0.023, 0.02, [-0.045, 0.2, 0], '0x000000'),
             new Ellipsoid(0.02, 0.02, [0.15, 0.6, 0], '0x000000f0'),
             new Ellipsoid(0.02, 0.02, [-0.15, 0.6, 0], '0x000000f0')
         ];
-        this.Wing = new Wing(0.95);
-        this.flatWings = this.Wing.flats;
-        this.lines = [
+        _this.Wing = new Wing(0.95);
+        _this.flatWings = _this.Wing.flats;
+        _this.lines = [
             -0.008, 0.3, 0, -0.15, 0.6, 0,
             0.008, 0.3, 0, 0.15, 0.6, 0
         ];
+        return _this;
         // let LinesOnWings = [1, 2];
         // for (let j of LinesOnWings) {
         //     let centerPoint = [
@@ -142,9 +281,6 @@ var ButterFly = /** @class */ (function () {
         //         this.lines.push(...this.flatWings[j].slice(i, i + 2), centerPoint[2]);
         //     }
         // }
-        this.modelMatrixs = mat4();
-        this.baseMatrixs = mat4();
-        this.lastTrans = transType.none;
     }
     ButterFly.prototype.initBuffer = function (gl) {
         var _gl = gl.gl;
@@ -184,129 +320,6 @@ var ButterFly = /** @class */ (function () {
         gl.buffers.positions.butterfly.Wing = WingBuf;
         _gl.bindBuffer(_gl.ARRAY_BUFFER, WingBuf);
         _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.Wing.vertices), _gl.STATIC_DRAW);
-    };
-    /**
-     *
-     * @param delta 旋转角度
-     * @param related 旋转是否相对于上次绘制
-     * @param axisType 旋转轴：1--X；2--Y；3--Z;0--自身纵轴
-     */
-    ButterFly.prototype.rotate = function (delta, related, axisType) {
-        if (related === void 0) { related = true; }
-        if (axisType === void 0) { axisType = 0; }
-        var transMetrix;
-        var currentTrans;
-        switch (axisType) {
-            case 0:
-                transMetrix = translate.apply(void 0, Util.Mat4Vec(mat4(-1), this.basePosition));
-                var temp = rotate.apply(void 0, [delta].concat(this.baseAxis));
-                transMetrix = mult(temp, transMetrix);
-                transMetrix = mult(translate.apply(void 0, this.basePosition), transMetrix);
-                currentTrans = transType.rotateMain;
-                break;
-            case 1:
-                transMetrix = rotateX(delta);
-                currentTrans = transType.rotateX;
-                break;
-            case 2:
-                transMetrix = rotateY(delta);
-                currentTrans = transType.rotateY;
-                break;
-            case 3:
-                transMetrix = rotateZ(delta);
-                currentTrans = transType.rotateZ;
-                break;
-        }
-        var ret = false;
-        if (related) {
-            this.modelMatrixs = mult(transMetrix, this.modelMatrixs);
-            this.direction = Util.Mat4Vec(transMetrix, this.direction);
-            return ret;
-        }
-        else if (this.lastTrans !== currentTrans && this.lastTrans !== transType.none) {
-            ret = true;
-            this.baseDirection = this.direction;
-            this.baseMatrixs = this.modelMatrixs;
-            this.baseAxis = this.axis;
-            this.basePosition = this.position;
-        }
-        this.modelMatrixs = mult(transMetrix, this.baseMatrixs);
-        this.direction = Util.Mat4Vec(transMetrix, this.baseDirection);
-        this.position = Util.Mat4Vec(transMetrix, this.basePosition);
-        if (axisType !== 0) {
-            this.axis = Util.Mat4Vec(transMetrix, this.baseAxis);
-        }
-        console.log(this.axis, this.baseAxis);
-        this.lastTrans = currentTrans;
-        return ret;
-    };
-    /**
-     *
-     * @param distance 距离
-     * @param direction 0：主方向；1：x轴方向；2：y轴方向；3：z轴方向
-     * @param related 平移是否相对于上次绘制
-     */
-    ButterFly.prototype.translate = function (distance, direction, related) {
-        var x_dis, y_dis, z_dis;
-        var currentTrans;
-        switch (direction) {
-            case 0:
-                var eachStep = distance / Math.sqrt(this.direction[0] * this.direction[0]
-                    + this.direction[1] * this.direction[1]
-                    + this.direction[2] * this.direction[2]);
-                x_dis = eachStep * this.direction[0];
-                y_dis = eachStep * this.direction[1];
-                z_dis = eachStep * this.direction[2];
-                currentTrans = transType.translateMain;
-                break;
-            case 1:
-                x_dis = distance;
-                y_dis = z_dis = 0;
-                currentTrans = transType.translateX;
-                break;
-            case 2:
-                y_dis = distance;
-                x_dis = z_dis = 0;
-                currentTrans = transType.translateY;
-                break;
-            case 3:
-                z_dis = distance;
-                y_dis = x_dis = 0;
-                currentTrans = transType.translateZ;
-                break;
-        }
-        var transMetrix = translate(x_dis, y_dis, z_dis);
-        var ret = false;
-        if (related) {
-            this.modelMatrixs = mult(transMetrix, this.modelMatrixs);
-            return ret;
-        }
-        else if (this.lastTrans !== currentTrans && this.lastTrans !== transType.none) {
-            ret = true;
-            this.baseMatrixs = this.modelMatrixs;
-            this.basePosition = this.position;
-        }
-        this.modelMatrixs = mult(transMetrix, this.baseMatrixs);
-        this.position = Util.Mat4Vec(transMetrix, this.basePosition);
-        this.lastTrans = currentTrans;
-        console.log(this.axis, this.baseAxis);
-        return ret;
-    };
-    ButterFly.prototype.zoom = function (size, related) {
-        var transMetrix = translate.apply(void 0, Util.Mat4Vec(mat4(-1), this.basePosition));
-        var temp = mat4(size);
-        temp[3][3] = 1;
-        transMetrix = mult(temp, transMetrix);
-        transMetrix = mult(translate.apply(void 0, this.basePosition), transMetrix);
-        var currentTrans = transType.zoom;
-        if (related) {
-            this.modelMatrixs = mult(transMetrix, this.modelMatrixs);
-        }
-        else if (this.lastTrans !== currentTrans && this.lastTrans !== transType.none) {
-            this.baseMatrixs = this.modelMatrixs;
-        }
-        this.modelMatrixs = mult(transMetrix, this.baseMatrixs);
-        this.lastTrans = currentTrans;
     };
     ButterFly.prototype.draw = function (gl, clear) {
         if (clear === void 0) { clear = true; }
@@ -353,16 +366,18 @@ var ButterFly = /** @class */ (function () {
         _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexColor);
     };
     return ButterFly;
-}());
-var Insect = /** @class */ (function () {
+}(Translatable));
+var Insect = /** @class */ (function (_super) {
+    __extends(Insect, _super);
     function Insect() {
-        this.direction = [0, 1, 0, 1];
-        this.baseDirection = [0, 1, 0, 1];
-        this.axis = [0, 0, 1, 1];
-        this.baseAxis = [0, 0, 1, 1];
-        this.position = [0, 0, 0, 1];
-        this.basePosition = [0, 0, 0, 1];
-        this.body = [
+        var _this = _super.call(this) || this;
+        _this.direction = [0, 1, 0, 1];
+        _this.baseDirection = [0, 1, 0, 1];
+        _this.axisMain = [0, 0, 1, 1];
+        _this.baseAxisMain = [0, 0, 1, 1];
+        _this.position = [0, 0, 0, 1];
+        _this.basePosition = [0, 0, 0, 1];
+        _this.body = [
             new Ellipsoid(0.1, 0.1, [-0.06, 0.3, 0], [0.196, 0.80392, 0.196, 1.0]),
             new Ellipsoid(0.1, 0.1, [-0.10, 0.15, 0], [0, 1, 0, 1.0]),
             new Ellipsoid(0.1, 0.1, [-0.16, 0, 0], [0.196, 0.80392, 0.196, 1.0]),
@@ -370,8 +385,8 @@ var Insect = /** @class */ (function () {
             new Ellipsoid(0.1, 0.1, [0, -0.3, 0], [0.196, 0.80392, 0.196, 1.0]),
             new Ellipsoid(0.1, 0.1, [0.06, -0.45, 0], [0, 1, 0, 1.0]),
         ];
-        this.head = new Ellipsoid(0.13, 0.11, [0, 0.45, 0], [0, 1, 0, 1.0]);
-        this.eyes = [
+        _this.head = new Ellipsoid(0.13, 0.11, [0, 0.45, 0], [0, 1, 0, 1.0]);
+        _this.eyes = [
             new Ellipsoid(0.023, 0.02, [0.05, 0.55, 0], '0x000000'),
             new Ellipsoid(0.023, 0.02, [-0.05, 0.55, 0], '0x000000'),
             new Ellipsoid(0.023, 0.02, [0, 0.55, 0.08], '0x000000'),
@@ -390,7 +405,7 @@ var Insect = /** @class */ (function () {
             new Ellipsoid(0.02, 0.02, [0.23, -0.4, 0], '0x000000f0'),
             new Ellipsoid(0.02, 0.02, [0.1, -0.1, 0], '0x000000f0')
         ];
-        this.lines = [
+        _this.lines = [
             0, 0.45, 0, -0.1, 0.75, -0.15,
             0, 0.45, 0, 0.1, 0.75, -0.15,
             -0.06, 0.3, 0, -0.2, 0.4, 0,
@@ -406,9 +421,7 @@ var Insect = /** @class */ (function () {
             0.06, -0.45, 0, -0.13, -0.41, 0,
             0.06, -0.45, 0, 0.23, -0.4, 0
         ];
-        this.modelMatrixs = mat4();
-        this.baseMatrixs = mat4();
-        this.lastTrans = transType.none;
+        return _this;
     }
     Insect.prototype.initBuffer = function (gl) {
         var _gl = gl.gl;
@@ -451,129 +464,6 @@ var Insect = /** @class */ (function () {
         _gl.bindBuffer(_gl.ARRAY_BUFFER, lineBuf);
         _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.lines), _gl.STATIC_DRAW);
     };
-    /**
-     *
-     * @param delta 旋转角度
-     * @param related 旋转是否相对于上次绘制
-     * @param axisType 旋转轴：1--X；2--Y；3--Z;0--自身纵轴
-     */
-    Insect.prototype.rotate = function (delta, related, axisType) {
-        if (related === void 0) { related = true; }
-        if (axisType === void 0) { axisType = 0; }
-        var transMetrix;
-        var currentTrans;
-        switch (axisType) {
-            case 0:
-                transMetrix = translate.apply(void 0, Util.Mat4Vec(mat4(-1), this.basePosition));
-                var temp = rotate.apply(void 0, [delta].concat(this.baseAxis));
-                transMetrix = mult(temp, transMetrix);
-                transMetrix = mult(translate.apply(void 0, this.basePosition), transMetrix);
-                currentTrans = transType.rotateMain;
-                break;
-            case 1:
-                transMetrix = rotateX(delta);
-                currentTrans = transType.rotateX;
-                break;
-            case 2:
-                transMetrix = rotateY(delta);
-                currentTrans = transType.rotateY;
-                break;
-            case 3:
-                transMetrix = rotateZ(delta);
-                currentTrans = transType.rotateZ;
-                break;
-        }
-        var ret = false;
-        if (related) {
-            this.modelMatrixs = mult(transMetrix, this.modelMatrixs);
-            this.direction = Util.Mat4Vec(transMetrix, this.direction);
-            return ret;
-        }
-        else if (this.lastTrans !== currentTrans && this.lastTrans !== transType.none) {
-            ret = true;
-            this.baseDirection = this.direction;
-            this.baseMatrixs = this.modelMatrixs;
-            this.baseAxis = this.axis;
-            this.basePosition = this.position;
-        }
-        this.modelMatrixs = mult(transMetrix, this.baseMatrixs);
-        this.direction = Util.Mat4Vec(transMetrix, this.baseDirection);
-        this.position = Util.Mat4Vec(transMetrix, this.basePosition);
-        if (axisType !== 0) {
-            this.axis = Util.Mat4Vec(transMetrix, this.baseAxis);
-        }
-        console.log(this.axis, this.baseAxis);
-        this.lastTrans = currentTrans;
-        return ret;
-    };
-    /**
-     *
-     * @param distance 距离
-     * @param direction 0：主方向；1：x轴方向；2：y轴方向；3：z轴方向
-     * @param related 平移是否相对于上次绘制
-     */
-    Insect.prototype.translate = function (distance, direction, related) {
-        var x_dis, y_dis, z_dis;
-        var currentTrans;
-        switch (direction) {
-            case 0:
-                var eachStep = distance / Math.sqrt(this.direction[0] * this.direction[0]
-                    + this.direction[1] * this.direction[1]
-                    + this.direction[2] * this.direction[2]);
-                x_dis = eachStep * this.direction[0];
-                y_dis = eachStep * this.direction[1];
-                z_dis = eachStep * this.direction[2];
-                currentTrans = transType.translateMain;
-                break;
-            case 1:
-                x_dis = distance;
-                y_dis = z_dis = 0;
-                currentTrans = transType.translateX;
-                break;
-            case 2:
-                y_dis = distance;
-                x_dis = z_dis = 0;
-                currentTrans = transType.translateY;
-                break;
-            case 3:
-                z_dis = distance;
-                y_dis = x_dis = 0;
-                currentTrans = transType.translateZ;
-                break;
-        }
-        var transMetrix = translate(x_dis, y_dis, z_dis);
-        var ret = false;
-        if (related) {
-            this.modelMatrixs = mult(transMetrix, this.modelMatrixs);
-            return ret;
-        }
-        else if (this.lastTrans !== currentTrans && this.lastTrans !== transType.none) {
-            ret = true;
-            this.baseMatrixs = this.modelMatrixs;
-            this.basePosition = this.position;
-        }
-        this.modelMatrixs = mult(transMetrix, this.baseMatrixs);
-        this.position = Util.Mat4Vec(transMetrix, this.basePosition);
-        this.lastTrans = currentTrans;
-        console.log(this.axis, this.baseAxis);
-        return ret;
-    };
-    Insect.prototype.zoom = function (size, related) {
-        var transMetrix = translate.apply(void 0, Util.Mat4Vec(mat4(-1), this.basePosition));
-        var temp = mat4(size);
-        temp[3][3] = 1;
-        transMetrix = mult(temp, transMetrix);
-        transMetrix = mult(translate.apply(void 0, this.basePosition), transMetrix);
-        var currentTrans = transType.zoom;
-        if (related) {
-            this.modelMatrixs = mult(transMetrix, this.modelMatrixs);
-        }
-        else if (this.lastTrans !== currentTrans && this.lastTrans !== transType.none) {
-            this.baseMatrixs = this.modelMatrixs;
-        }
-        this.modelMatrixs = mult(transMetrix, this.baseMatrixs);
-        this.lastTrans = currentTrans;
-    };
     Insect.prototype.draw = function (gl, clear) {
         if (clear === void 0) { clear = true; }
         var _gl = gl.gl;
@@ -612,7 +502,7 @@ var Insect = /** @class */ (function () {
         _gl.drawArrays(_gl.LINES, 0, this.lines.length / 3);
     };
     return Insect;
-}());
+}(Translatable));
 var GL = /** @class */ (function () {
     function GL() {
         var canvas = document.getElementById("gl-canvas");

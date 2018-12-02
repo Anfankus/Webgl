@@ -70,11 +70,16 @@ main()
                 <span>{{angleZ}}</span>
             </div>
             <div>
-                    <span>绕自身旋转</span>
+                    <span>绕自身纵轴旋转</span>
                     <input type="range" v-model="angleMain" min="-180" max="180" />
                     <span>{{angleMain}}</span>
                 </div>
-    
+                <div>
+                    <span>绕自身横轴旋转</span>
+                    <input type="range" v-model="angleSec" min="-180" max="180" />
+                    <span>{{angleSec}}</span>
+                </div>
+
             <hr />
             <div>
                 <span>沿X轴平移</span>
