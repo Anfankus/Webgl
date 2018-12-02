@@ -652,14 +652,19 @@ var GL = /** @class */ (function () {
         this.butterfly.initBuffer(this);
         this.insect = new Insect();
         this.insect.initBuffer(this);
-        this.view(4.0, 2, 0.0);
+        this.view(4.0, 0, 0.0);
     }
     //视图
     GL.prototype.view = function (radius, theta, phi) {
-        var far = 10, near = 0.1, aspect = 1, fovy = 45;
+        var far = 100, near = 0.1, aspect = 1, fovy = 45;
         var at = vec3(0.0, 0.0, 0.0);
         var up = vec3(0.0, 1.0, 0.0);
-        var eye = vec3(radius * Math.sin(Util.radians(theta)) * Math.cos(Util.radians(phi)), radius * Math.sin(Util.radians(theta)) * Math.sin(Util.radians(phi)), radius * Math.cos(Util.radians(theta)));
+        if(phi>90||phi<-90)
+        up=vec3(0.0, -1.0, 0.0);
+        var eye;
+        eye = vec3(radius * Math.sin(Util.radians(theta)) * Math.cos(Util.radians(phi)), 
+         radius * Math.sin(Util.radians(phi)),
+         radius * Math.cos(Util.radians(theta)) * Math.cos(Util.radians(phi)));
         this.cameraMatrix = lookAt(eye, at, up);
         this.projectionMatrix = perspective(fovy, aspect, near, far);
     };
