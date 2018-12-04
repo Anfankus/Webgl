@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec4 vPosition;
+attribute vec4 vColor;
+uniform mat4 uCameraMatrix;
+uniform mat4 uProjectionMatrix;
+
+uniform mat4 uModelViewMatrix;
+
+varying vec4 fColor;
+void
+main()
+{   fColor=vColor;
+    gl_Position = uProjectionMatrix * uCameraMatrix * uModelViewMatrix * vPosition;
+}
+</script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+varying vec4 fColor;
+void
+main()
+{
+    gl_FragColor = fColor;
+}
+</script>
+    <style>
+        .app{
+            float: left;
+            width: 492px;
+            padding: 10px;
+            margin: 0 10px 0 10px;
+            border:1px solid black;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="gl-canvas" width="512" height="512" style="border: 1px solid black;float: left;">
+        Oops ... your browser doesn't support the HTML5 canvas element
+    </canvas>
+
+    <div id="app" class="app">
+        <div>
+            <strong>蝴蝶</strong>
+            <button v-if="!animeHandle" @click="play">播放</button>
+            <button v-else @click="stop">停止</button>
+            <div>
+                <span>左右旋转</span>
+                <input type="range" v-model="attrib.angleMain" min="-180" max="180" />
+                <input v-model="attrib.angleMain" />
+            </div>
+            <div>
+                <span>上下旋转</span>
+                <input type="range" v-model="attrib.angleSec" min="-180" max="180" />
+                <input v-model="attrib.angleSec" />
+            </div>
+
+            <hr />
+            <div>
+                <span>沿前方平移</span>
+                <input type="range" v-model="attrib.distMain" min="-5" max="5" step="0.1" />
+                <span>{{attrib.distMain}}</span>
+            </div>
+            <hr />
+            <div>
+                <span>缩放</span>
+                <input type="range" v-model="zoom" min="0" max="5" step="0.05" />
+                <input v-model="zoom" />
+            </div>
+
+        </div>
+    </div>
+
+    <div id="app1" class="app">
+        <div>
+            <strong>毛毛虫</strong>
+            <button v-if="!animeHandle" @click="play">播放</button>
+            <button v-else @click="stop">停止</button>
+            <div>
+                <span>左右旋转</span>
+                <input type="range" v-model="attrib.angleMain" min="-180" max="180" />
+                <span>{{attrib.angleMain}}</span>
+            </div>
+            <div>
+                <span>上下旋转</span>
+                <input type="range" v-model="attrib.angleSec" min="-180" max="180" />
+                <span>{{attrib.angleSec}}</span>
+            </div>
+
+            <hr />
+            <div>
+                <span>沿前方平移</span>
+                <input type="range" v-model="attrib.distMain" min="-5" max="5" step="0.1" />
+                <span>{{attrib.distMain}}</span>
+            </div>
+            <hr />
+            <div>
+                <span>缩放</span>
+                <input type="range" v-model="zoom" min="0" max="5" step="0.05" />
+                <input v-model="zoom" />
+            </div>
+
+        </div>
+    </div>
+    <div id="camera" class="app">
+        <div>
+            <strong>视图</strong>
+            <button v-if="!animeHandle" @click="play">播放</button>
+            <button v-else @click="stop">停止</button>
+        </div>
+        <div>
+            <span>左右</span>
+            <input type="range" v-model="theta" min="-180" max="180" />
+            <span>{{Math.floor(theta)}}</span>
+        </div>
+        <div>
+            <span>上下</span>
+            <input type="range" v-model="phi" min="-180" max="180" />
+            <span>{{Math.floor(phi)}}</span>
+        </div>
+        <div>
+            <span>前后</span>
+            <input type="range" v-model="radius" min="0" max="10" step="0.1" />
+            <span>{{Math.floor(radius)}}</span>
+        </div>
+    </div>
+    <script type="text/javascript" src="script/main.js"></script>
+</body>
+
+</html>
