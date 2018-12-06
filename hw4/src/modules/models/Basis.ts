@@ -1,4 +1,8 @@
 import {Util} from '../Util';
+import { Translatable } from '../interface/Translatable';
+import Drawable from '../interface/Drawable';
+import GL from '../GL'
+import { flatten } from '../MV';
 class Circle3D {
     public vertices: Array<number>;
     public colors: Array<number>;
@@ -13,27 +17,31 @@ class Circle3D {
         }
     }
 }
-class FlatWing {
+class FlatHalfWing {
     public flag;
     public vertices: Array<number>;
     public colors: Array<number>;
     //flag: 0--线 1--面
-    constructor(size = 0.5, z = 0, frag = 90, flag = 0, edgeColor = '0x000000') {
+    constructor(size = 0.5,isLeft=true, z = 0, frag = 90, flag = 0, edgeColor = '0x000000') {
         let wingCount = 2;
 
         this.vertices = [];
         this.colors = [];
         this.flag = flag;
         let _color = Util.Hex2Vec4(edgeColor);
-        let radian = 2 * Math.PI;
+
+        let offset=Math.PI/2;
+        let start=isLeft?0:Math.PI;
+        let radian = isLeft?Math.PI:2 * Math.PI;
 
         let eachDegree = radian / frag;
-        for (let i = 0; i <= radian; i += eachDegree) {
+        for (let i = start+offset; i <= radian+offset; i += eachDegree) {
             let length = size * Math.sin(wingCount * i);
-            if (i > radian / 2) {
-                length *= 0.85;
+            if(Math.sin(i)<0){
+                length*=0.85;
             }
-            this.vertices.push(Math.sin(i) * length, Math.cos(i) * length, z);
+            let x=Math.sin(i) * length,y=Math.cos(i) * length;
+            this.vertices.push(x,y, z);
             this.colors.push(..._color);
         }
     }
@@ -46,17 +54,20 @@ class FlatWing {
 
     }
 }
-class Wing {
+class HalfWing extends Translatable implements Drawable {
+    buffers: any;
     public vertices: Array<number>;
     public flats: Array<Array<number>>;
-    constructor(size = 0.5, thicknessFrag = 20) {
+    constructor(size = 0.5,isLeft=true, thicknessFrag = 20) {
+        super();
+
         this.vertices = new Array<number>();
         this.flats = new Array<Array<number>>(2);
 
-        let angle = 5;
+        let angle = 1;
         let eachAngle = 2 * angle / thicknessFrag;
 
-        let baseWing = new FlatWing(size)
+        let baseWing = new FlatHalfWing(size,isLeft)
 
         let rotate = Util.rotateY(-angle);
         let last = Util.MatsMult(baseWing.vertices, rotate, 3, true);
@@ -77,10 +88,38 @@ class Wing {
         }
         this.flats[1] = last;
     }
-    private static getSize(maxSize: number, maxThickness: number, angle: number) {
-        let cos = Math.cos(angle);
-        let sin = Math.sin(angle);
-        return 2 * cos / (maxSize * ((Math.sqrt(sin / maxThickness) + Math.sqrt(cos / maxSize))));
+    initBuffer(gl: GL): void {
+        let _gl=gl.gl;
+        this.buffers={
+            positions:{},
+            colors:{}
+        }
+        this.buffers.positions.flatWings = [_gl.createBuffer(), _gl.createBuffer()];
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.flatWings[0]);
+        _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.flats[0]), _gl.STATIC_DRAW);
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.flatWings[1]);
+        _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.flats[1]), _gl.STATIC_DRAW);
+        //Wing:
+        let WingBuf = _gl.createBuffer();
+        this.buffers.positions.ringWing = WingBuf;
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, WingBuf);
+        _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.vertices), _gl.STATIC_DRAW);
+
+    }
+    draw(gl: GL): void {
+        let _gl = gl.gl;
+        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));
+
+        for (let i in this.flats) {
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.flatWings[i]);
+            _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
+            _gl.drawArrays(_gl.TRIANGLE_FAN, 0, this.flats[i].length / 3)
+
+        }
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.ringWing);
+        _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
+        _gl.drawArrays(_gl.TRIANGLE_STRIP, 0, this.vertices.length / 3)
+
     }
 }
 class Ellipsoid {
@@ -116,4 +155,4 @@ class Ellipsoid {
     }
 }
 
-export {Circle3D,FlatWing,Wing,Ellipsoid}
+export {Circle3D,FlatHalfWing,HalfWing,Ellipsoid}

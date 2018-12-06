@@ -1,12 +1,12 @@
 import {vec3,lookAt,perspective} from '../MV';
 import {Util} from '../Util';
 
-export default class Viewable{
+export default class Camera{
     public projectionMatrix: any;
     public cameraMatrix: any;
     
     public view(radius, theta, phi) {
-        const far = 10, near = 0.1, aspect = 1, fovy = 45;
+        const far = 1000, near = 0.1, aspect = 1, fovy = 60;
 
         const at = vec3(0.0, 0.0, 0.0);
         var up = vec3(0.0, 1.0, 0.0);

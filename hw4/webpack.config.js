@@ -9,9 +9,6 @@ module.exports = {
     },
     devtool:'source-map',
     devServer:{
-        clientLogLevel:'none',
-        contentBase:'./dist',
-        publicPath:'/dist',
         watchOptions:{
             ignored: /node_modules/
         }

@@ -1,16 +1,17 @@
-import {Ellipsoid,Wing} from './Basis';
-import {Translatable} from '../interface/Translatable';
+import { Ellipsoid, HalfWing } from './Basis';
+import { Translatable } from '../interface/Translatable';
 import Drawable from '../interface/Drawable'
-import {flatten} from '../MV'
+import { flatten } from '../MV'
 import GL from '../GL';
+import { Util } from '../Util';
 
-export class ButterFly extends Translatable implements Drawable,GLObject{
+export class ButterFly extends Translatable implements Drawable {
     buffers: any;
-    
+
     public body: Ellipsoid;
     public eyes: Array<Ellipsoid>;
-    public flatWings: Array<Array<number>>;
-    public Wing: Wing;
+    public LeftWing: HalfWing;
+    public RightWing: HalfWing;
     public lines;
     constructor() {
         super();
@@ -23,8 +24,9 @@ export class ButterFly extends Translatable implements Drawable,GLObject{
             new Ellipsoid(0.02, 0.02, [-0.15, 0.6, 0], '0x000000f0')
 
         ];
-        this.Wing = new Wing(0.95);
-        this.flatWings = this.Wing.flats;
+        this.LeftWing = new HalfWing(0.95);
+        this.RightWing = new HalfWing(0.95, false);
+
         this.lines = [
             -0.008, 0.3, 0, -0.15, 0.6, 0,
             0.008, 0.3, 0, 0.15, 0.6, 0
@@ -43,9 +45,9 @@ export class ButterFly extends Translatable implements Drawable,GLObject{
     }
     public initBuffer(gl: GL) {
         let _gl = gl.gl;
-        this.buffers={
-            positions:{},
-            colors:{}
+        this.buffers = {
+            positions: {},
+            colors: {}
         }
         //body
         this.buffers.positions.body = _gl.createBuffer();
@@ -70,38 +72,19 @@ export class ButterFly extends Translatable implements Drawable,GLObject{
             _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.eyes[i].colors), _gl.STATIC_DRAW);
 
         }
-
-        //FlatWings
-        this.buffers.positions.wings = [_gl.createBuffer(), _gl.createBuffer()];
-        _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.wings[0]);
-        _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.Wing.flats[0]), _gl.STATIC_DRAW);
-        _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.wings[1]);
-        _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.Wing.flats[1]), _gl.STATIC_DRAW);
+        this.LeftWing.initBuffer(gl);
+        this.RightWing.initBuffer(gl);
 
         //lines
         let lineBuf = _gl.createBuffer();
         this.buffers.positions.lines = lineBuf;
         _gl.bindBuffer(_gl.ARRAY_BUFFER, lineBuf);
         _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.lines), _gl.STATIC_DRAW);
-
-        //Wing:
-        let WingBuf = _gl.createBuffer();
-        this.buffers.positions.Wing = WingBuf;
-        _gl.bindBuffer(_gl.ARRAY_BUFFER, WingBuf);
-        _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.Wing.vertices), _gl.STATIC_DRAW);
-
-
     }
 
-    public draw(gl: GL, clear = true):void {
+    public draw(gl: GL): void {
         let _gl = gl.gl;
-        if (clear) {
-            _gl.clearColor(0.0, 0.0, 0.0, 1.0);
-            _gl.clearDepth(1.0);
-        }
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));
-        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.cameraMatrixLoc, false, flatten(gl.cameraMatrix));
-        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.projectionMatrixLoc, false, flatten(gl.projectionMatrix));
 
         //body
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.body);
@@ -125,25 +108,42 @@ export class ButterFly extends Translatable implements Drawable,GLObject{
         }
 
         _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexColor);
-        //wings
-        for (let i in this.flatWings) {
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.wings[i]);
-            _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-            _gl.drawArrays(_gl.TRIANGLE_FAN, 0, this.flatWings[i].length / 3)
-
-        }
         //lines
 
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.lines);
         _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
         _gl.drawArrays(_gl.LINES, 0, this.lines.length / 3)
 
-        //Wing
-        _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.Wing);
-        _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-        _gl.drawArrays(_gl.TRIANGLE_STRIP, 0, this.Wing.vertices.length / 3)
-        _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexColor);
+        //wings
+        this.RightWing.draw(gl);
+        this.LeftWing.draw(gl);
+    }
+    public rotate(delta: number, related = true, axisType = 0): boolean {
+        this.LeftWing.rotate(delta, related, axisType);
+        this.RightWing.rotate(delta, related, axisType);
+        return super.rotate(delta, related, axisType);
+    }
+    public translate(distance: number, direction: number, related=true) {
+        this.LeftWing.translate(distance, direction, related);
+        this.RightWing.translate(distance, direction, related);
+        return super.translate(distance, direction, related);
+    }
+    public flap(degree:number):void{
+        this.LeftWing.rotate(degree,true,5,false)
+        this.RightWing.rotate(-degree,true,5,false)
+    }
+    public fall(lastTime:number):void{
+        let increase=9.8*lastTime/500;//下坠偏转角
 
+        let a=Math.sqrt(this.direction[0]**2+this.direction[2]**2);
+        let b=this.direction[1];
+        let deflection=-Util.degree( Math.atan(b/a)-Math.atan((b+increase)/a));
+
+        console.log(deflection);
+        this.rotate(deflection,true,4);
+    }
+    public moveForward(distance:number):void{
+        let velocityDown=9.8*distance/500;
+        this.translate(distance,0);
     }
 }
-

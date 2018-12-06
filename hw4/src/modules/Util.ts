@@ -71,6 +71,9 @@ export class Util {
     public static radians(degrees: number) {
         return degrees * Math.PI / 180.0;
     }
+    public static degree(radians:number){
+        return radians/Math.PI*180;
+    }
 
     public static rotateY(theta: number) {
         var c = Math.cos(Util.radians(theta));

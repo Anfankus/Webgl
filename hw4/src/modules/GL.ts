@@ -1,22 +1,19 @@
 import { Util } from './Util'
 import { ButterFly } from './models/Butterfly'
 import { Insect } from './models/Insect'
-import {vec3,lookAt,perspective} from './MV'
+import { vec3, lookAt, perspective, flatten } from './MV'
 import Drawable from './interface/Drawable';
-import Viewable from './interface/Viewable';
+import Camera from './models/Camera';
+import { Ground } from './models/Ground';
 
 export default class GL {
     public gl: WebGLRenderingContext;
-    public programInfo:any;
-    public butterfly: ButterFly;
-    public insect: Insect;
-    public buffers: any;
-    public buffers1: any;
+    public programInfo: any;
 
-    public objects:Array<Drawable>
-    public cameras:Array<Viewable>
-    public projectionMatrix: any;
-    public cameraMatrix: any;
+    public objects: Array<Drawable>
+    public cameras: Array<Camera>
+
+    private currentCamera:Camera;
 
     constructor() {
         let canvas = document.getElementById("gl-canvas");
@@ -40,52 +37,45 @@ export default class GL {
 
             },
         };
-        this.buffers = {
-            positions: { butterfly: {} },
-            colors: { butterfly: {} }
-        }
-        this.buffers1 = {
-            positions: { insect: {} },
-            colors: { insect: {} }
-        }
         this.gl.useProgram(this.programInfo.program);
         this.gl.enableVertexAttribArray(this.programInfo.attribLocations.vertexPosition);
-        this.gl.enableVertexAttribArray(this.programInfo.attribLocations.vertexColor);
 
-
-        this.butterfly = new ButterFly();
-        this.butterfly.initBuffer(this);
-        this.insect = new Insect();
-        this.insect.initBuffer(this);
-
-        this.view(4.0, 2, 0.0);
+        this.objects=[];
+        this.cameras = [new Camera()];
+        this.cameras[0].view(100, 2, 0.0);
+        this.currentCamera=this.cameras[0];
     }
-    public drawScene(){
-        if(this.objects.length<=0)
-            throw '场景内没有物体';
-        else{
-            this.objects[0].draw(this,true);
-            for(let i of this.objects){
-                i.draw(this,false);
-            }
+    public addObjects(...obs: Array<Drawable>) {
+        for (let i of obs) {
+            this.objects.push(i);
+            i.initBuffer(this);
         }
     }
+    public addCameras(...obs: Array<Camera>) {
+        for (let i of obs) {
+            this.cameras.push(i);
+        }
+    }
+    public switchCamera(camera:Camera){
+        this.currentCamera=camera;
+    }
 
-    //视图
-    public view(radius, theta, phi) {
-        const far = 10, near = 0.1, aspect = 1, fovy = 45;
+    public drawScene() {
+        if (this.objects.length <= 0)
+            throw '场景内没有物体';
+        else if(this.cameras.length<=0||!this.currentCamera){
+            throw '未指定摄像机';
+        }
+        else {
+            this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
+            this.gl.clearDepth(1.0);
+            this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.cameraMatrixLoc, false, flatten(this.currentCamera.cameraMatrix));
+            this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrixLoc, false, flatten(this.currentCamera.projectionMatrix));
 
-        const at = vec3(0.0, 0.0, 0.0);
-        var up = vec3(0.0, 1.0, 0.0);
-        if (phi > 90 || phi < -90)
-            up = vec3(0.0, -1.0, 0.0);
-        let eye = vec3(radius * Math.sin(Util.radians(theta)) * Math.cos(Util.radians(phi)),
-            radius * Math.sin(Util.radians(phi)),
-            radius * Math.cos(Util.radians(theta)) * Math.cos(Util.radians(phi)));
-
-        this.cameraMatrix = lookAt(eye, at, up);
-        this.projectionMatrix = perspective(fovy, aspect, near, far);
-
+            for (let i of this.objects) {
+                i.draw(this);
+            }
+        }
     }
 }
 

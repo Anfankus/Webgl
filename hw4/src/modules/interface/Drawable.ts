@@ -1,5 +1,8 @@
 import GL from "../GL";
 
 export default interface Drawable{
-    draw(gl: GL, clear:boolean):void;
+    buffers:any;
+
+    initBuffer(gl: GL):void;
+    draw(gl: GL):void;
 }

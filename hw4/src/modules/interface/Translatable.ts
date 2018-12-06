@@ -1,9 +1,9 @@
-import {Util} from '../Util';
-import {mat4,translate,mult,rotate,rotateX,rotateY,rotateZ} from '../MV' 
+import { mat4, mult, rotate, rotateX, rotateY, rotateZ, translate } from '../MV';
+import { Util } from '../Util';
 export enum transType {
-    none, rotateX, rotateY, rotateZ, rotateMain, rotateSec, translateX, translateY, translateZ, translateMain, zoom
+    none, rotateX, rotateY, rotateZ, rotateMain, rotateSec, rotateDir, translateX, translateY, translateZ, translateMain, zoom
 }
-export  class Translatable {
+export class Translatable {
     public direction: Array<number>;
     public baseDirection: Array<number>;
     public axisMain: Array<number>;
@@ -13,9 +13,9 @@ export  class Translatable {
     public position: Array<number>;
     public basePosition: Array<number>;
 
-    public modelMatrix:Array<Array<number>>;
-    public baseMatrix:Array<Array<number>>;
-    
+    public modelMatrix: Array<Array<number>>;
+    public baseMatrix: Array<Array<number>>;
+
     public lastTrans: transType;
     constructor() {
         this.direction = [0, 1, 0, 1];
@@ -36,27 +36,40 @@ export  class Translatable {
     }
     /**
      * 
-     * @param delta 旋转角度
+     * @param delta 旋转角度,角度
      * @param related 旋转是否相对于上次绘制
-     * @param axisType 旋转轴：1--X；2--Y；3--Z,4---自身横轴;0--自身纵轴
+     * @param axisType 旋转轴：1--X；2--Y；3--Z,4---自身横轴;5----自身方向;0--自身纵轴
      */
-    public rotate(delta: number, related = true, axisType = 0): boolean {
+    public rotate(delta: number, related = true, axisType = 0, changeAxis = true): boolean {
         let rotateMatrix;
 
         let transMatrix;
-        let currentTrans = [transType.rotateMain, transType.rotateX, transType.rotateY, transType.rotateZ, transType.rotateSec][axisType];
+        let currentTrans = [
+            transType.rotateMain,
+            transType.rotateX,
+            transType.rotateY,
+            transType.rotateZ,
+            transType.rotateSec,
+            transType.rotateDir
+        ][axisType];
         let ret = false;
-        if (this.lastTrans !== currentTrans && this.lastTrans !== transType.none) {
+        if (related || this.lastTrans !== currentTrans && this.lastTrans !== transType.none) {
             ret = true;
-            this.baseDirection = this.direction;
             this.baseMatrix = this.modelMatrix;
+            this.baseDirection = this.direction;
             this.baseAxisMain = this.axisMain;
             this.baseAxisSec = this.axisSecondary;
             this.basePosition = this.position;
         }
         switch (currentTrans) {
+            case transType.rotateDir:
+                transMatrix = translate(...Util.Mat4Vec(mat4(-1), this.basePosition));
+                rotateMatrix = rotate(delta, this.baseDirection);
+                transMatrix = mult(rotateMatrix, transMatrix);
+                transMatrix = mult(translate(...this.basePosition), transMatrix);
+                break;
             case transType.rotateSec:
-                transMatrix = translate(...Util.Mat4Vec(mat4(-1), this.basePosition) );
+                transMatrix = translate(...Util.Mat4Vec(mat4(-1), this.basePosition));
                 rotateMatrix = rotate(delta, this.baseAxisSec);
                 transMatrix = mult(rotateMatrix, transMatrix);
                 transMatrix = mult(translate(...this.basePosition), transMatrix);
@@ -74,17 +87,13 @@ export  class Translatable {
             case transType.rotateZ: rotateMatrix = transMatrix = rotateZ(delta);
                 break;
         }
-        if (related) {
-            this.modelMatrix = mult(transMatrix, this.modelMatrix);
-            this.direction = Util.Mat4Vec(transMatrix, this.direction);
-            return ret;
-        }
         this.modelMatrix = mult(transMatrix, this.baseMatrix);
         this.position = Util.Mat4Vec(transMatrix, this.basePosition);
-
-        this.direction = Util.Mat4Vec(rotateMatrix, this.baseDirection);
-        this.axisMain = Util.Mat4Vec(rotateMatrix, this.baseAxisMain);
-        this.axisSecondary=Util.Mat4Vec(rotateMatrix, this.baseAxisSec);
+        if (changeAxis) {
+            this.direction = Util.Mat4Vec(rotateMatrix, this.baseDirection);
+            this.axisMain = Util.Mat4Vec(rotateMatrix, this.baseAxisMain);
+            this.axisSecondary = Util.Mat4Vec(rotateMatrix, this.baseAxisSec);
+        }
         this.lastTrans = currentTrans;
         return ret;
     }
@@ -94,16 +103,16 @@ export  class Translatable {
      * @param direction 0：主方向；1：x轴方向；2：y轴方向；3：z轴方向
      * @param related 平移是否相对于上次绘制
      */
-    public translate(distance: number, direction: number, related: boolean) {
+    public translate(distance: number, direction: number, related = true) {
         let x_dis, y_dis, z_dis;
         let currentTrans = [transType.translateMain, transType.translateX, transType.translateY, transType.translateZ][direction];
         let ret = false;
-        if (this.lastTrans !== currentTrans && this.lastTrans !== transType.none) {
+        if (related || this.lastTrans !== currentTrans && this.lastTrans !== transType.none) {
             ret = true;
             this.baseDirection = this.direction;
             this.baseMatrix = this.modelMatrix;
             this.baseAxisMain = this.axisMain;
-            this.baseAxisSec=this.axisSecondary;
+            this.baseAxisSec = this.axisSecondary;
             this.basePosition = this.position;
         }
         switch (currentTrans) {
@@ -130,11 +139,6 @@ export  class Translatable {
                 break;
         }
         let transMatrix = translate(x_dis, y_dis, z_dis);
-
-        if (related) {
-            this.modelMatrix = mult(transMatrix, this.modelMatrix);
-            return ret;
-        }
         this.modelMatrix = mult(transMatrix, this.baseMatrix);
         this.position = Util.Mat4Vec(transMatrix, this.basePosition);
         this.lastTrans = currentTrans;

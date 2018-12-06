@@ -3,7 +3,7 @@ import {Translatable} from '../interface/Translatable';
 import GL from '../GL';
 import {flatten} from '../MV'
 import Drawable from '../interface/Drawable';
-export class Insect extends Translatable implements Drawable,GLObject{
+export class Insect extends Translatable implements Drawable{
     buffers: any;
 
     public body: Array<Ellipsoid>;
@@ -116,15 +116,9 @@ export class Insect extends Translatable implements Drawable,GLObject{
         _gl.bindBuffer(_gl.ARRAY_BUFFER, lineBuf);
         _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.lines), _gl.STATIC_DRAW);
     }
-    public draw(gl: GL, clear = true) {
+    public draw(gl: GL) {
         let _gl = gl.gl;
-        if (clear) {
-            _gl.clearColor(0.0, 0.0, 0.0, 1.0);
-            _gl.clearDepth(1.0);
-        }
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));
-        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.cameraMatrixLoc, false, flatten(gl.cameraMatrix));
-        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.projectionMatrixLoc, false, flatten(gl.projectionMatrix));
 
         //body
         for (let i in this.body) {
