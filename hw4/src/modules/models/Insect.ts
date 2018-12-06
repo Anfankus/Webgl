@@ -1,8 +1,11 @@
-import {Ellipsoid} from './basis';
-import {Translatable} from './translatable';
-import GL from './GL';
-import {flatten} from './MV'
-export class Insect extends Translatable {
+import {Ellipsoid} from './Basis';
+import {Translatable} from '../interface/Translatable';
+import GL from '../GL';
+import {flatten} from '../MV'
+import Drawable from '../interface/Drawable';
+export class Insect extends Translatable implements Drawable,GLObject{
+    buffers: any;
+
     public body: Array<Ellipsoid>;
     public head: Ellipsoid;
     public eyes: Array<Ellipsoid>;
@@ -64,39 +67,44 @@ export class Insect extends Translatable {
     }
     public initBuffer(gl: GL) {
         let _gl = gl.gl;
+        this.buffers={
+            positions:{},
+            colors:{}
+        }
+
         //body
-        gl.buffers1.positions.insect.body = [];
-        gl.buffers1.colors.insect.body = [];
+        this.buffers.positions.body = [];
+        this.buffers.colors.body = [];
         for (let i in this.body) {
             let tempPBuf = _gl.createBuffer();
-            gl.buffers1.positions.insect.body.push(tempPBuf);
+            this.buffers.positions.body.push(tempPBuf);
             _gl.bindBuffer(_gl.ARRAY_BUFFER, tempPBuf);
             _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.body[i].vertices), _gl.STATIC_DRAW);
 
             let tempCBuf = _gl.createBuffer();
-            gl.buffers1.colors.insect.body.push(tempCBuf);
+            this.buffers.colors.body.push(tempCBuf);
             _gl.bindBuffer(_gl.ARRAY_BUFFER, tempCBuf);
             _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.body[i].colors), _gl.STATIC_DRAW);
         }
         //head
-        gl.buffers1.positions.insect.head = _gl.createBuffer();
-        _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers1.positions.insect.head);
+        this.buffers.positions.head = _gl.createBuffer();
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.head);
         _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.head.vertices), _gl.STATIC_DRAW);
 
-        gl.buffers1.colors.insect.head = _gl.createBuffer();
-        _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers1.colors.insect.head);
+        this.buffers.colors.head = _gl.createBuffer();
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.colors.head);
         _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.head.colors), _gl.STATIC_DRAW);
         //eyes
-        gl.buffers1.positions.insect.eyes = [];
-        gl.buffers1.colors.insect.eyes = [];
+        this.buffers.positions.eyes = [];
+        this.buffers.colors.eyes = [];
         for (let i in this.eyes) {
             let tempPBuf = _gl.createBuffer();
-            gl.buffers1.positions.insect.eyes.push(tempPBuf);
+            this.buffers.positions.eyes.push(tempPBuf);
             _gl.bindBuffer(_gl.ARRAY_BUFFER, tempPBuf);
             _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.eyes[i].vertices), _gl.STATIC_DRAW);
 
             let tempCBuf = _gl.createBuffer();
-            gl.buffers1.colors.insect.eyes.push(tempCBuf);
+            this.buffers.colors.eyes.push(tempCBuf);
             _gl.bindBuffer(_gl.ARRAY_BUFFER, tempCBuf);
             _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.eyes[i].colors), _gl.STATIC_DRAW);
 
@@ -104,7 +112,7 @@ export class Insect extends Translatable {
 
         //lines
         let lineBuf = _gl.createBuffer();
-        gl.buffers1.positions.insect.lines = lineBuf;
+        this.buffers.positions.lines = lineBuf;
         _gl.bindBuffer(_gl.ARRAY_BUFFER, lineBuf);
         _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.lines), _gl.STATIC_DRAW);
     }
@@ -120,32 +128,32 @@ export class Insect extends Translatable {
 
         //body
         for (let i in this.body) {
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers1.positions.insect.body[i]);
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.body[i]);
             _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers1.colors.insect.body[i]);
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.colors.body[i]);
             _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexColor, 4, _gl.FLOAT, false, 0, 0);
 
             _gl.drawArrays(_gl.TRIANGLE_STRIP, 0, this.body[i].vertices.length / 3)
         }
         //head
-        _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers1.positions.insect.head);
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.head);
         _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-        _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers1.colors.insect.head);
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.colors.head);
         _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexColor, 4, _gl.FLOAT, false, 0, 0);
 
         _gl.drawArrays(_gl.TRIANGLE_STRIP, 0, this.head.vertices.length / 3)
         //eyes
         for (let i in this.eyes) {
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers1.positions.insect.eyes[i]);
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.eyes[i]);
             _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers1.colors.insect.eyes[i]);
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.colors.eyes[i]);
             _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexColor, 4, _gl.FLOAT, false, 0, 0);
 
             _gl.drawArrays(_gl.TRIANGLE_FAN, 0, this.eyes[i].vertices.length / 3)
         }
 
         //lines
-        _gl.bindBuffer(_gl.ARRAY_BUFFER, gl.buffers1.positions.insect.lines);
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.lines);
         _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
         _gl.drawArrays(_gl.LINES, 0, this.lines.length / 3)
 

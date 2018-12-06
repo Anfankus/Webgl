@@ -1,4 +1,4 @@
 .DS_Store
 .vs/
 node_modules/
-hw*/dist/script/
+hw*/dist/

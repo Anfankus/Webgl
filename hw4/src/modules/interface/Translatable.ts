@@ -1,5 +1,5 @@
-import {Util} from './Util';
-import {mat4,translate,mult,rotate,rotateX,rotateY,rotateZ} from './MV' 
+import {Util} from '../Util';
+import {mat4,translate,mult,rotate,rotateX,rotateY,rotateZ} from '../MV' 
 export enum transType {
     none, rotateX, rotateY, rotateZ, rotateMain, rotateSec, translateX, translateY, translateZ, translateMain, zoom
 }

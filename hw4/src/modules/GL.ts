@@ -1,7 +1,9 @@
 import { Util } from './Util'
-import { ButterFly } from './Butterfly'
-import { Insect } from './Insect'
+import { ButterFly } from './models/Butterfly'
+import { Insect } from './models/Insect'
 import {vec3,lookAt,perspective} from './MV'
+import Drawable from './interface/Drawable';
+import Viewable from './interface/Viewable';
 
 export default class GL {
     public gl: WebGLRenderingContext;
@@ -11,9 +13,10 @@ export default class GL {
     public buffers: any;
     public buffers1: any;
 
+    public objects:Array<Drawable>
+    public cameras:Array<Viewable>
     public projectionMatrix: any;
     public cameraMatrix: any;
-    public aspect: number;
 
     constructor() {
         let canvas = document.getElementById("gl-canvas");
@@ -22,7 +25,6 @@ export default class GL {
         this.gl.viewport(0, 0, canvas.offsetWidth, canvas.offsetHeight);
         this.gl.clearColor(1.0, 1.0, 1.0, 1.0);
         this.gl.enable(this.gl.DEPTH_TEST);
-        this.aspect = canvas.offsetWidth / canvas.offsetHeight;
 
         let shaderPro = initShaders(this.gl, "vertex-shader", "fragment-shader");
         this.programInfo = {
@@ -57,7 +59,16 @@ export default class GL {
         this.insect.initBuffer(this);
 
         this.view(4.0, 2, 0.0);
-
+    }
+    public drawScene(){
+        if(this.objects.length<=0)
+            throw '场景内没有物体';
+        else{
+            this.objects[0].draw(this,true);
+            for(let i of this.objects){
+                i.draw(this,false);
+            }
+        }
     }
 
     //视图

@@ -1,0 +1,3 @@
+interface GLObject{
+    buffers:any;
+}
