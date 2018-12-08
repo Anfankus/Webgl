@@ -8,7 +8,7 @@ export default class Camera{
     public view(radius, theta, phi) {
         const far = 1000, near = 0.1, aspect = 1, fovy = 60;
 
-        const at = vec3(0.0, 0.0, 0.0);
+        const at = vec3(0.0, 30, 0.0);
         var up = vec3(0.0, 1.0, 0.0);
         if (phi > 90 || phi < -90)
             up = vec3(0.0, -1.0, 0.0);

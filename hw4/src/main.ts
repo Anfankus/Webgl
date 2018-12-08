@@ -10,10 +10,20 @@ but.translate(50,2);
 but.rotate(90,true,4);
 _gl.addObjects(new Ground([0,-2,0],50),but);
 let stateButterFly={
+    butt:but,
     height:10,
-    speed:0
+    speedX:5,
+    speedY:0,
+    get speed() : number {
+        return Math.sqrt(this.speedX**2+this.speedY**2)
+    },
+    turn:{
+        state:0,             //0为可变状态
+        set degree(val){
+            this.
+        }
+    }
 }
-_gl.drawScene();
 let camera = new Vue({
     el: '#camera',
     data() {
@@ -43,23 +53,27 @@ let camera = new Vue({
             this.glOb.drawScene();
         },
         play() {
-            let then = performance.now() * 0.03,start=then;
-            let range=30*2;
+            let then = performance.now() * 0.001,start=then;
+            let range=45*2;
             let degree=0,flap=1;
 
             let c=this.camera;
             function _draw(now: number) {
-                now *= 0.03;
-                let relatedDegree=((now - then)*(flap+2))*flap*1.8;
+                now *= 0.001;
+                let lastTime=now-then;
+                //翅膀扇动
+                let relatedDegree=(lastTime*(flap+2))*flap*50;
                 if(Math.abs(degree+relatedDegree)>range/2){
                     relatedDegree*=-1;
                     flap*=-1;
                 }
                 but.flap(relatedDegree);
-                but.fall(now-then);
 
-                let speed=Math.sqrt(0.01**2+((now-start)*9.8/500)**2)
-                but.moveForward(speed)
+                //随时间加速
+                stateButterFly.speedX+=lastTime*3;
+                //蝴蝶下坠
+                stateButterFly.speedY+=but.fall(lastTime,stateButterFly.speedX);
+                but.moveForward(stateButterFly.speed*lastTime)
 
                 _gl.drawScene();
                 then=now;
@@ -74,10 +88,10 @@ let camera = new Vue({
         }
     }
 })
-
-camera.play();
+but.rotate(-30,true,4);
+//camera.play();
 let mousedown = false;
-let ele = window;
+let ele = document.getElementById('gl-canvas');
 if (ele) {
     ele.onmousedown = function (e) {
         mousedown = true;
@@ -91,32 +105,31 @@ if (ele) {
             camera.phi = ((camera.phi) + (e.movementY) * 0.8) % 360;
         }
     }
-    ele.onwheel = function (e) {
+    window.onwheel = function (e) {
         let temp = (camera.radius) + e.deltaY / 350;
         if (temp <= 0 || temp > 10)
             return;
         camera.radius = temp;
     }
-    ele.onkeydown=function(e){
+    window.onkeydown=function(e){
         console.log(e.keyCode);
         switch(e.keyCode){
-            case 37:
-            but.rotate(5,true,0)
+            case 32://空格
+            stateButterFly.speedY+=but.fly(stateButterFly.speedX);
             break;
-            case 38:
+            case 37://←
+            but.rotate(5,true,5)
+            break;
+            case 38://↑
             but.translate(0.3,0)
             break;
-            case 39:
-            but.rotate(-5,true,0)
+            case 39://→
+            but.rotate(-5,true,5)
             break;
-            case 40:
+            case 40://↓
             but.translate(-0.3,0)
             break;
         }
     };
-    ele.onkeypress=e=>{
-        console.log('press',e.key,e.keyCode);
-    }
 }
-console.log(but.position,but.direction,but.axisMain,but.axisSecondary);
-console.log(but.LeftWing.position,but.LeftWing.direction,but.LeftWing.axisMain,but.LeftWing.axisSecondary);
+_gl.drawScene();

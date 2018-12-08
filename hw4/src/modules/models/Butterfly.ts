@@ -132,18 +132,33 @@ export class ButterFly extends Translatable implements Drawable {
         this.LeftWing.rotate(degree,true,5,false)
         this.RightWing.rotate(-degree,true,5,false)
     }
-    public fall(lastTime:number):void{
-        let increase=9.8*lastTime/500;//下坠偏转角
+    public fall(lastTime:number,speedX:number):number{
+        let decrease=-9.8*lastTime;
+        let x=Math.sqrt(this.direction[0]**2+this.direction[2]**2);
+        let y=this.direction[1];
+        let a=speedX
+        let b=speedX*y/x;
 
-        let a=Math.sqrt(this.direction[0]**2+this.direction[2]**2);
-        let b=this.direction[1];
-        let deflection=-Util.degree( Math.atan(b/a)-Math.atan((b+increase)/a));
-
-        console.log(deflection);
+        let alpha=Math.atan(y/x),beta=Math.atan((b+decrease)/a);
+        let deflection=Util.degree(alpha-beta);
+        console.log(alpha,beta,alpha-beta);
         this.rotate(deflection,true,4);
+        return decrease;
     }
     public moveForward(distance:number):void{
-        let velocityDown=9.8*distance/500;
         this.translate(distance,0);
+    }
+    public fly(speedX:number):number{
+        let decrease=5;
+        let x=Math.sqrt(this.direction[0]**2+this.direction[2]**2);
+        let y=this.direction[1];
+        let a=speedX
+        let b=speedX*y/x;
+
+        let alpha=Math.atan(y/x),beta=Math.atan((b+decrease)/a);
+        let deflection=Util.degree(alpha-beta);
+        console.log(alpha,beta,alpha-beta);
+        this.rotate(deflection,true,4);
+        return decrease;
     }
 }

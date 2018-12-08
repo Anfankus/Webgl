@@ -42,7 +42,7 @@ export default class GL {
 
         this.objects=[];
         this.cameras = [new Camera()];
-        this.cameras[0].view(100, 2, 0.0);
+        this.cameras[0].view(150, 90, 0.0);
         this.currentCamera=this.cameras[0];
     }
     public addObjects(...obs: Array<Drawable>) {
