@@ -140,7 +140,7 @@ export class ButterFly extends Translatable implements Drawable {
         let b=speedX*y/x;
 
         let alpha=Math.atan(y/x),beta=Math.atan((b+decrease)/a);
-        let deflection=Util.degree(alpha-beta);
+        let deflection=Math.abs(Util.degree(alpha-beta));
         console.log(alpha,beta,alpha-beta);
         this.rotate(deflection,true,4);
         return decrease;

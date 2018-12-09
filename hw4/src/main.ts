@@ -19,8 +19,11 @@ let stateButterFly={
     },
     turn:{
         state:0,             //0为可变状态
+        $degree:0,
         set degree(val){
-            this.
+            if(!this.state){
+
+            }
         }
     }
 }

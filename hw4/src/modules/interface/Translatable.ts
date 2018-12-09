@@ -1,7 +1,11 @@
 import { mat4, mult, rotate, rotateX, rotateY, rotateZ, translate } from '../MV';
 import { Util } from '../Util';
 export enum transType {
-    none, rotateX, rotateY, rotateZ, rotateMain, rotateSec, rotateDir, translateX, translateY, translateZ, translateMain, zoom
+    none,
+    rotateSelfX, rotateSelfY, rotateSelfZ,
+    rotateMain, rotateSec, rotateDir,
+    translateX, translateY, translateZ, translateMain,
+    zoom
 }
 export class Translatable {
     public direction: Array<number>;
@@ -46,9 +50,9 @@ export class Translatable {
         let transMatrix;
         let currentTrans = [
             transType.rotateMain,
-            transType.rotateX,
-            transType.rotateY,
-            transType.rotateZ,
+            transType.rotateSelfX,
+            transType.rotateSelfY,
+            transType.rotateSelfZ,
             transType.rotateSec,
             transType.rotateDir
         ][axisType];
@@ -61,32 +65,30 @@ export class Translatable {
             this.baseAxisSec = this.axisSecondary;
             this.basePosition = this.position;
         }
+        transMatrix = translate(...Util.Mat4Vec(mat4(-1), this.basePosition));
+
         switch (currentTrans) {
             case transType.rotateDir:
-                transMatrix = translate(...Util.Mat4Vec(mat4(-1), this.basePosition));
                 rotateMatrix = rotate(delta, this.baseDirection);
-                transMatrix = mult(rotateMatrix, transMatrix);
-                transMatrix = mult(translate(...this.basePosition), transMatrix);
                 break;
             case transType.rotateSec:
-                transMatrix = translate(...Util.Mat4Vec(mat4(-1), this.basePosition));
                 rotateMatrix = rotate(delta, this.baseAxisSec);
-                transMatrix = mult(rotateMatrix, transMatrix);
-                transMatrix = mult(translate(...this.basePosition), transMatrix);
                 break;
             case transType.rotateMain:
-                transMatrix = translate(...Util.Mat4Vec(mat4(-1), this.basePosition));
                 rotateMatrix = rotate(delta, this.baseAxisMain);
-                transMatrix = mult(rotateMatrix, transMatrix);
-                transMatrix = mult(translate(...this.basePosition), transMatrix);
                 break;
-            case transType.rotateX: rotateMatrix = transMatrix = rotateX(delta);
+            case transType.rotateSelfX:
+                rotateMatrix  = rotateX(delta);
                 break;
-            case transType.rotateY: rotateMatrix = transMatrix = rotateY(delta);
+            case transType.rotateSelfY:
+                rotateMatrix  = rotateY(delta);
                 break;
-            case transType.rotateZ: rotateMatrix = transMatrix = rotateZ(delta);
+            case transType.rotateSelfZ:
+                rotateMatrix  = rotateZ(delta);
                 break;
         }
+        transMatrix = mult(rotateMatrix, transMatrix);
+        transMatrix = mult(translate(...this.basePosition), transMatrix);
         this.modelMatrix = mult(transMatrix, this.baseMatrix);
         this.position = Util.Mat4Vec(transMatrix, this.basePosition);
         if (changeAxis) {
