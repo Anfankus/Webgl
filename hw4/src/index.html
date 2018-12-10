@@ -4,29 +4,66 @@
 <head>
     <meta charset="utf-8" />
     <script id="vertex-shader" type="x-shader/x-vertex">
-        attribute vec4 vPosition;
-attribute vec4 vColor;
+attribute vec4 vPosition;
+attribute vec4 vNormal;
+varying vec3 N, L, E;
 uniform mat4 uCameraMatrix;
 uniform mat4 uProjectionMatrix;
-
 uniform mat4 uModelViewMatrix;
+uniform vec4 lightPosition;
+uniform mat3 normalMatrix;
 
-varying vec4 fColor;
-void
-main()
-{   fColor=vColor;
-    gl_Position = uProjectionMatrix * uCameraMatrix * uModelViewMatrix * vPosition;
+void main()
+{   
+    vec4 modelViewPos= uCameraMatrix * uModelViewMatrix * vPosition;
+    vec3 pos = modelViewPos.xyz;    
+    if(lightPosition.w == 0.0) L = normalize(lightPosition.xyz);
+    else L = normalize( lightPosition.xyz - pos );
+    E =  -normalize(pos);
+    N = normalize( normalMatrix*vNormal.xyz);
+    gl_Position = uProjectionMatrix * modelViewPos;
+
+    //fColor=vColor;
+    //gl_Position = uProjectionMatrix * uCameraMatrix * uModelViewMatrix * vPosition;
 }
 </script>
 
     <script id="fragment-shader" type="x-shader/x-fragment">
         precision mediump float;
-varying vec4 fColor;
-void
-main()
-{
-    gl_FragColor = fColor;
-}
+        uniform vec4 ambientProduct;
+        uniform vec4 diffuseProduct;
+        uniform vec4 specularProduct;
+        uniform float shininess;
+        varying vec3 N, L, E;
+        
+        void main()
+        {    
+            vec4 fColor;
+            
+            vec3 H = normalize( L + E );
+            vec4 ambient = ambientProduct;
+        
+            float Kd = max( dot(L, N), 0.0 );
+            vec4  diffuse = Kd*diffuseProduct;
+        
+            float Ks = pow( max(dot(N, H), 0.0), shininess );
+            vec4  specular = Ks * specularProduct;
+            
+            if( dot(L, N) < 0.0 ) specular = vec4(0.0, 0.0, 0.0, 1.0);
+        
+            fColor = ambient + diffuse +specular;
+            fColor.a = 1.0;
+        
+            gl_FragColor = fColor;
+        }
+        
+//precision mediump float;
+//varying vec4 fColor;
+//void
+//main()
+//{
+//    gl_FragColor = fColor;
+//}
 </script>
     <style>
         .app{

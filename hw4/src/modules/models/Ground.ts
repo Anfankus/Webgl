@@ -30,22 +30,22 @@ export class Ground implements Drawable {
         }
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions);
         _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.vertices), _gl.STATIC_DRAW);
-        _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.colors);
-        _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.colors), _gl.STATIC_DRAW);
+        // _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.colors);
+        // _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.colors), _gl.STATIC_DRAW);
 
     }
     draw(gl: GL): void {
         let _gl = gl.gl;
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(mat4()));
-        _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexColor);
+        // _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexColor);
 
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions);
         _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-        _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.colors);
-        _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexColor, 4, _gl.FLOAT, false, 0, 0);
+        // _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.colors);
+        // _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexColor, 4, _gl.FLOAT, false, 0, 0);
 
         _gl.drawArrays(_gl.TRIANGLES, 0, this.vertices.length / 3)
-        _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexColor);
+        // _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexColor);
     }
 
 }

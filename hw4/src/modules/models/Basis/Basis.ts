@@ -1,8 +1,8 @@
-import {Util} from '../Util';
-import { Translatable } from '../interface/Translatable';
-import Drawable from '../interface/Drawable';
-import GL from '../GL'
-import { flatten } from '../MV';
+import {Util} from '../../Util';
+import { Translatable } from '../../interface/Translatable';
+import Drawable from '../../interface/Drawable';
+import GL from '../../GL'
+import { flatten } from '../../MV';
 class Circle3D {
     public vertices: Array<number>;
     public colors: Array<number>;
@@ -109,6 +109,7 @@ class HalfWing extends Translatable implements Drawable {
     draw(gl: GL): void {
         let _gl = gl.gl;
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));
+        _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexNormal);
 
         for (let i in this.flats) {
             _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.flatWings[i]);
@@ -124,12 +125,14 @@ class HalfWing extends Translatable implements Drawable {
 }
 class Ellipsoid {
     public vertices: Array<number>;
+    public normals:Array<number>;
     public colors: Array<number>;
     public baseCircle: Circle3D;
     constructor(a, b, position, color: string | Array<number>) {
 
         this.baseCircle = new Circle3D(a, b);
         this.vertices = [];
+        this.normals=[];
         this.colors = [];
         let last = this.baseCircle.vertices;
         let frag = 30;
@@ -143,12 +146,15 @@ class Ellipsoid {
             let newVer = [];
             for (let j = 0; j < this.baseCircle.vertices.length; j += 3) {
                 this.colors.push(..._color, ..._color);
-                this.vertices.push(last[j] + xp, last[j + 1] + yp, last[j + 2] + zp)
+                this.vertices.push(last[j] + xp, last[j + 1] + yp, last[j + 2] + zp);
+                this.normals.push(last[j] + xp, last[j + 1] + yp, last[j + 2] + zp,0);
                 for (let k = 0; k < 3; k++) {
                     let newEle = rotateM[3 * k] * last[j] + rotateM[3 * k + 1] * last[j + 1] + rotateM[3 * k + 2] * last[j + 2];
                     newVer.push(newEle);
                     this.vertices.push(newEle + position[k]);
+                    this.normals.push(newEle + position[k]);
                 }
+                this.normals.push(0);
             }
             last = newVer;
         }

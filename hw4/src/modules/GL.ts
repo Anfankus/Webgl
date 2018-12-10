@@ -1,7 +1,7 @@
 import { Util } from './Util'
 import { ButterFly } from './models/Butterfly'
 import { Insect } from './models/Insect'
-import { vec3, lookAt, perspective, flatten } from './MV'
+import { vec3, lookAt, perspective, flatten, vec4, mult } from './MV'
 import Drawable from './interface/Drawable';
 import Camera from './models/Camera';
 import { Ground } from './models/Ground';
@@ -28,13 +28,19 @@ export default class GL {
             program: shaderPro,
             attribLocations: {
                 vertexPosition: this.gl.getAttribLocation(shaderPro, 'vPosition'),
-                vertexColor: this.gl.getAttribLocation(shaderPro, 'vColor'),
+                vertexNormal:this.gl.getAttribLocation(shaderPro,'vNormal')
             },
             uniformLocations: {
                 modelViewMatrix: this.gl.getUniformLocation(shaderPro, 'uModelViewMatrix'),
                 cameraMatrixLoc: this.gl.getUniformLocation(shaderPro, 'uCameraMatrix'),
                 projectionMatrixLoc: this.gl.getUniformLocation(shaderPro, 'uProjectionMatrix'),
-
+                normalMatrixLoc :this. gl.getUniformLocation(shaderPro, "normalMatrix"),
+                
+                ambientVectorLoc:this.gl.getUniformLocation(shaderPro,'ambientProduct'),
+                diffuseVectorLoc:this.gl.getUniformLocation(shaderPro,'diffuseProduct'),
+                specularVectorLoc:this.gl.getUniformLocation(shaderPro,'specularProduct'),
+                lightVectorLoc:this.gl.getUniformLocation(shaderPro,'lightProduct'),
+                shininessLoc:this.gl.getUniformLocation(shaderPro,'shininess')
             },
         };
         this.gl.useProgram(this.programInfo.program);
@@ -42,7 +48,7 @@ export default class GL {
 
         this.objects=[];
         this.cameras = [new Camera()];
-        this.cameras[0].view(150, 90, 0.0);
+        this.cameras[0].view(2, 0, 0.0);
         this.currentCamera=this.cameras[0];
     }
     public addObjects(...obs: Array<Drawable>) {

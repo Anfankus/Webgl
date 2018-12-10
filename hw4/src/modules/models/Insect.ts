@@ -1,4 +1,4 @@
-import {Ellipsoid} from './Basis';
+import {Ellipsoid} from './Basis/Basis';
 import {Translatable} from '../interface/Translatable';
 import GL from '../GL';
 import {flatten} from '../MV'

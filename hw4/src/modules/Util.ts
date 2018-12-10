@@ -1,4 +1,14 @@
 export class Util {
+    public static Vec4Mult(A:Array<number>,B:Array<number>):Array<number>{
+        if(A.length!==B.length){
+            throw '错误的向量值'
+        }
+        let ret=[];
+        for(let i in A){
+            ret.push(A[i]*B[i]);
+        }
+        return ret;
+    }
     public static Mat4Vec(Mat4:Array<Array<number>>, Vec:Array<number>) {
         let tempVec = [];
         for (let i in [0, 1, 2]) {

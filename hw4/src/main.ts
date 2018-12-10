@@ -6,9 +6,10 @@ import { Ground } from './modules/models/Ground';
 
 var _gl = new GL;
 let but=new ButterFly;
-but.translate(50,2);
-but.rotate(90,true,4);
-_gl.addObjects(new Ground([0,-2,0],50),but);
+//but.translate(10,2);
+//but.rotate(90,true,4);
+//new Ground([0,-2,0],50),
+_gl.addObjects(but);
 let stateButterFly={
     butt:but,
     height:10,
@@ -35,7 +36,7 @@ let camera = new Vue({
             glOb: _gl,
             theta: 0,
             phi: 0,
-            radius: 75,
+            radius: 3,
             animeHandle: 0
         }
     },
@@ -76,7 +77,7 @@ let camera = new Vue({
                 stateButterFly.speedX+=lastTime*3;
                 //蝴蝶下坠
                 stateButterFly.speedY+=but.fall(lastTime,stateButterFly.speedX);
-                but.moveForward(stateButterFly.speed*lastTime)
+                //but.moveForward(stateButterFly.speed*lastTime)
 
                 _gl.drawScene();
                 then=now;
@@ -91,7 +92,7 @@ let camera = new Vue({
         }
     }
 })
-but.rotate(-30,true,4);
+//but.rotate(-30,true,4);
 //camera.play();
 let mousedown = false;
 let ele = document.getElementById('gl-canvas');
