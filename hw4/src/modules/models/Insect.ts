@@ -3,7 +3,12 @@ import {Translatable} from '../interface/Translatable';
 import GL from '../GL';
 import {flatten} from '../MV'
 import Drawable from '../interface/Drawable';
+import { Material } from '../interface/Material';
 export class Insect extends Translatable implements Drawable{
+    material:Material;
+    setMaterial(m: Material) {
+        throw new Error("Method not implemented.");
+    }
     buffers: any;
 
     public body: Array<Ellipsoid>;

@@ -576,7 +576,9 @@ export function scale(s, u) {
 //
 
 export function flatten(v) {
+    if(Array.isArray(v[0])){
     v = transpose(v);
+}
 
     var n = v.length;
     var elemsAreArrays = false;

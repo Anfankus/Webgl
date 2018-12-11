@@ -20,6 +20,17 @@ export class Util {
         tempVec.push(1);
         return tempVec
     }
+    public static Mat3Vec(Mat3:Array<number>, Vec:Array<number>) {
+        let tempVec = [];
+        for (let i of [0, 1, 2]) {
+            tempVec.push(Vec[0] * Mat3[i*3+0]
+                + Vec[1] * Mat3[i*3+1]
+                + Vec[2] * Mat3[i*3+2]);
+        }
+        tempVec.push(1);
+        return tempVec
+    }
+
     public static Hex2Vec4(hex: string) {
         let _hex = parseInt(hex);
         let ret;
@@ -85,13 +96,21 @@ export class Util {
         return radians/Math.PI*180;
     }
 
-    public static rotateY(theta: number) {
+    public static rotateY(theta: number, arar = false){
         var c = Math.cos(Util.radians(theta));
         var s = Math.sin(Util.radians(theta));
-        var ry = new Array<number>(c, 0.0, -s,
-            0.0, 1.0, 0.0,
-            s, 0.0, c);
-        return ry;
+        let rt;
+        if (arar) {
+            rt = [[c, 0.0, -s],
+            [0.0, 1.0, 0.0],
+            [s, 0.0, c]]
+        }
+        else {
+            rt = new Array<number>(c, 0.0, -s,
+                0.0, 1.0, 0.0,
+                s, 0.0, c);
+        }
+        return rt;
     }
 
 }

@@ -5,15 +5,18 @@ import { vec3, lookAt, perspective, flatten, vec4, mult } from './MV'
 import Drawable from './interface/Drawable';
 import Camera from './models/Camera';
 import { Ground } from './models/Ground';
+import { Light } from './scene/Light';
 
 export default class GL {
     public gl: WebGLRenderingContext;
     public programInfo: any;
 
-    public objects: Array<Drawable>
-    public cameras: Array<Camera>
+    public objects: Array<Drawable>;
+    public cameras: Array<Camera>;
+    public lights:Array<Light>;
 
-    private currentCamera:Camera;
+    public currentCamera:Camera;
+    public currentLight:Light;
 
     constructor() {
         let canvas = document.getElementById("gl-canvas");
@@ -39,17 +42,24 @@ export default class GL {
                 ambientVectorLoc:this.gl.getUniformLocation(shaderPro,'ambientProduct'),
                 diffuseVectorLoc:this.gl.getUniformLocation(shaderPro,'diffuseProduct'),
                 specularVectorLoc:this.gl.getUniformLocation(shaderPro,'specularProduct'),
-                lightVectorLoc:this.gl.getUniformLocation(shaderPro,'lightProduct'),
+                lightVectorLoc:this.gl.getUniformLocation(shaderPro,'lightPosition'),
                 shininessLoc:this.gl.getUniformLocation(shaderPro,'shininess')
             },
         };
         this.gl.useProgram(this.programInfo.program);
-        this.gl.enableVertexAttribArray(this.programInfo.attribLocations.vertexPosition);
 
         this.objects=[];
+        this.lights=[];
+        this.cameras=[];
+        /**
+         * 测试用例
+         */
         this.cameras = [new Camera()];
         this.cameras[0].view(2, 0, 0.0);
         this.currentCamera=this.cameras[0];
+        let l=new Light;
+        this.currentLight=l;
+        this.lights.push(l);
     }
     public addObjects(...obs: Array<Drawable>) {
         for (let i of obs) {
@@ -75,9 +85,18 @@ export default class GL {
         else {
             this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
             this.gl.clearDepth(1.0);
+            let normalMatrix = [
+                1,-0,0,
+                0,1,0,
+                -0,-0,1
+            ];
+
             this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.cameraMatrixLoc, false, flatten(this.currentCamera.cameraMatrix));
             this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrixLoc, false, flatten(this.currentCamera.projectionMatrix));
-
+            
+            this.gl.uniform4fv(this.programInfo.uniformLocations.lightVectorLoc, new Float32Array(this.currentLight.lightPosition));
+    
+    
             for (let i of this.objects) {
                 i.draw(this);
             }

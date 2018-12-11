@@ -1,7 +1,12 @@
 import Drawable from "../interface/Drawable";
 import GL from '../GL'
 import { mat4, flatten } from "../MV";
+import { Material } from "../interface/Material";
 export class Ground implements Drawable {
+    material: Material;
+    setMaterial(m:Material) {
+        throw new Error("Method not implemented.");
+    }
     buffers: any;
 
     vertices:Array<number>;
