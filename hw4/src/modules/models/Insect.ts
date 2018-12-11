@@ -1,9 +1,9 @@
-import {Ellipsoid} from './Basis/Basis';
 import {Translatable} from '../interface/Translatable';
 import GL from '../GL';
 import {flatten} from '../MV'
 import Drawable from '../interface/Drawable';
 import { Material } from '../interface/Material';
+import { Ellipsoid } from './Basis/Ellipsoid';
 export class Insect extends Translatable implements Drawable{
     material:Material;
     setMaterial(m: Material) {
