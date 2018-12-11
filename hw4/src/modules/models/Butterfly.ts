@@ -1,4 +1,3 @@
-import { Ellipsoid, HalfWing } from './Basis/Basis';
 import { Translatable } from '../interface/Translatable';
 import Drawable from '../interface/Drawable'
 import { flatten, vec4, mult } from '../MV'
@@ -7,6 +6,8 @@ import { Util } from '../Util';
 import { Light } from '../scene/Light';
 import { Material } from '../interface/Material';
 import { NoneMaterial } from '../materials/NoneMaterial';
+import { Ellipsoid } from './Basis/Ellipsoid';
+import { HalfWing } from './Basis/HalfWing';
 
 export class ButterFly extends Translatable implements Drawable {
     material: Material;
@@ -44,38 +45,20 @@ export class ButterFly extends Translatable implements Drawable {
             positions: {},
             normals: {}
         }
-        //body
-        this.body.initBuffer(gl);
-        this.buffers.positions.body = _gl.createBuffer();
-        _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.body);
-        _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.body.vertices), _gl.STATIC_DRAW);
-
-        this.buffers.normals.body = _gl.createBuffer();
-        _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.normals.body);
-        _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.body.normals), _gl.STATIC_DRAW);
-        //eyes
-        this.buffers.positions.eyes = [];
-        this.buffers.normals.eyes=[];
-        for (let i in this.eyes) {
-            let tempPBuf = _gl.createBuffer();
-            this.buffers.positions.eyes.push(tempPBuf);
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, tempPBuf);
-            _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.eyes[i].vertices), _gl.STATIC_DRAW);
-
-            let tempNBuf = _gl.createBuffer();
-            this.buffers.normals.eyes.push(tempNBuf);
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, tempNBuf);
-            _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.eyes[i].normals), _gl.STATIC_DRAW);
-
-        }
-        this.LeftWing.initBuffer(gl);
-        this.RightWing.initBuffer(gl);
-
         //lines
         let lineBuf = _gl.createBuffer();
         this.buffers.positions.lines = lineBuf;
         _gl.bindBuffer(_gl.ARRAY_BUFFER, lineBuf);
         _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.lines), _gl.STATIC_DRAW);
+        //body
+        this.body.initBuffer(gl);
+        //eyes
+        for (let i of this.eyes) {
+            i.initBuffer(gl);
+        }
+
+        this.LeftWing.initBuffer(gl);
+        this.RightWing.initBuffer(gl);
     }
 
     public draw(gl: GL): void {
@@ -102,36 +85,23 @@ export class ButterFly extends Translatable implements Drawable {
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));
         _gl.uniformMatrix3fv(gl.programInfo.uniformLocations.normalMatrixLoc, false, new Float32Array(normalMatrix));
         
-        //body
-        // _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.body);
-        // _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-        // _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.normals.body);
-        // _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexNormal, 3, _gl.FLOAT, false, 0, 0);
-        this.body.draw(gl);
-        //_gl.drawArrays(_gl.LINES, 0, this.body.vertices.length / 3)
-        _gl.drawArrays(_gl.TRIANGLE_STRIP, 0, this.body.vertices.length / 3)
-
 
         _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
-        _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexNormal);
-        _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexNormal);
-
-        //eyes
-        for (let i in this.eyes) {
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.eyes[i]);
-            _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-            _gl.drawArrays(_gl.TRIANGLE_FAN, 0, this.eyes[i].vertices.length / 3)
-        }
         //lines
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.lines);
         _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
         _gl.drawArrays(_gl.LINES, 0, this.lines.length / 3)
         _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
-
+        //body
+        this.body.draw(gl);
+        //_gl.drawArrays(_gl.LINES, 0, this.body.vertices.length / 3)
+        _gl.drawArrays(_gl.TRIANGLE_STRIP, 0, this.body.vertices.length / 3)
+        for(let i of this.eyes){
+            i.draw(gl);
+        }
         //wings
-        this.RightWing.draw(gl);
         this.LeftWing.draw(gl);
-
+        this.RightWing.draw(gl);
     }
     public rotate(delta: number, related = true, axisType = 0): boolean {
         this.LeftWing.rotate(delta, related, axisType);
