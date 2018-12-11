@@ -60,6 +60,7 @@ let camera = new Vue({
             let then = performance.now() * 0.001,start=then;
             let range=45*2;
             let degree=0,flap=1;
+            this.camera.bind(but);
 
             let c=this.camera;
             function _draw(now: number) {
@@ -79,6 +80,7 @@ let camera = new Vue({
                 stateButterFly.speedY+=but.fall(lastTime,stateButterFly.speedX);
                 //but.moveForward(stateButterFly.speed*lastTime)
 
+                c.translateC();
                 _gl.drawScene();
                 then=now;
                 degree+=relatedDegree;
