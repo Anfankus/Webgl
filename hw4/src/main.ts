@@ -78,7 +78,7 @@ let camera = new Vue({
                 stateButterFly.speedX+=lastTime*3;
                 //蝴蝶下坠
                 stateButterFly.speedY+=but.fall(lastTime,stateButterFly.speedX);
-                //but.moveForward(stateButterFly.speed*lastTime)
+                but.moveForward(stateButterFly.speed*lastTime)
 
                 c.translateC();
                 _gl.drawScene();

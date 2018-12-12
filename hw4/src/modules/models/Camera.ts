@@ -45,7 +45,7 @@ export default class Camera {
     }
     public bind(ob: Translatable) {
         this.observeObject = ob;
-        this.baseEye=vec4(ob.position[0],ob.position[1]-2,ob.position[2]+2,1);
+        this.baseEye=vec4(ob.position[0],ob.position[1]-2.5,ob.position[2]+1.8,1);
     }
     public translateC(): boolean {
         if (!this.observeObject)
