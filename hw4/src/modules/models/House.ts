@@ -2,9 +2,13 @@ import Drawable from "../interface/Drawable";
 import GL from '../GL'
 import { mat4, flatten } from "../MV";
 import { Cube, Tri_prism } from "./Basis";
+import {Material} from "../interface/Material";
+import {Util} from "../Util";
+import {NoneMaterial} from "../materials/NoneMaterial";
 export class House implements Drawable{
-    material: import("c:/Users/21405/Desktop/Webgl-master/hw4/src/modules/interface/Material").Material;
-    setMaterial(m: import("c:/Users/21405/Desktop/Webgl-master/hw4/src/modules/interface/Material").Material) {
+  material: Material;
+
+  setMaterial(m: Material) {
         throw new Error("Method not implemented.");
     }
     buffers: any;
@@ -16,6 +20,7 @@ export class House implements Drawable{
 
     constructor(position:Array<number>){
         let [x,y,z] = position;
+      this.material = new NoneMaterial;
         this.building = [
             new Cube(4,5,3,[x,y,z]),
             new Cube(1.5,3,3,[x+3.999,y-2,z]),//[x+4,y-2,z]取3.99为让两个平面错开
@@ -84,9 +89,20 @@ export class House implements Drawable{
         }
    
     }
-    draw(gl: GL): void {
+
+  draw(gl: GL, self: boolean = true): void {
         let _gl = gl.gl;
-        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(mat4()));
+    //光照处理
+    let lt = gl.currentLight;
+    let ambientProduct = Util.Vec4Mult(lt.lightAmbient, this.material.materialAmbient);
+    let diffuseProduct = Util.Vec4Mult(lt.lightDiffuse, this.material.materialDiffuse);
+    let specularProduct = Util.Vec4Mult(lt.lightSpecular, this.material.materialSpecular);
+    _gl.uniform4fv(gl.programInfo.uniformLocations.ambientVectorLoc, new Float32Array(ambientProduct));
+    _gl.uniform4fv(gl.programInfo.uniformLocations.diffuseVectorLoc, new Float32Array(diffuseProduct));
+    _gl.uniform4fv(gl.programInfo.uniformLocations.specularVectorLoc, new Float32Array(specularProduct));
+    _gl.uniform1f(gl.programInfo.uniformLocations.shininessLoc, this.material.materialShininess);
+
+    _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(mat4()));
         //building
         _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
         for (let i in this.building) {

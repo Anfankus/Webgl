@@ -1,10 +1,6 @@
-import { Util } from './Util'
-import { ButterFly } from './models/Butterfly'
-import { Insect } from './models/Insect'
-import { vec3, lookAt, perspective, flatten, vec4, mult } from './MV'
+import {flatten} from './MV'
 import Drawable from './interface/Drawable';
 import Camera from './models/Camera';
-import { Ground } from './models/Ground';
 import { Light } from './scene/Light';
 
 export default class GL {
@@ -37,7 +33,6 @@ export default class GL {
                 modelViewMatrix: this.gl.getUniformLocation(shaderPro, 'uModelViewMatrix'),
                 cameraMatrixLoc: this.gl.getUniformLocation(shaderPro, 'uCameraMatrix'),
                 projectionMatrixLoc: this.gl.getUniformLocation(shaderPro, 'uProjectionMatrix'),
-                normalMatrixLoc :this. gl.getUniformLocation(shaderPro, "normalMatrix"),
                 
                 ambientVectorLoc:this.gl.getUniformLocation(shaderPro,'ambientProduct'),
                 diffuseVectorLoc:this.gl.getUniformLocation(shaderPro,'diffuseProduct'),
@@ -85,11 +80,6 @@ export default class GL {
         else {
             this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
             this.gl.clearDepth(1.0);
-            let normalMatrix = [
-                1,-0,0,
-                0,1,0,
-                -0,-0,1
-            ];
 
             this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.cameraMatrixLoc, false, flatten(this.currentCamera.cameraMatrix));
             this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrixLoc, false, flatten(this.currentCamera.projectionMatrix));
@@ -98,7 +88,7 @@ export default class GL {
     
     
             for (let i of this.objects) {
-                i.draw(this);
+              i.draw(this, true);
             }
         }
     }

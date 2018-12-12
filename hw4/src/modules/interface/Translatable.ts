@@ -38,12 +38,14 @@ export abstract class Translatable {
         this.baseMatrix = mat4();
         this.lastTrans = transType.none;
     }
-    /**
-     * 
-     * @param delta 旋转角度,角度
-     * @param related 旋转是否相对于上次绘制
-     * @param axisType 旋转轴：1--X；2--Y；3--Z,4---自身横轴;5----自身方向;0--自身纵轴;6--下坠形式
-     */
+
+  /**
+   *
+   * @param delta 旋转角度,角度
+   * @param related 旋转是否相对于上次绘制
+   * @param axisType 旋转轴：1--X；2--Y；3--Z,4---自身横轴;5----自身方向;0--自身纵轴;6--下坠形式
+   * @param changeAxis
+   */
     public rotate(delta: number, related = true, axisType = 0, changeAxis = true): boolean {
         let rotateMatrix;
 

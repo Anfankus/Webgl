@@ -7,5 +7,6 @@ export default interface Drawable{
     
     setMaterial(m:Material);
     initBuffer(gl: GL):void;
-    draw(gl: GL):void;
+
+  draw(gl: GL, self: boolean): void;
 }

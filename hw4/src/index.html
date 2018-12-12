@@ -11,16 +11,15 @@ uniform mat4 uCameraMatrix;
 uniform mat4 uProjectionMatrix;
 uniform mat4 uModelViewMatrix;
 uniform vec4 lightPosition;
-uniform mat3 normalMatrix;
 
 void main()
-{   
-    vec4 modelViewPos= uCameraMatrix * uModelViewMatrix * vPosition;
-    vec3 pos = modelViewPos.xyz;    
+{   mat4 modelView=uCameraMatrix * uModelViewMatrix;
+    vec4 modelViewPos= modelView * vPosition;
+    vec3 pos = modelViewPos.xyz;
     if(lightPosition.w == 0.0) L = normalize(lightPosition.xyz);
     else L = normalize( lightPosition.xyz - pos );
     E =  -normalize(pos);
-    N = normalize( normalMatrix*vNormal.xyz);
+    N = normalize( (vNormal).xyz);
     gl_Position = uProjectionMatrix * modelViewPos;
 }
 </script>

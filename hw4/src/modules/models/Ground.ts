@@ -3,6 +3,8 @@ import GL from '../GL'
 import { mat4, flatten } from "../MV";
 import { Material } from "../interface/Material";
 import { NoneMaterial } from "../materials/NoneMaterial";
+import {Util} from "../Util";
+import {CustomizedMaterial} from "../materials/CustomizedMaterial";
 export class Ground implements Drawable {
     material: Material;
     setMaterial(m:Material) {
@@ -30,24 +32,34 @@ export class Ground implements Drawable {
             0,1,0,
             0,1,0,
             0,1,0
-        ]
-        this.material=new NoneMaterial;
+        ];
+      this.material = new CustomizedMaterial;
     }
     initBuffer(gl: GL): void {
         let _gl=gl.gl;
         this.buffers={
             positions:_gl.createBuffer(),
             normals:_gl.createBuffer()
-        }
+        };
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions);
         _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.vertices), _gl.STATIC_DRAW);
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.normals);
         _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.normals), _gl.STATIC_DRAW);
 
     }
-    draw(gl: GL): void {
+
+  draw(gl: GL, self: boolean = true): void {
         let _gl = gl.gl;
+
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(mat4()));
+    let lt = gl.currentLight;
+    let ambientProduct = Util.Vec4Mult(lt.lightAmbient, this.material.materialAmbient);
+    let diffuseProduct = Util.Vec4Mult(lt.lightDiffuse, this.material.materialDiffuse);
+    let specularProduct = Util.Vec4Mult(lt.lightSpecular, this.material.materialSpecular);
+    _gl.uniform4fv(gl.programInfo.uniformLocations.ambientVectorLoc, new Float32Array(ambientProduct));
+    _gl.uniform4fv(gl.programInfo.uniformLocations.diffuseVectorLoc, new Float32Array(diffuseProduct));
+    _gl.uniform4fv(gl.programInfo.uniformLocations.specularVectorLoc, new Float32Array(specularProduct));
+    _gl.uniform1f(gl.programInfo.uniformLocations.shininessLoc, this.material.materialShininess);
 
         _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
         _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexNormal);
@@ -56,7 +68,7 @@ export class Ground implements Drawable {
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.normals);
         _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexNormal, 3, _gl.FLOAT, false, 0, 0);
 
-        _gl.drawArrays(_gl.TRIANGLES, 0, this.vertices.length / 3)
+    _gl.drawArrays(_gl.TRIANGLES, 0, this.vertices.length / 3);
         _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
         _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexNormal);
     }

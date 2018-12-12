@@ -8,7 +8,7 @@ import { House } from './modules/models/House';
 var _gl = new GL;
 let but=new ButterFly;
 but.translate(10,2);
-//but.rotate(90,true,4);
+but.rotate(90, true, 4);
 _gl.addObjects(new Ground([0,-10,0],50),new House([0,-2,0]),but);
 let stateButterFly={
     butt:but,
@@ -92,7 +92,7 @@ let camera = new Vue({
         }
     }
 })
-//but.rotate(-30,true,4);
+but.rotate(-30, true, 4);
 //camera.play();
 let mousedown = false;
 let ele = document.getElementById('gl-canvas');
@@ -122,16 +122,16 @@ if (ele) {
             stateButterFly.speedY+=but.fly(stateButterFly.speedX);
             break;
             case 37://←
-            but.rotate(5,true,5)
+              but.rotate(-5, true, 5);
             break;
             case 38://↑
-            but.translate(0.3,0)
+              but.translate(0.3, 0);
             break;
             case 39://→
-            but.rotate(-5,true,5)
+              but.rotate(5, true, 5);
             break;
             case 40://↓
-            but.translate(-0.3,0)
+              but.translate(-0.3, 0);
             break;
         }
     };
