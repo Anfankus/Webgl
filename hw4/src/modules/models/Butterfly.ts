@@ -104,11 +104,13 @@ export class ButterFly extends Translatable implements Drawable {
         this.RightWing.draw(gl);
     }
     public rotate(delta: number, related = true, axisType = 0): boolean {
+        this.body.rotate(delta, related, axisType);  
         this.LeftWing.rotate(delta, related, axisType);
         this.RightWing.rotate(delta, related, axisType);
         return super.rotate(delta, related, axisType);
     }
     public translate(distance: number, direction: number, related = true) {
+        this.body.translate(distance, direction, related);
         this.LeftWing.translate(distance, direction, related);
         this.RightWing.translate(distance, direction, related);
         return super.translate(distance, direction, related);
