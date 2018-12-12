@@ -3,13 +3,13 @@ import GL from './modules/GL';
 import Camera from './modules/models/Camera';
 import { ButterFly } from './modules/models/Butterfly';
 import { Ground } from './modules/models/Ground';
+import { House } from './modules/models/House';
 
 var _gl = new GL;
 let but=new ButterFly;
-//but.translate(10,2);
+but.translate(10,2);
 //but.rotate(90,true,4);
-//new Ground([0,-2,0],50),
-_gl.addObjects(but);
+_gl.addObjects(new Ground([0,-10,0],50),new House([0,-2,0]),but);
 let stateButterFly={
     butt:but,
     height:10,
@@ -36,7 +36,7 @@ let camera = new Vue({
             glOb: _gl,
             theta: 0,
             phi: 0,
-            radius: 3,
+            radius: 50,
             animeHandle: 0
         }
     },
@@ -77,7 +77,7 @@ let camera = new Vue({
                 stateButterFly.speedX+=lastTime*3;
                 //蝴蝶下坠
                 stateButterFly.speedY+=but.fall(lastTime,stateButterFly.speedX);
-                //but.moveForward(stateButterFly.speed*lastTime)
+                but.moveForward(stateButterFly.speed*lastTime)
 
                 _gl.drawScene();
                 then=now;
