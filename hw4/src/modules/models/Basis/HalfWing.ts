@@ -65,7 +65,7 @@ export class HalfWing extends Translatable implements Drawable {
         this.buffers={
             positions:{},
             normals:{}
-        }
+        };
         this.buffers.positions.flatWings = [_gl.createBuffer(), _gl.createBuffer()];
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.flatWings[0]);
         _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.flats[0]), _gl.STATIC_DRAW);
@@ -100,6 +100,7 @@ export class HalfWing extends Translatable implements Drawable {
         _gl.uniform4fv(gl.programInfo.uniformLocations.diffuseVectorLoc, new Float32Array(diffuseProduct));
         _gl.uniform4fv(gl.programInfo.uniformLocations.specularVectorLoc, new Float32Array(specularProduct));
         _gl.uniform1f(gl.programInfo.uniformLocations.shininessLoc, this.material.materialShininess);
+        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.normalMatrixLoc, false,flatten(this.rotateMatrix));
 
         //模型
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));

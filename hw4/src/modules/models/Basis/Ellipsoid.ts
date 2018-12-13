@@ -71,6 +71,7 @@ export class Ellipsoid extends Translatable implements Drawable{
     _gl.uniform4fv(gl.programInfo.uniformLocations.diffuseVectorLoc, new Float32Array(diffuseProduct));
     _gl.uniform4fv(gl.programInfo.uniformLocations.specularVectorLoc, new Float32Array(specularProduct));
     _gl.uniform1f(gl.programInfo.uniformLocations.shininessLoc, this.material.materialShininess);
+    _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.normalMatrixLoc, false,flatten(this.rotateMatrix));
 
     if (self) {
       _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));

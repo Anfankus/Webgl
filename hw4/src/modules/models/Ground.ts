@@ -60,6 +60,7 @@ export class Ground implements Drawable {
     _gl.uniform4fv(gl.programInfo.uniformLocations.diffuseVectorLoc, new Float32Array(diffuseProduct));
     _gl.uniform4fv(gl.programInfo.uniformLocations.specularVectorLoc, new Float32Array(specularProduct));
     _gl.uniform1f(gl.programInfo.uniformLocations.shininessLoc, this.material.materialShininess);
+    _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.normalMatrixLoc, false,flatten(mat4()));
 
         _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
         _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexNormal);

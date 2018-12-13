@@ -19,9 +19,11 @@ export abstract class Translatable {
 
     public modelMatrix: Array<Array<number>>;
     public baseMatrix: Array<Array<number>>;
+    public rotateMatrix:Array<Array<number>>;
+    public baseRotateMatrix:Array<Array<number>>;
 
     public lastTrans: transType;
-    constructor() {
+    protected constructor() {
         this.direction = [0, 1, 0, 1];
         this.baseDirection = [0, 1, 0, 1];
 
@@ -36,6 +38,9 @@ export abstract class Translatable {
 
         this.modelMatrix = mat4();
         this.baseMatrix = mat4();
+        this.rotateMatrix=mat4();
+        this.baseRotateMatrix=mat4();
+
         this.lastTrans = transType.none;
     }
 
@@ -67,6 +72,7 @@ export abstract class Translatable {
             this.baseAxisMain = this.axisMain;
             this.baseAxisSec = this.axisSecondary;
             this.basePosition = this.position;
+            this.baseRotateMatrix=this.rotateMatrix;
         }
         transMatrix = translate(...Util.Mat4Vec(mat4(-1), this.basePosition));
 
@@ -95,6 +101,8 @@ export abstract class Translatable {
         }
         transMatrix = mult(rotateMatrix, transMatrix);
         transMatrix = mult(translate(...this.basePosition), transMatrix);
+
+        this.rotateMatrix=mult(rotateMatrix,this.baseRotateMatrix);
         this.modelMatrix = mult(transMatrix, this.baseMatrix);
         this.position = Util.Mat4Vec(transMatrix, this.basePosition);
         if (changeAxis) {

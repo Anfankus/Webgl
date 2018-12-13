@@ -10,6 +10,7 @@ varying vec3 N, L, E;
 uniform mat4 uCameraMatrix;
 uniform mat4 uProjectionMatrix;
 uniform mat4 uModelViewMatrix;
+uniform mat4 uNormalMatrix;
 uniform vec4 lightPosition;
 
 void main()
@@ -19,7 +20,7 @@ void main()
     if(lightPosition.w == 0.0) L = normalize(lightPosition.xyz);
     else L = normalize( lightPosition.xyz - pos );
     E =  -normalize(pos);
-    N = normalize( (vNormal).xyz);
+    N = normalize( (uNormalMatrix*vNormal).xyz);
     gl_Position = uProjectionMatrix * modelViewPos;
 }
 </script>

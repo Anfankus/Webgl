@@ -63,17 +63,18 @@ export class ButterFly extends Translatable implements Drawable {
   public draw(gl: GL, self: boolean = true): void {
         let _gl = gl.gl;
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));
-
         _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
         //lines
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.lines);
         _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-        _gl.drawArrays(_gl.LINES, 0, this.lines.length / 3)
+        _gl.drawArrays(_gl.LINES, 0, this.lines.length / 3);
         _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
+
+
         //body
         this.body.draw(gl);
         //_gl.drawArrays(_gl.LINES, 0, this.body.vertices.length / 3)
-    //_gl.drawArrays(_gl.TRIANGLE_STRIP, 0, this.body.vertices.length / 3)
+        //_gl.drawArrays(_gl.TRIANGLE_STRIP, 0, this.body.vertices.length / 3)
         for(let i of this.eyes){
           i.draw(gl, false);
         }

@@ -33,7 +33,8 @@ export default class GL {
                 modelViewMatrix: this.gl.getUniformLocation(shaderPro, 'uModelViewMatrix'),
                 cameraMatrixLoc: this.gl.getUniformLocation(shaderPro, 'uCameraMatrix'),
                 projectionMatrixLoc: this.gl.getUniformLocation(shaderPro, 'uProjectionMatrix'),
-                
+                normalMatrixLoc:this.gl.getUniformLocation(shaderPro,'uNormalMatrix'),
+
                 ambientVectorLoc:this.gl.getUniformLocation(shaderPro,'ambientProduct'),
                 diffuseVectorLoc:this.gl.getUniformLocation(shaderPro,'diffuseProduct'),
                 specularVectorLoc:this.gl.getUniformLocation(shaderPro,'specularProduct'),
@@ -83,10 +84,10 @@ export default class GL {
 
             this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.cameraMatrixLoc, false, flatten(this.currentCamera.cameraMatrix));
             this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrixLoc, false, flatten(this.currentCamera.projectionMatrix));
-            
+
             this.gl.uniform4fv(this.programInfo.uniformLocations.lightVectorLoc, new Float32Array(this.currentLight.lightPosition));
-    
-    
+
+
             for (let i of this.objects) {
               i.draw(this, true);
             }
