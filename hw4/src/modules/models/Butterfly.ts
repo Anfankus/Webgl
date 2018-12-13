@@ -37,14 +37,13 @@ export class ButterFly extends Translatable implements Drawable {
             -0.008, 0.3, 0, -0.15, 0.6, 0,
             0.008, 0.3, 0, 0.15, 0.6, 0
         ];
-        this.material=new NoneMaterial;
     }
     public initBuffer(gl: GL) {
         let _gl = gl.gl;
         this.buffers = {
             positions: {},
             normals: {}
-        }
+        };
         //lines
         let lineBuf = _gl.createBuffer();
         this.buffers.positions.lines = lineBuf;
@@ -61,30 +60,9 @@ export class ButterFly extends Translatable implements Drawable {
         this.RightWing.initBuffer(gl);
     }
 
-    public draw(gl: GL): void {
+  public draw(gl: GL, self: boolean = true): void {
         let _gl = gl.gl;
-        // let normalMatrix = [
-        //     ...this.modelMatrix[0].slice(0,3),
-        //     ...this.modelMatrix[1].slice(0,3),
-        //     ...this.modelMatrix[2].slice(0,3)
-        // ];
-        let normalMatrix=[
-            1,0,0,
-            0,1,0,
-            0,0,1
-        ]
-        let lt=gl.currentLight;
-        let ambientProduct = Util.Vec4Mult(lt.lightAmbient, this.material.materialAmbient);
-        let diffuseProduct = Util.Vec4Mult(lt.lightDiffuse, this.material.materialDiffuse);
-        let specularProduct = Util.Vec4Mult(lt.lightSpecular, this.material.materialSpecular);
-        _gl.uniform4fv(gl.programInfo.uniformLocations.ambientVectorLoc, new Float32Array(ambientProduct));
-        _gl.uniform4fv(gl.programInfo.uniformLocations.diffuseVectorLoc, new Float32Array(diffuseProduct));
-        _gl.uniform4fv(gl.programInfo.uniformLocations.specularVectorLoc, new Float32Array(specularProduct));
-        _gl.uniform1f(gl.programInfo.uniformLocations.shininessLoc, this.material.materialShininess);
-
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));
-        _gl.uniformMatrix3fv(gl.programInfo.uniformLocations.normalMatrixLoc, false, new Float32Array(normalMatrix));
-        
 
         _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
         //lines
@@ -95,20 +73,22 @@ export class ButterFly extends Translatable implements Drawable {
         //body
         this.body.draw(gl);
         //_gl.drawArrays(_gl.LINES, 0, this.body.vertices.length / 3)
-        _gl.drawArrays(_gl.TRIANGLE_STRIP, 0, this.body.vertices.length / 3)
+    //_gl.drawArrays(_gl.TRIANGLE_STRIP, 0, this.body.vertices.length / 3)
         for(let i of this.eyes){
-            i.draw(gl);
+          i.draw(gl, false);
         }
         //wings
         this.LeftWing.draw(gl);
         this.RightWing.draw(gl);
     }
     public rotate(delta: number, related = true, axisType = 0): boolean {
+        this.body.rotate(delta, related, axisType);  
         this.LeftWing.rotate(delta, related, axisType);
         this.RightWing.rotate(delta, related, axisType);
         return super.rotate(delta, related, axisType);
     }
     public translate(distance: number, direction: number, related = true) {
+        this.body.translate(distance, direction, related);
         this.LeftWing.translate(distance, direction, related);
         this.RightWing.translate(distance, direction, related);
         return super.translate(distance, direction, related);
@@ -121,12 +101,12 @@ export class ButterFly extends Translatable implements Drawable {
         let decrease = -9.8 * lastTime;
         let x = Math.sqrt(this.direction[0] ** 2 + this.direction[2] ** 2);
         let y = this.direction[1];
-        let a = speedX
+      let a = speedX;
         let b = speedX * y / x;
 
         let alpha = Math.atan(y / x), beta = Math.atan((b + decrease) / a);
         let deflection = Math.abs(Util.degree(alpha - beta));
-        this.rotate(deflection, true, 4);
+      this.rotate(deflection, true, 6);
         return decrease;
     }
     public moveForward(distance: number): void {

@@ -87,15 +87,11 @@ export class HalfWing extends Translatable implements Drawable {
 
 
     }
-    draw(gl: GL): void {
+
+  draw(gl: GL, self: boolean = true): void {
         let _gl = gl.gl;
 
         //光照处理
-        let normalMatrix = [
-            ...this.modelMatrix[0].slice(0,3),
-            ...this.modelMatrix[1].slice(0,3),
-            ...this.modelMatrix[2].slice(0,3)
-        ];
         let lt=gl.currentLight;
         let ambientProduct = Util.Vec4Mult(lt.lightAmbient, this.material.materialAmbient);
         let diffuseProduct = Util.Vec4Mult(lt.lightDiffuse, this.material.materialDiffuse);
@@ -106,9 +102,6 @@ export class HalfWing extends Translatable implements Drawable {
         _gl.uniform1f(gl.programInfo.uniformLocations.shininessLoc, this.material.materialShininess);
 
         //模型
-        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));
-        _gl.uniformMatrix3fv(gl.programInfo.uniformLocations.normalMatrixLoc, false, new Float32Array(normalMatrix));
-
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));
         _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
         _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexNormal);

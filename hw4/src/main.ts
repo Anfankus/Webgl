@@ -3,13 +3,13 @@ import GL from './modules/GL';
 import Camera from './modules/models/Camera';
 import { ButterFly } from './modules/models/Butterfly';
 import { Ground } from './modules/models/Ground';
+import { House } from './modules/models/House';
 
 var _gl = new GL;
 let but=new ButterFly;
-//but.translate(10,2);
-//but.rotate(90,true,4);
-//new Ground([0,-2,0],50),
-_gl.addObjects(but);
+but.translate(10,2);
+but.rotate(90, true, 4);
+_gl.addObjects(new Ground([0,-10,0],50),new House([0,-2,0]),but);
 let stateButterFly={
     butt:but,
     height:10,
@@ -36,7 +36,7 @@ let camera = new Vue({
             glOb: _gl,
             theta: 0,
             phi: 0,
-            radius: 3,
+            radius: 50,
             animeHandle: 0
         }
     },
@@ -60,9 +60,9 @@ let camera = new Vue({
             let then = performance.now() * 0.001,start=then;
             let range=45*2;
             let degree=0,flap=1;
-            this.camera.bind(but);
 
             let c=this.camera;
+            c.bind(but);
             function _draw(now: number) {
                 now *= 0.001;
                 let lastTime=now-then;
@@ -94,7 +94,7 @@ let camera = new Vue({
         }
     }
 })
-//but.rotate(-30,true,4);
+but.rotate(-30, true, 4);
 //camera.play();
 let mousedown = false;
 let ele = document.getElementById('gl-canvas');
@@ -124,16 +124,16 @@ if (ele) {
             stateButterFly.speedY+=but.fly(stateButterFly.speedX);
             break;
             case 37://←
-            but.rotate(5,true,5)
+              but.rotate(-5, true, 5);
             break;
             case 38://↑
-            but.translate(0.3,0)
+              but.translate(0.3, 0);
             break;
             case 39://→
-            but.rotate(-5,true,5)
+              but.rotate(5, true, 5);
             break;
             case 40://↓
-            but.translate(-0.3,0)
+              but.translate(-0.3, 0);
             break;
         }
     };

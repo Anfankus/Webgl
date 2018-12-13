@@ -5,6 +5,7 @@ import { Circle3D } from "./Basis";
 import { Util } from "../../Util";
 import GL from "../../GL";
 import { flatten } from "../../MV";
+import {NoneMaterial} from "../../materials/NoneMaterial";
 
 export class Ellipsoid extends Translatable implements Drawable{
     buffers: any;
@@ -19,6 +20,7 @@ export class Ellipsoid extends Translatable implements Drawable{
         this.vertices = [];
         this.normals=[];
         this.colors = [];
+      this.material = new NoneMaterial;
         let last = this.baseCircle.vertices;
         let frag = 30;
 
@@ -57,10 +59,22 @@ export class Ellipsoid extends Translatable implements Drawable{
         _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.normals), _gl.STATIC_DRAW);
 
     }
-    draw(gl: GL): void {
+
+  draw(gl: GL, self: boolean = true): void {
         let _gl = gl.gl;
-    
-        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));
+    //光照处理
+    let lt = gl.currentLight;
+    let ambientProduct = Util.Vec4Mult(lt.lightAmbient, this.material.materialAmbient);
+    let diffuseProduct = Util.Vec4Mult(lt.lightDiffuse, this.material.materialDiffuse);
+    let specularProduct = Util.Vec4Mult(lt.lightSpecular, this.material.materialSpecular);
+    _gl.uniform4fv(gl.programInfo.uniformLocations.ambientVectorLoc, new Float32Array(ambientProduct));
+    _gl.uniform4fv(gl.programInfo.uniformLocations.diffuseVectorLoc, new Float32Array(diffuseProduct));
+    _gl.uniform4fv(gl.programInfo.uniformLocations.specularVectorLoc, new Float32Array(specularProduct));
+    _gl.uniform1f(gl.programInfo.uniformLocations.shininessLoc, this.material.materialShininess);
+
+    if (self) {
+      _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));
+    }
         _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
         _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexNormal);
 

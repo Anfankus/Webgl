@@ -121,7 +121,8 @@ export class Insect extends Translatable implements Drawable{
         _gl.bindBuffer(_gl.ARRAY_BUFFER, lineBuf);
         _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.lines), _gl.STATIC_DRAW);
     }
-    public draw(gl: GL) {
+
+  public draw(gl: GL, self: boolean = true): void {
         let _gl = gl.gl;
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));
 

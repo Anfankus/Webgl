@@ -1,13 +1,13 @@
-import { mat4, mult, rotate, rotateX, rotateY, rotateZ, translate } from '../MV';
+import { mat4, mult, rotate, rotateX, rotateY, rotateZ, translate, cross } from '../MV';
 import { Util } from '../Util';
 export enum transType {
     none,
     rotateSelfX, rotateSelfY, rotateSelfZ,
-    rotateMain, rotateSec, rotateDir,
+    rotateMain, rotateSec, rotateDir,rotateFall,
     translateX, translateY, translateZ, translateMain,
     zoom
 }
-export class Translatable {
+export abstract class Translatable {
     public direction: Array<number>;
     public baseDirection: Array<number>;
     public axisMain: Array<number>;
@@ -38,12 +38,14 @@ export class Translatable {
         this.baseMatrix = mat4();
         this.lastTrans = transType.none;
     }
-    /**
-     * 
-     * @param delta 旋转角度,角度
-     * @param related 旋转是否相对于上次绘制
-     * @param axisType 旋转轴：1--X；2--Y；3--Z,4---自身横轴;5----自身方向;0--自身纵轴
-     */
+
+  /**
+   *
+   * @param delta 旋转角度,角度
+   * @param related 旋转是否相对于上次绘制
+   * @param axisType 旋转轴：1--X；2--Y；3--Z,4---自身横轴;5----自身方向;0--自身纵轴;6--下坠形式
+   * @param changeAxis
+   */
     public rotate(delta: number, related = true, axisType = 0, changeAxis = true): boolean {
         let rotateMatrix;
 
@@ -54,7 +56,8 @@ export class Translatable {
             transType.rotateSelfY,
             transType.rotateSelfZ,
             transType.rotateSec,
-            transType.rotateDir
+            transType.rotateDir,
+            transType.rotateFall
         ][axisType];
         let ret = false;
         if (related || this.lastTrans !== currentTrans && this.lastTrans !== transType.none) {
@@ -68,6 +71,9 @@ export class Translatable {
         transMatrix = translate(...Util.Mat4Vec(mat4(-1), this.basePosition));
 
         switch (currentTrans) {
+            case transType.rotateFall:
+                rotateMatrix = rotate(delta, cross(this.baseDirection,[0,-1,0]));
+            break;
             case transType.rotateDir:
                 rotateMatrix = rotate(delta, this.baseDirection);
                 break;
