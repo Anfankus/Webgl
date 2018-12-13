@@ -1,4 +1,5 @@
 import { vec4 } from "../MV";
+import { Util } from "../Util";
 
 export class Light {
     public lightPosition: Array<number>;
@@ -6,9 +7,9 @@ export class Light {
     public lightDiffuse: Array<number>;
     public lightSpecular: Array<number>;
     constructor() {
-        this.lightPosition = vec4(0.0, 50.0, 50.0, 1.0);
-        this.lightAmbient = vec4(0.6, 0.6, 0.6, 1.0);
-        this.lightDiffuse = vec4(1.0, 1.0, 1.0, 1.0);
-        this.lightSpecular = vec4(1.0, 1.0, 1.0, 1.0);
+        this.lightPosition = vec4(0, 0, 30, 1);
+        this.lightAmbient = Util.Hex2Vec4('0xffffff');
+        this.lightDiffuse = Util.Hex2Vec4('0xffffff');
+        this.lightSpecular = Util.Hex2Vec4('0xffffff');
     }
 }

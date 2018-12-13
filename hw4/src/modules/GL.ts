@@ -51,7 +51,7 @@ export default class GL {
          * 测试用例
          */
         this.cameras = [new Camera()];
-        this.cameras[0].view(50, 0, 0.0);
+        this.cameras[0].view(100, -63, 36);
         this.currentCamera=this.cameras[0];
         let l=new Light;
         this.currentLight=l;
