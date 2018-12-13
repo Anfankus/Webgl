@@ -9,7 +9,7 @@ var _gl = new GL;
 let but=new ButterFly;
 but.translate(10,2);
 but.rotate(90, true, 4);
-_gl.addObjects(new Ground([0,-10,0],50),new House([0,-2,0]),but);
+_gl.addObjects(new Ground([0,-10,0],500),new House([0,-2,0]),but);
 let stateButterFly={
     butt:but,
     height:10,
@@ -75,7 +75,7 @@ let camera = new Vue({
                 but.flap(relatedDegree);
 
                 //随时间加速
-                stateButterFly.speedX+=lastTime*3;
+                //stateButterFly.speedX+=lastTime*3;
                 //蝴蝶下坠
                 stateButterFly.speedY+=but.fall(lastTime,stateButterFly.speedX);
                 but.moveForward(stateButterFly.speed*lastTime)
@@ -118,7 +118,6 @@ if (ele) {
         camera.radius = temp;
     }
     window.onkeydown=function(e){
-        console.log(e.keyCode);
         switch(e.keyCode){
             case 32://空格
             stateButterFly.speedY+=but.fly(stateButterFly.speedX);

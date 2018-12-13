@@ -83,7 +83,7 @@ export class ButterFly extends Translatable implements Drawable {
         this.RightWing.draw(gl);
     }
     public rotate(delta: number, related = true, axisType = 0): boolean {
-        this.body.rotate(delta, related, axisType);  
+        this.body.rotate(delta, related, axisType);
         this.LeftWing.rotate(delta, related, axisType);
         this.RightWing.rotate(delta, related, axisType);
         return super.rotate(delta, related, axisType);
@@ -108,6 +108,7 @@ export class ButterFly extends Translatable implements Drawable {
         let alpha = Math.atan(y / x), beta = Math.atan((b + decrease) / a);
         let deflection = Math.abs(Util.degree(alpha - beta));
       this.rotate(deflection, true, 6);
+      console.log('fall',deflection);
         return decrease;
     }
     public moveForward(distance: number): void {
@@ -122,7 +123,7 @@ export class ButterFly extends Translatable implements Drawable {
 
         let alpha = Math.atan(y / x), beta = Math.atan((b + decrease) / a);
         let deflection = Util.degree(alpha - beta);
-        console.log(alpha, beta, alpha - beta);
+        console.log('fly',deflection);
         this.rotate(deflection, true, 4);
         return decrease;
     }

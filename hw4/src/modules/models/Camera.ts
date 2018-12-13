@@ -32,15 +32,22 @@ export default class Camera {
     }
     public view(radius, theta, phi) {
 
-        this.at = vec3(0.0, 0, 0.0);
-        this.up = vec3(0.0, 1.0, 0.0);
-        if (phi > 90 || phi < -90)
-            this.up = vec3(0.0, -1.0, 0.0);
-        let eye = vec3(radius * Math.sin(Util.radians(theta)) * Math.cos(Util.radians(phi)),
-            radius * Math.sin(Util.radians(phi)),
-            radius * Math.cos(Util.radians(theta)) * Math.cos(Util.radians(phi)));
-
-        this.cameraMatrix = lookAt(eye, this.at, this.up);
+        let at,up,eye;
+        if(this.observeObject){
+            radius=10;
+            at=this.observeObject.position.slice(0,3);
+            up=this.observeObject.direction.slice(0,3);    
+            eye = vec3(radius * Math.sin(Util.radians(theta)) * Math.cos(Util.radians(phi))+this.observeObject.position[0],
+            radius * Math.sin(Util.radians(phi))+this.observeObject.position[1],
+            radius * Math.cos(Util.radians(theta)) * Math.cos(Util.radians(phi))+this.observeObject.position[2]);
+        }else{
+            at = vec3(0.0, 0, 0.0);
+            up = vec3(0.0, Math.cos(Util.radians(phi)), 0.0);
+            eye = vec3(radius * Math.sin(Util.radians(theta)) * Math.cos(Util.radians(phi)),
+                radius * Math.sin(Util.radians(phi)),
+                radius * Math.cos(Util.radians(theta)) * Math.cos(Util.radians(phi)));
+        }
+        this.cameraMatrix = lookAt(eye, at, up);
     }
 
     public bind(ob: Translatable) {
@@ -53,8 +60,8 @@ export default class Camera {
         if (!this.observeObject)
             throw '摄像机未绑定对象'
         let ret = false;
-        this.at=vec3(this.observeObject.position[0],this.observeObject.position[1],this.observeObject.position[2]);
-        this.up=vec3(this.observeObject.direction[0],this.observeObject.direction[1],this.observeObject.direction[2]);
+        this.at=this.observeObject.position.slice(0,3);
+        this.up=this.observeObject.direction.slice(0,3);
         let tempVec = Util.Mat4Vec(this.observeObject.modelMatrix, this.baseEye);
         this.nowEye = vec3(tempVec[0], tempVec[1], tempVec[2]);
         this.cameraMatrix = lookAt(this.nowEye, this.at, this.up);
