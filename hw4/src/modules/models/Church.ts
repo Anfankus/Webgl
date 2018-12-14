@@ -1,50 +1,57 @@
 import Drawable from "../interface/Drawable";
 import GL from '../GL'
 import { mat4, flatten } from "../MV";
-import { Cube, Tri_prism } from "./Basis/Basis";
-import {Material} from "../interface/Material";
+import { Material } from "../interface/Material";
+import { NoneMaterial } from "../materials/NoneMaterial";
 import {Util} from "../Util";
-import {NoneMaterial} from "../materials/NoneMaterial";
-
-export class House implements Drawable{//size = 9*7
-  material: Material;
-  setMaterial(m: Material) {
+import {CustomizedMaterial} from "../materials/CustomizedMaterial";
+import { Cube, Tri_prism, Rect_pyramid, HalfCircle3D } from "./Basis/Basis";
+export class Church implements Drawable{
+    material: Material;
+    setMaterial(m: Material) {
         throw new Error("Method not implemented.");
     }
     buffers: any;
     public building:Array<Cube>;
-    public roof:Array<Tri_prism>;
-    public door:Array<Cube>;
-    public window:Array<Cube>;
-    public wall:Array<Cube>;
-
-    constructor(position:Array<number>){
+    public roof:Array<any>;
+    public door:Array<any>;
+    public window:Array<any>;
+    constructor(position:Array<number>){//size = 6*6
         let [x,y,z] = position;
         this.material = new NoneMaterial;
         this.building = [
-            new Cube(5,3,4,[x,y,z]),
-            new Cube(2,3,2.5,[x+4.9999,y,z-1.5]),
-            new Cube(3,2.7,2.5,[x,y+2.9999,z-1.5])
+            new Cube(4,5,4,[x,y,z]),
+            new Cube(1.5,6,1.5,[x-1,y,z+1]),
+            new Cube(1.5,6,1.5,[x+3.5,y,z+1]),
+            new Cube(1.5,6,1.5,[x-1,y,z-3.5]),
+            new Cube(1.5,6,1.5,[x+3.5,y,z-3.5])
         ];
         this.roof = [
-            new Tri_prism(6,0.8,4,[x-0.5,y+2.9998,z]),
-            new Tri_prism(3.5,0.5,2.5,[x-0.25,y+5.6999,z-1.5])
+            new Tri_prism(4,0.8,4,[x,y+4.9999,z]),
+            new Rect_pyramid(1.5,1.2,[x-1,y+5.9999,z+1]),
+            new Rect_pyramid(1.5,1.2,[x+3.5,y+5.9999,z+1]),
+            new Rect_pyramid(1.5,1.2,[x-1,y+5.9999,z-3.5]),
+            new Rect_pyramid(1.5,1.2,[x+3.5,y+5.9999,z-3.5])
         ];
         this.door = [
-            new Cube(1,1.8,0.1,[x+5.5,y,z-1.55])
+            new Cube(1.8,2,0.01,[x+1.1,0,0.005]),
+            new HalfCircle3D(0.9,0.9,[x+1.1,y+2,z+0.00001]),
         ];
-        this.window = [//数据有点问题，等加了纹理再调
-            new Cube(2,1.5,0.06,[x+1.5,y+0.8,z-0.05]),
-            new Cube(0.06,1.5,2,[x-0.01,y+0.8,z-1]),
-            new Cube(0.06,1.3,1.5,[x-0.01,y+3.7,z-2]),
-        ];
-        this.wall = [
-            new Cube(6.2,2,0.2,[x-1,y,z+1]),
-            new Cube(0.2,2,6,[x-0.9999,y+0.00001,z+0.9999]),
-            new Cube(9,2,0.2,[x-1,y,z-5]),
-            new Cube(0.2,2,6,[x+7.9999,y+0.00001,z+0.9999]),
-        ];
-    } 
+        this.window = [
+            new Cube(0.6,0.8,0.01,[x-0.55,y,z+1.0005]),
+            new HalfCircle3D(0.3,0.3,[x-0.55,y+0.8,z+1.000001]),
+            new Cube(0.6,0.8,0.01,[x-0.55,y+2,z+1.0005]),
+            new HalfCircle3D(0.3,0.3,[x-0.55,y+2.8,z+1.000001]),
+            new Cube(0.6,0.8,0.01,[x-0.55,y+4,z+1.0005]),
+            new HalfCircle3D(0.3,0.3,[x-0.55,y+4.8,z+1.000001]),
+            new Cube(0.6,0.8,0.01,[x+3.95,y,z+1.0005]),
+            new HalfCircle3D(0.3,0.3,[x+3.95,y+0.8,z+1.000001]),
+            new Cube(0.6,0.8,0.01,[x+3.95,y+2,z+1.0005]),
+            new HalfCircle3D(0.3,0.3,[x+3.95,y+2.8,z+1.000001]),
+            new Cube(0.6,0.8,0.01,[x+3.95,y+4,z+1.0005]),
+            new HalfCircle3D(0.3,0.3,[x+3.95,y+4.8,z+1.000001]),
+        ]
+    }
     initBuffer(gl: GL): void {
         let _gl = gl.gl;
         this.buffers={
@@ -83,17 +90,16 @@ export class House implements Drawable{//size = 9*7
             _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.window[i].vertices), _gl.STATIC_DRAW);
         }
         //wall
-        this.buffers.positions.wall = [];
-        for(let i in this.wall){
-            let tempPBuf = _gl.createBuffer();
-            this.buffers.positions.wall.push(tempPBuf);
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, tempPBuf);
-            _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.wall[i].vertices), _gl.STATIC_DRAW);
-        }
+        // this.buffers.positions.wall = [];
+        // for(let i in this.wall){
+        //     let tempPBuf = _gl.createBuffer();
+        //     this.buffers.positions.wall.push(tempPBuf);
+        //     _gl.bindBuffer(_gl.ARRAY_BUFFER, tempPBuf);
+        //     _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.wall[i].vertices), _gl.STATIC_DRAW);
+        // }
    
     }
-
-  draw(gl: GL, self: boolean = true): void {
+    draw(gl: GL, self: boolean = true): void {
         let _gl = gl.gl;
     //光照处理
     let lt = gl.currentLight;
@@ -132,13 +138,14 @@ export class House implements Drawable{//size = 9*7
             _gl.drawArrays(_gl.TRIANGLE_FAN, 0, this.window[i].vertices.length / 3)
         }
          //wall
-         for (let i in this.wall) {
-             _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.wall[i]);
-             _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-             _gl.drawArrays(_gl.TRIANGLE_FAN, 0, this.wall[i].vertices.length / 3)
-         }
+        //  for (let i in this.wall) {
+        //      _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.wall[i]);
+        //      _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
+        //      _gl.drawArrays(_gl.TRIANGLE_FAN, 0, this.wall[i].vertices.length / 3)
+        //  }
 
-         _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
+        //  _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
 
     }
+
 }

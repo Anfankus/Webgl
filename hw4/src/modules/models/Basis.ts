@@ -59,13 +59,13 @@ class Cube{
     public vertices:Array<number>;
     constructor(l = 5,h = 5,w = 5,center = [0,0,0]){
         let a_ = [center[0],center[1],center[2]];
-        let b_ = [center[0],center[1],center[2]+h];
-        let c_ = [center[0]+l,center[1],center[2]+h];
+        let b_ = [center[0],center[1]+h,center[2]];
+        let c_ = [center[0]+l,center[1]+h,center[2]];
         let d_ = [center[0]+l,center[1],center[2]];
-        let e_ = [center[0]+l,center[1]-w,center[2]];
-        let f_ = [center[0]+l,center[1]-w,center[2]+h];
-        let g_ = [center[0],center[1]-w,center[2]];
-        let h_ = [center[0],center[1]-w,center[2]+h];
+        let e_ = [center[0]+l,center[1],center[2]-w];
+        let f_ = [center[0]+l,center[1]+h,center[2]-w];
+        let g_ = [center[0],center[1],center[2]-w];
+        let h_ = [center[0],center[1]+h,center[2]-w];
         this.vertices = [
             ...a_,...b_,...c_,
             ...a_,...d_,...c_,
@@ -89,8 +89,8 @@ class Cube{
 }
 class Tri_prism{
     public vertices:Array<number>;
-    constructor(s = 5,h = 3,l = 5,a = [0,0,0]){//h,l参数写反了
-        let b = [a[0]+s,a[1],a[1]];
+    constructor(s = 5,h = 3,l = 5,a = [0,0,0]){
+        let b = [a[0]+s,a[1],a[2]];
         let c = [a[0]+s,a[1],a[2]-l];
         let d = [a[0],a[1],a[2]-l];
         let e = [a[0]+s/2,a[1]+h,a[2]];
@@ -111,4 +111,21 @@ class Tri_prism{
         ];
     }
 }
-export {Circle3D,FlatHalfWing,Cube,Tri_prism}
+
+class Cir_cone{
+    public vertices: Array<number>;
+    public colors: Array<number>;
+    constructor(a = 0.5, b = 0.5, h = 1 ,center = [0, 0, 0], frag = 30) {
+        let radian = 2 * Math.PI;
+        let eachDegree = radian / frag;
+        this.vertices = [];
+        let [, y, ] = center;
+
+        for (let i = 0; i <= radian; i += eachDegree) {
+            this.vertices.push(center[0] + Math.cos(i) * a, y, center[2] + Math.sin(i) * b);
+            this.vertices.push(center[0], y+h ,center[2] )
+        }
+        
+    }
+}
+export {Circle3D,FlatHalfWing,Cube,Tri_prism,Cir_cone}

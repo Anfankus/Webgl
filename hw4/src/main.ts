@@ -7,6 +7,7 @@ import { House } from './modules/models/House';
 import { Ellipsoid } from './modules/models/Basis/Ellipsoid';
 import { rotateY, rotateX, rotateZ } from './modules/MV';
 import { Util } from './modules/Util';
+import { Church } from './modules/models/Church';
 
 var _gl = new GL;
 let but = new ButterFly;
@@ -19,7 +20,7 @@ let [radius,theta,phi]=[200, -63, 36]
 _gl.addCameras(camera1);
 _gl.switchCamera(camera1);
 camera1.view(radius,theta,phi);
-_gl.addObjects(but,new House([0, -2, 0]),new Ground([0, -10, 0], 500));
+_gl.addObjects(but,new House([0, -2, 0]),new Church([10,-2,0]),new Ground([0, -10, 0], 500));
 let stateButterFly = {
     butt: but,
     height: 10,
