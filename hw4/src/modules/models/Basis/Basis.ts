@@ -4,8 +4,7 @@ const sin=Math.sin,cos=Math.cos;
 class Circle3D {
     public vertices: Array<number>;
     public normals: Array<number>;
-    constructor(a = 0.5, b = 0.5, center = [0, 0, 0], frag = 30) {
-        let radian =2 * Math.PI;
+    constructor(a = 0.5, b = 0.5, center = [0, 0, 0],radian:number=2 * Math.PI, frag = 30) {
         let eachDegree = radian / frag;
         this.vertices = [];
         this.normals=[];
