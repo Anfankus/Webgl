@@ -1,30 +1,34 @@
 import {Util} from '../../Util';
+import { normalize } from '../../MV';
+const sin=Math.sin,cos=Math.cos;
 class Circle3D {
     public vertices: Array<number>;
-    public colors: Array<number>;
+    public normals: Array<number>;
     constructor(a = 0.5, b = 0.5, center = [0, 0, 0], frag = 30) {
-        let radian = 2 * Math.PI;
+        let radian =2 * Math.PI;
         let eachDegree = radian / frag;
         this.vertices = [];
-        let [, , z] = center;
+        this.normals=[];
+        let [, , _z] = center;
 
         for (let i = 0; i <= radian; i += eachDegree) {
-            this.vertices.push(center[0] + Math.cos(i) * a, center[1] + Math.sin(i) * b, z);
+            let [x,y,z]=[center[0] + Math.cos(i) * a, center[1] + Math.sin(i) * b, _z]
+            this.vertices.push(x,y,z);
+            this.normals.push(x/a**2,y/b**2,0);
         }
     }
 }
 class FlatHalfWing {
-    public flag;
+    public flag:number;
     public vertices: Array<number>;
-    public colors: Array<number>;
+    public normals:Array<number>;
     //flag: 0--线 1--面
-    constructor(size = 0.5,isLeft=true, z = 0, frag = 90, flag = 0, edgeColor = '0x000000') {
+    constructor(size = 0.5,isLeft=true, z = 0, frag = 90, flag = 0) {
         let wingCount = 2;
 
         this.vertices = [];
-        this.colors = [];
+        this.normals=[];
         this.flag = flag;
-        let _color = Util.Hex2Vec4(edgeColor);
 
         let offset=Math.PI/2;
         let start=isLeft?0:Math.PI;
@@ -38,16 +42,13 @@ class FlatHalfWing {
             }
             let x=Math.sin(i) * length,y=Math.cos(i) * length;
             this.vertices.push(x,y, z);
-            this.colors.push(..._color);
+            let nor=[
+                sin(wingCount * i)*sin(i)-wingCount*cos(wingCount*i)*cos(i),
+                wingCount*cos(wingCount*i)*sin(i)+sin(wingCount*i)*cos(i),
+                z
+            ]
+            this.normals.push(...normalize(nor));
         }
-    }
-    public setCenterColor(color: string) {
-        let [r, g, b, a] = Util.Hex2Vec4(color);
-        this.colors[0] = r;
-        this.colors[1] = g;
-        this.colors[2] = b;
-        this.colors[3] = a
-
     }
 }
 export {Circle3D,FlatHalfWing}

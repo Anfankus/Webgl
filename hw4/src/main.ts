@@ -5,15 +5,21 @@ import { ButterFly } from './modules/models/Butterfly';
 import { Ground } from './modules/models/Ground';
 import { House } from './modules/models/House';
 import { Ellipsoid } from './modules/models/Basis/Ellipsoid';
-import { rotateY, rotateX } from './modules/MV';
+import { rotateY, rotateX, rotateZ } from './modules/MV';
 import { Util } from './modules/Util';
 
 var _gl = new GL;
 let but = new ButterFly;
-let ball = new Ellipsoid(25, 25, [0, 0, 0], '0xfffff');
-// but.translate(10, 2);
-// but.rotate(90, true, 4);//new Ground([0, -10, 0], 500),, but
-_gl.addObjects( new House([0, -2, 0]),ball);
+ let ball = new Ellipsoid(20, 50, [0, 0, 0], '0xfffff');
+// ball.translate(50,1);
+//but.translate(10, 2);
+but.rotate(90, true, 4);//,ball,
+let camera1=new Camera;
+let [radius,theta,phi]=[200, -63, 36]
+_gl.addCameras(camera1);
+_gl.switchCamera(camera1);
+camera1.view(radius,theta,phi);
+_gl.addObjects(but,new House([0, -2, 0]),new Ground([0, -10, 0], 500));
 let stateButterFly = {
     butt: but,
     height: 10,
@@ -36,31 +42,34 @@ let camera = new Vue({
     el: '#camera',
     data() {
         return {
-            camera: _gl.cameras[0],
+            camera: camera1,
             glOb: _gl,
-            theta: 0,
-            phi: 0,
-            radius: 100,
+            theta: theta,
+            phi: phi,
+            radius: radius,
             animeHandle: 0
         }
     },
     watch: {
-        theta() {
+        theta(val) {
+            this.theta=parseInt(val);
             this.change();
         },
-        phi() {
-            this.change();
+        phi(val) {
+            this.phi=parseInt(val);
+           this.change();
         },
-        radius() {
+        radius(val) {
+            this.radius=parseFloat(val);
             this.change();
         }
     },
     methods: {
         change() {
             this.camera.view(this.radius, this.theta, this.phi);
-            if (!this.animeHandle) {
+
                 this.glOb.drawScene();
-            }
+
         },
         play() {
             let then = performance.now() * 0.001, start = then;
@@ -94,10 +103,21 @@ let camera = new Vue({
             function _draw2(now: number) {
                 now *= 0.001;
                 let lastTime = now - then;
-                //ball.rotate(lastTime * 100, true, 4);
+                //ball.rotate(15*lastTime,true,2);
+                //ball.rotate(15*lastTime,true,1);
+                //翅膀扇动
+                let relatedDegree = (lastTime * (flap + 2)) * flap * 50;
+                if (Math.abs(degree + relatedDegree) > range / 2) {
+                    relatedDegree *= -1;
+                    flap *= -1;
+                }
+                but.flap(relatedDegree);
+
                 _gl.currentLight.lightPosition=Util.Mat4Vec(rotateX(50*lastTime),_gl.currentLight.lightPosition)
+                // _gl.currentLight.lightPosition=Util.Mat4Vec(rotateZ(50*lastTime),_gl.currentLight.lightPosition)
                 _gl.drawScene();
                 then = now;
+                degree += relatedDegree;
                 camera.animeHandle = requestAnimationFrame(_draw2);
             }
             this.animeHandle = requestAnimationFrame(_draw2);
@@ -126,8 +146,13 @@ if (ele) {
         }
     }
     window.onwheel = function (e) {
-        let temp = (camera.radius) + e.deltaY / 350;
-        if (temp <= 0 || temp > 10)
+        let temp=0;
+        if(camera.radius<50){
+             temp= (camera.radius) + e.deltaY/50 ;
+        }else{
+            temp = (camera.radius) + e.deltaY/5 ;
+        }
+        if (temp <= 0 )
             return;
         camera.radius = temp;
     }

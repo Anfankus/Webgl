@@ -15,13 +15,12 @@ uniform vec4 lightPosition;
 
 void main()
 {   mat4 modelView=uCameraMatrix * uModelViewMatrix;
-    vec4 modelViewPos= modelView * vPosition;
-    vec3 pos = modelViewPos.xyz;
-    if(lightPosition.w == 0.0) L = normalize(lightPosition.xyz);
-    else L = normalize( lightPosition.xyz - pos );
-    E =  -normalize(pos);
+    vec4 modelViewPos= uModelViewMatrix * vPosition;
+
+    L = normalize( lightPosition.xyz - modelViewPos.xyz );
+    E =  -normalize(modelViewPos.xyz);
     N = normalize( (uNormalMatrix*vNormal).xyz);
-    gl_Position = uProjectionMatrix * modelViewPos;
+    gl_Position = uProjectionMatrix *uCameraMatrix * modelViewPos;
 }
 </script>
 

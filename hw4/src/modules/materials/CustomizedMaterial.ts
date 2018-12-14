@@ -9,10 +9,10 @@ export class CustomizedMaterial implements Material {
   materialSpecular: Array<number>;
 
   constructor() {
-    this.materialAmbient = vec4(0, 0.5, 0.5, 1.0);
-    this.materialDiffuse = Util.Hex2Vec4('0xffff00')
-    this.materialSpecular = Util.Hex2Vec4('0x9d9d9df0')
-    this.materialShininess = 1.0;
+    this.materialAmbient = Util.Hex2Vec4('0x202020');
+    this.materialDiffuse = vec4(0.3, 0.9, 0.4,1.0)
+    this.materialSpecular = Util.Hex2Vec4('0x2f2f2f')
+    this.materialShininess = 50.0;
 
   }
 }
