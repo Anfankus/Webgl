@@ -7,8 +7,8 @@ export class Light {
     public lightDiffuse: Array<number>;
     public lightSpecular: Array<number>;
     constructor() {
-        this.lightPosition = vec4(2000, 2000, 2000, 1);
-        this.lightAmbient = Util.Hex2Vec4('0xa0a0a0');
+        this.lightPosition = vec4(0, 500, 500, 1);
+        this.lightAmbient = Util.Hex2Vec4('0x202020');
         this.lightDiffuse = Util.Hex2Vec4('0xffffff');
         this.lightSpecular = Util.Hex2Vec4('0xffffff');
     }

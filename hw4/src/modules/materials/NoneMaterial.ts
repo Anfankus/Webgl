@@ -10,7 +10,7 @@ export class NoneMaterial implements Material{
     constructor(){
       this.materialAmbient = Util.Hex2Vec4('0xd8d8d8');
         this.materialDiffuse = Util.Hex2Vec4('0xd0d0d0');
-        this.materialSpecular = Util.Hex2Vec4('0xa0a0a0');
-        this.materialShininess = 20.0;
+        this.materialSpecular = Util.Hex2Vec4('0x040404');
+        this.materialShininess = 5.0;
     }
 }

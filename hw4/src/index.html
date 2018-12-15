@@ -9,18 +9,19 @@ attribute vec4 vNormal;
 varying vec3 N, L, E;
 uniform mat4 uCameraMatrix;
 uniform mat4 uProjectionMatrix;
-uniform mat4 uModelViewMatrix;
+uniform mat4 uModelMatrix;
 uniform mat4 uNormalMatrix;
+
 uniform vec4 lightPosition;
-
+uniform vec4 eyePosition;
 void main()
-{   mat4 modelView=uCameraMatrix * uModelViewMatrix;
-    vec4 modelViewPos= uModelViewMatrix * vPosition;
+{
+    gl_Position = uProjectionMatrix * uCameraMatrix *uModelMatrix * vPosition;
 
-    L = normalize( lightPosition.xyz - modelViewPos.xyz );
-    E =  -normalize(modelViewPos.xyz);
+    vec4 modelPosition= uCameraMatrix *uModelMatrix * vPosition;
+    L = normalize( lightPosition.xyz - modelPosition.xyz );
+    E =  -normalize(modelPosition.xyz);
     N = normalize( (uNormalMatrix*vNormal).xyz);
-    gl_Position = uProjectionMatrix *uCameraMatrix * modelViewPos;
 }
 </script>
 
@@ -61,7 +62,7 @@ void main()
 
     uniform mat4 uCameraMatrix;
     uniform mat4 uProjectionMatrix;
-    uniform mat4 uModelViewMatrix;
+    uniform mat4 uModelMatrix;
     uniform mat4 uNormalMatrix;
     uniform vec4 lightPosition;
     uniform vec4 ambientProduct;
@@ -72,7 +73,7 @@ void main()
     {
 
 
-        vec3 pos = -(uModelViewMatrix * vPosition).xyz;
+        vec3 pos = -(uModelMatrix * vPosition).xyz;
 
         //fixed light postion
 
@@ -87,7 +88,7 @@ void main()
 
         // Transform vertex normal into eye coordinates
 
-        vec3 N = normalize( (uModelViewMatrix*NN).xyz);
+        vec3 N = normalize( (uModelMatrix*NN).xyz);
 
         // Compute terms in the illumination equation
         vec4 ambient = ambientProduct;
@@ -102,7 +103,7 @@ void main()
         specular = vec4(0.0, 0.0, 0.0, 1.0);
         }
 
-        gl_Position = uProjectionMatrix * uCameraMatrix * uModelViewMatrix * vPosition;
+        gl_Position = uProjectionMatrix * uCameraMatrix * uModelMatrix * vPosition;
         fColor = ambient + diffuse +specular;
 
         fColor.a = 1.0;

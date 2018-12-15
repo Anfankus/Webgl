@@ -8,6 +8,7 @@ import { Material } from '../interface/Material';
 import { NoneMaterial } from '../materials/NoneMaterial';
 import { Ellipsoid } from './Basis/Ellipsoid';
 import { HalfWing } from './Basis/HalfWing';
+import { ButterFlyBodyMaterial } from '../materials/ButterFlyBodyMaterial';
 
 export class ButterFly extends Translatable implements Drawable {
     material: Material;
@@ -58,6 +59,7 @@ export class ButterFly extends Translatable implements Drawable {
 
         this.LeftWing.initBuffer(gl);
         this.RightWing.initBuffer(gl);
+        this.body.setMaterial(new ButterFlyBodyMaterial);
     }
 
     public draw(gl: GL, self: boolean = true): void {

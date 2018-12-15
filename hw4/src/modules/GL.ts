@@ -30,7 +30,7 @@ export default class GL {
                 vertexNormal:this.gl.getAttribLocation(shaderPro,'vNormal')
             },
             uniformLocations: {
-                modelViewMatrix: this.gl.getUniformLocation(shaderPro, 'uModelViewMatrix'),
+                modelViewMatrix: this.gl.getUniformLocation(shaderPro, 'uModelMatrix'),
                 cameraMatrixLoc: this.gl.getUniformLocation(shaderPro, 'uCameraMatrix'),
                 projectionMatrixLoc: this.gl.getUniformLocation(shaderPro, 'uProjectionMatrix'),
                 normalMatrixLoc:this.gl.getUniformLocation(shaderPro,'uNormalMatrix'),
@@ -39,6 +39,7 @@ export default class GL {
                 diffuseVectorLoc:this.gl.getUniformLocation(shaderPro,'diffuseProduct'),
                 specularVectorLoc:this.gl.getUniformLocation(shaderPro,'specularProduct'),
                 lightVectorLoc:this.gl.getUniformLocation(shaderPro,'lightPosition'),
+                eyeVectorLoc:this.gl.getUniformLocation(shaderPro,'eyePosition'),
                 shininessLoc:this.gl.getUniformLocation(shaderPro,'shininess')
             },
         };

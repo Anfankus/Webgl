@@ -5,11 +5,9 @@ import { Material } from "../interface/Material";
 import { NoneMaterial } from "../materials/NoneMaterial";
 import {Util} from "../Util";
 import {CustomizedMaterial} from "../materials/CustomizedMaterial";
+import { MetalMaterial } from "../materials/MetalMaterial";
 export class Ground implements Drawable {
     material: Material;
-    setMaterial(m:Material) {
-        this.material=m;
-    }
     buffers: any;
 
     vertices:Array<number>;
@@ -33,7 +31,9 @@ export class Ground implements Drawable {
             0,1,0,
             0,1,0
         ];
-      this.material = new CustomizedMaterial;
+    }
+    setMaterial(m:Material) {
+        this.material=m;
     }
     initBuffer(gl: GL): void {
         let _gl=gl.gl;

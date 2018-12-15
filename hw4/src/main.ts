@@ -8,19 +8,27 @@ import { Ellipsoid } from './modules/models/Basis/Ellipsoid';
 import { rotateY, rotateX, rotateZ } from './modules/MV';
 import { Util } from './modules/Util';
 import { Church } from './modules/models/Church';
+import { NoneMaterial } from './modules/materials/NoneMaterial';
+import { MetalMaterial } from './modules/materials/MetalMaterial';
+import { CustomizedMaterial } from './modules/materials/CustomizedMaterial';
 
 var _gl = new GL;
 let but = new ButterFly;
- let ball = new Ellipsoid(20, 50, [0, 0, 0], '0xfffff');
+let ball = new Ellipsoid(30, 50, [0, 0, 0], '0xfffff');ball.setMaterial(new MetalMaterial);
+let ground=new Ground([0,-20, 0], 100);ground.setMaterial(new CustomizedMaterial);
 // ball.translate(50,1);
 //but.translate(10, 2);
-but.rotate(90, true, 4);//,ball,
+but.rotate(90, true, 4);//,,ball
+
+//初始相机初始化
 let camera1=new Camera;
-let [radius,theta,phi]=[200, -63, 36]
+let [radius,theta,phi]=[50, 0, 0]
 _gl.addCameras(camera1);
 _gl.switchCamera(camera1);
 camera1.view(radius,theta,phi);
-_gl.addObjects(but,new House([0, -2, 0]),new Church([10,-2,0]),new Ground([0, -10, 0], 500));
+
+//场景对象添加
+_gl.addObjects(but,new House([0, -2, 0]),new Church([10,-2,0]),ground);
 let stateButterFly = {
     butt: but,
     height: 10,
@@ -30,7 +38,7 @@ let stateButterFly = {
         return Math.sqrt(this.speedX ** 2 + this.speedY ** 2)
     },
     turn: {
-        state: 0,             //0为可变状态
+        state: 0,
         $degree: 0,
         set degree(val) {
             if (!this.state) {
@@ -116,6 +124,7 @@ let camera = new Vue({
 
                 _gl.currentLight.lightPosition=Util.Mat4Vec(rotateX(50*lastTime),_gl.currentLight.lightPosition)
                 // _gl.currentLight.lightPosition=Util.Mat4Vec(rotateZ(50*lastTime),_gl.currentLight.lightPosition)
+                //but.rotate(lastTime*20);
                 _gl.drawScene();
                 then = now;
                 degree += relatedDegree;
@@ -130,7 +139,7 @@ let camera = new Vue({
     }
 })
 // but.rotate(-30, true, 4);
-//camera.play();
+camera.play();
 let mousedown = false;
 let ele = document.getElementById('gl-canvas');
 if (ele) {
@@ -148,8 +157,10 @@ if (ele) {
     }
     window.onwheel = function (e) {
         let temp=0;
-        if(camera.radius<50){
+        if(5<camera.radius&&camera.radius<50){
              temp= (camera.radius) + e.deltaY/50 ;
+        }else if(camera.radius<=5){
+            temp = (camera.radius) + e.deltaY/500 ;
         }else{
             temp = (camera.radius) + e.deltaY/5 ;
         }

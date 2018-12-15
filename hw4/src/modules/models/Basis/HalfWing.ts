@@ -139,6 +139,11 @@ export class HalfWing extends Translatable implements Drawable {
             let vec = this.normals.arc.slice(i, i + 3);
             v.push(...point, ...add(point, scale(0.05, vec)));
         }
+        for (let i = 0; i < this.flats[0].length; i += 3) {
+            let point = this.flats[0].slice(i, i + 3);
+            let vec = this.normals.flats[0].slice(i, i + 3);
+            v.push(...point, ...add(point, scale(0.05, vec)));
+        }
         _gl.bindBuffer(_gl.ARRAY_BUFFER, tempbuf);
         _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(v), _gl.STATIC_DRAW)
         _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);

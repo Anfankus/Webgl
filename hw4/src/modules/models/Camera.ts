@@ -36,7 +36,7 @@ export default class Camera {
         if(this.observeObject){
             radius=10;
             at=this.observeObject.position.slice(0,3);
-            up=this.observeObject.direction.slice(0,3);    
+            up=this.observeObject.direction.slice(0,3);
             eye = vec3(radius * Math.sin(Util.radians(theta)) * Math.cos(Util.radians(phi))+this.observeObject.position[0],
             radius * Math.sin(Util.radians(phi))+this.observeObject.position[1],
             radius * Math.cos(Util.radians(theta)) * Math.cos(Util.radians(phi))+this.observeObject.position[2]);

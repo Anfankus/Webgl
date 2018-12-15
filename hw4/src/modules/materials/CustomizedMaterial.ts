@@ -11,8 +11,8 @@ export class CustomizedMaterial implements Material {
   constructor() {
     this.materialAmbient = Util.Hex2Vec4('0x202020');
     this.materialDiffuse = vec4(0.3, 0.9, 0.4,1.0)
-    this.materialSpecular = Util.Hex2Vec4('0x2f2f2f')
-    this.materialShininess = 50.0;
+    this.materialSpecular = Util.Hex2Vec4('0x080808')
+    this.materialShininess = 20.0;
 
   }
 }
