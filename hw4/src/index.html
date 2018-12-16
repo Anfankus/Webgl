@@ -13,15 +13,16 @@ uniform mat4 uModelMatrix;
 uniform mat4 uNormalMatrix;
 
 uniform vec4 lightPosition;
-uniform vec4 eyePosition;
 void main()
 {
-    gl_Position = uProjectionMatrix * uCameraMatrix *uModelMatrix * vPosition;
-
-    vec4 modelPosition= uCameraMatrix *uModelMatrix * vPosition;
-    L = normalize( lightPosition.xyz - modelPosition.xyz );
-    E =  -normalize(modelPosition.xyz);
+    vec4 ModelPosition=uModelMatrix * vPosition;
+    vec4 EyePosition= uCameraMatrix *ModelPosition;
+    L = normalize( lightPosition.xyz - ModelPosition.xyz );
+    E =  -normalize(EyePosition.xyz);
     N = normalize( (uNormalMatrix*vNormal).xyz);
+
+    gl_Position = uProjectionMatrix *EyePosition;
+
 }
 </script>
 

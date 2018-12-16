@@ -2,6 +2,7 @@ import { mat4, mult, rotate, rotateX, rotateY, rotateZ, translate, cross } from 
 import { Util } from '../Util';
 export enum transType {
     none,
+    rotateX,rotateY,rotateZ,
     rotateSelfX, rotateSelfY, rotateSelfZ,
     rotateMain, rotateSec, rotateDir,rotateFall,
     translateX, translateY, translateZ, translateMain,
@@ -114,7 +115,7 @@ export abstract class Translatable {
         return ret;
     }
     /**
-     * 
+     *
      * @param distance 距离
      * @param direction 0：主方向；1：x轴方向；2：y轴方向；3：z轴方向
      * @param related 平移是否相对于上次绘制
