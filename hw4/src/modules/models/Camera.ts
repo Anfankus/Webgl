@@ -20,6 +20,7 @@ export default class Camera {
     public nowEye: any;
     public at: any;
     public up: any;
+    public ret:boolean;
 
     constructor() {
         this.baseEye = vec4();
@@ -28,6 +29,7 @@ export default class Camera {
         //this.up = vec3(0, 1, 0);
         const far = 1000, near = 0.1, aspect = 1, fovy = 60;
         this.projectionMatrix = perspective(fovy, aspect, near, far);
+        this.ret=false;
 
     }
 
@@ -57,11 +59,14 @@ export default class Camera {
     }
 
     public bind(ob: Translatable) {
+        this.ret=true;
         this.observeObject = ob;
         this.baseEye=vec4(ob.position[0],ob.position[1]-5,ob.position[2]-5,1);
         this.at=vec3(ob.position[0],ob.position[1],ob.position[2]);
     }
-
+    public release(){
+        this.observeObject=null;
+    }
     public surround(){
         if (!this.observeObject)
             throw '摄像机未绑定对象'
