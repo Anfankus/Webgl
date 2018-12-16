@@ -85,33 +85,19 @@ export class Insect extends Translatable implements Drawable{
             this.buffers.positions.body.push(tempPBuf);
             _gl.bindBuffer(_gl.ARRAY_BUFFER, tempPBuf);
             _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.body[i].vertices), _gl.STATIC_DRAW);
-
-            let tempCBuf = _gl.createBuffer();
-            this.buffers.colors.body.push(tempCBuf);
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, tempCBuf);
-            _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.body[i].colors), _gl.STATIC_DRAW);
         }
         //head
         this.buffers.positions.head = _gl.createBuffer();
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.head);
         _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.head.vertices), _gl.STATIC_DRAW);
 
-        this.buffers.colors.head = _gl.createBuffer();
-        _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.colors.head);
-        _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.head.colors), _gl.STATIC_DRAW);
         //eyes
         this.buffers.positions.eyes = [];
-        this.buffers.colors.eyes = [];
         for (let i in this.eyes) {
             let tempPBuf = _gl.createBuffer();
             this.buffers.positions.eyes.push(tempPBuf);
             _gl.bindBuffer(_gl.ARRAY_BUFFER, tempPBuf);
             _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.eyes[i].vertices), _gl.STATIC_DRAW);
-
-            let tempCBuf = _gl.createBuffer();
-            this.buffers.colors.eyes.push(tempCBuf);
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, tempCBuf);
-            _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.eyes[i].colors), _gl.STATIC_DRAW);
 
         }
 

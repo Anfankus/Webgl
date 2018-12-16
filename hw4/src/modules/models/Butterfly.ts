@@ -8,11 +8,12 @@ import { Material } from '../interface/Material';
 import { NoneMaterial } from '../materials/NoneMaterial';
 import { Ellipsoid } from './Basis/Ellipsoid';
 import { HalfWing } from './Basis/HalfWing';
+import { ButterFlyBodyMaterial } from '../materials/ButterFlyBodyMaterial';
 
 export class ButterFly extends Translatable implements Drawable {
     material: Material;
-    setMaterial(m:Material) {
-        this.material=m;
+    setMaterial(m: Material) {
+        this.material = m;
     }
     buffers: any;
 
@@ -59,9 +60,10 @@ export class ButterFly extends Translatable implements Drawable {
 
         this.LeftWing.initBuffer(gl);
         this.RightWing.initBuffer(gl);
+        this.body.setMaterial(new ButterFlyBodyMaterial);
     }
 
-  public draw(gl: GL, self: boolean = true): void {
+    public draw(gl: GL, self: boolean = true): void {
         let _gl = gl.gl;
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));
         _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
@@ -76,8 +78,8 @@ export class ButterFly extends Translatable implements Drawable {
         this.body.draw(gl);
         //_gl.drawArrays(_gl.LINES, 0, this.body.vertices.length / 3)
         //_gl.drawArrays(_gl.TRIANGLE_STRIP, 0, this.body.vertices.length / 3)
-        for(let i of this.eyes){
-          i.draw(gl, false);
+        for (let i of this.eyes) {
+            i.draw(gl, false);
         }
         //wings
         this.LeftWing.draw(gl);
@@ -103,13 +105,12 @@ export class ButterFly extends Translatable implements Drawable {
         let decrease = -9.8 * lastTime;
         let x = Math.sqrt(this.direction[0] ** 2 + this.direction[2] ** 2);
         let y = this.direction[1];
-      let a = speedX;
+        let a = speedX;
         let b = speedX * y / x;
 
         let alpha = Math.atan(y / x), beta = Math.atan((b + decrease) / a);
         let deflection = Math.abs(Util.degree(alpha - beta));
-      this.rotate(deflection, true, 6);
-      console.log('fall',deflection);
+        this.rotate(deflection, true, 6);
         return decrease;
     }
     public moveForward(distance: number): void {
@@ -124,7 +125,7 @@ export class ButterFly extends Translatable implements Drawable {
 
         let alpha = Math.atan(y / x), beta = Math.atan((b + decrease) / a);
         let deflection = Util.degree(alpha - beta);
-        console.log('fly',deflection);
+        console.log('fly', deflection);
         this.rotate(deflection, true, 4);
         return decrease;
     }

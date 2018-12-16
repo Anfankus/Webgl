@@ -31,7 +31,7 @@ export class Util {
         return tempVec
     }
 
-    public static Hex2Vec4(hex: string) {
+    public static Hex2Vec4(hex: string):number[] {
         let _hex = parseInt(hex);
         let ret;
         if (hex.length <= 8) {

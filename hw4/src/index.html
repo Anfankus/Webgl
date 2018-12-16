@@ -9,19 +9,19 @@ attribute vec4 vNormal;
 varying vec3 N, L, E;
 uniform mat4 uCameraMatrix;
 uniform mat4 uProjectionMatrix;
-uniform mat4 uModelViewMatrix;
+uniform mat4 uModelMatrix;
 uniform mat4 uNormalMatrix;
-uniform vec4 lightPosition;
 
+uniform vec4 lightPosition;
+uniform vec4 eyePosition;
 void main()
-{   mat4 modelView=uCameraMatrix * uModelViewMatrix;
-    vec4 modelViewPos= modelView * vPosition;
-    vec3 pos = modelViewPos.xyz;
-    if(lightPosition.w == 0.0) L = normalize(lightPosition.xyz);
-    else L = normalize( lightPosition.xyz - pos );
-    E =  -normalize(pos);
+{
+    gl_Position = uProjectionMatrix * uCameraMatrix *uModelMatrix * vPosition;
+
+    vec4 modelPosition= uCameraMatrix *uModelMatrix * vPosition;
+    L = normalize( lightPosition.xyz - modelPosition.xyz );
+    E =  -normalize(modelPosition.xyz);
     N = normalize( (uNormalMatrix*vNormal).xyz);
-    gl_Position = uProjectionMatrix * modelViewPos;
 }
 </script>
 
@@ -54,14 +54,75 @@ void main()
             gl_FragColor = fColor;
         }
 
-//precision mediump float;
-//varying vec4 fColor;
-//void
-//main()
-//{
-//    gl_FragColor = fColor;
-//}
 </script>
+<script id="vertex-shader2" type="x-shader/x-vertex">
+    attribute  vec4 vPosition;
+    attribute  vec3 vNormal;
+    varying vec4 fColor;
+
+    uniform mat4 uCameraMatrix;
+    uniform mat4 uProjectionMatrix;
+    uniform mat4 uModelMatrix;
+    uniform mat4 uNormalMatrix;
+    uniform vec4 lightPosition;
+    uniform vec4 ambientProduct;
+    uniform vec4 diffuseProduct;
+    uniform vec4 specularProduct;
+    uniform float shininess;
+void main()
+    {
+
+
+        vec3 pos = -(uModelMatrix * vPosition).xyz;
+
+        //fixed light postion
+
+        vec3 light = lightPosition.xyz;
+        vec3 L = normalize( light - pos );
+
+
+        vec3 E = normalize( -pos );
+        vec3 H = normalize( L + E );
+
+        vec4 NN = vec4(vNormal,0);
+
+        // Transform vertex normal into eye coordinates
+
+        vec3 N = normalize( (uModelMatrix*NN).xyz);
+
+        // Compute terms in the illumination equation
+        vec4 ambient = ambientProduct;
+
+        float Kd = max( dot(L, N), 0.0 );
+        vec4  diffuse = Kd*diffuseProduct;
+
+        float Ks = pow( max(dot(N, H), 0.0), shininess );
+        vec4  specular = Ks * specularProduct;
+
+        if( dot(L, N) < 0.0 ) {
+        specular = vec4(0.0, 0.0, 0.0, 1.0);
+        }
+
+        gl_Position = uProjectionMatrix * uCameraMatrix * uModelMatrix * vPosition;
+        fColor = ambient + diffuse +specular;
+
+        fColor.a = 1.0;
+    }
+    </script>
+
+    <script id="fragment-shader2" type="x-shader/x-fragment">
+
+    precision mediump float;
+
+
+    varying vec4 fColor;
+
+    void
+    main()
+    {
+        gl_FragColor = fColor;
+    }
+    </script>
     <style>
         .app{
             float: left;
@@ -97,7 +158,7 @@ void main()
         </div>
         <div>
             <span>前后</span>
-            <input type="range" v-model="radius" min="0" max="100" step="1" />
+            <input type="range" v-model="radius" min="0" max="800" step="10" />
             <span>{{Math.floor(radius)}}</span>
         </div>
     </div>
