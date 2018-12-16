@@ -21,7 +21,7 @@ export default class GL {
         this.gl.viewport(0, 0, canvas.offsetWidth, canvas.offsetHeight);
         this.gl.clearColor(1.0, 1.0, 1.0, 1.0);
         this.gl.enable(this.gl.DEPTH_TEST);
-
+        
         let shaderPro = initShaders(this.gl, "vertex-shader", "fragment-shader");
         this.programInfo = {
             program: shaderPro,

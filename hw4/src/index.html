@@ -82,6 +82,8 @@ void main()
             <strong>视图</strong>
             <button v-if="!animeHandle" @click="play">播放</button>
             <button v-else @click="stop">停止</button>
+            <button v-if="binding" @click="fixation">移动视角</button>
+            <button v-else @click="switching">固定视角</button>
         </div>
         <div>
             <span>左右</span>

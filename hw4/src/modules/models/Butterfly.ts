@@ -21,6 +21,7 @@ export class ButterFly extends Translatable implements Drawable {
     public LeftWing: HalfWing;
     public RightWing: HalfWing;
     public lines;
+    public texture;
     constructor() {
         super();
         this.body = new Ellipsoid(0.07, 0.3, [0, 0, 0], [1, 0.8559, 0.73843, 1.0]);
@@ -127,4 +128,20 @@ export class ButterFly extends Translatable implements Drawable {
         this.rotate(deflection, true, 4);
         return decrease;
     }
+
+    public initTexture(_gl:GL){
+        this.texture=_gl.gl.createTexture();
+        this.texture.image=new Image();
+        this.texture.image.onload=function(){
+            _gl.gl.bindTexture(_gl.gl.TEXTURE_2D,this.texture);
+            _gl.gl.pixelStorei(_gl.gl.UNPACK_FLIP_Y_WEBGL,Number(true));
+            _gl.gl.texImage2D(_gl.gl.TEXTURE_2D,0,_gl.gl.RGBA,_gl.gl.RGBA,_gl.gl.UNSIGNED_BYTE,this.texture.image);
+            _gl.gl.texParameteri( _gl.gl.TEXTURE_2D, _gl.gl.TEXTURE_MIN_FILTER,_gl.gl.NEAREST_MIPMAP_LINEAR );
+            _gl.gl.texParameteri( _gl.gl.TEXTURE_2D, _gl.gl.TEXTURE_MAG_FILTER, _gl.gl.NEAREST );
+            _gl.gl.bindTexture(_gl.gl.TEXTURE_2D,null);
+        }
+        
+    }
+    
+
 }

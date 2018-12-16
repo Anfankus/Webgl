@@ -30,13 +30,16 @@ export default class Camera {
         this.projectionMatrix = perspective(fovy, aspect, near, far);
 
     }
+
     public view(radius, theta, phi) {
 
         let at,up,eye;
         if(this.observeObject){
-            radius=10;
+            radius=7.06;
             at=this.observeObject.position.slice(0,3);
-            up=this.observeObject.direction.slice(0,3);    
+            up=this.observeObject.direction.slice(0,3);
+            if(phi<-90||phi>90)
+              up=vec3(this.observeObject.direction[0],-this.observeObject.direction[1],this.observeObject.direction[2]);   
             eye = vec3(radius * Math.sin(Util.radians(theta)) * Math.cos(Util.radians(phi))+this.observeObject.position[0],
             radius * Math.sin(Util.radians(phi))+this.observeObject.position[1],
             radius * Math.cos(Util.radians(theta)) * Math.cos(Util.radians(phi))+this.observeObject.position[2]);
@@ -56,15 +59,23 @@ export default class Camera {
         this.at=vec3(ob.position[0],ob.position[1],ob.position[2]);
     }
 
-    public translateC(): boolean {
+    public surround(){
+        if (!this.observeObject)
+            throw '摄像机未绑定对象'
+        
+    }
+
+    public translateC(choice=true): boolean {
         if (!this.observeObject)
             throw '摄像机未绑定对象'
         let ret = false;
-        this.at=this.observeObject.position.slice(0,3);
-        this.up=this.observeObject.direction.slice(0,3);
-        let tempVec = Util.Mat4Vec(this.observeObject.modelMatrix, this.baseEye);
-        this.nowEye = vec3(tempVec[0], tempVec[1], tempVec[2]);
-        this.cameraMatrix = lookAt(this.nowEye, this.at, this.up);
+        if(choice){
+            this.at = this.observeObject.position.slice(0, 3);
+            this.up = this.observeObject.direction.slice(0, 3);
+            let tempVec = Util.Mat4Vec(this.observeObject.modelMatrix, this.baseEye);
+            this.nowEye = vec3(tempVec[0], tempVec[1], tempVec[2]);
+            this.cameraMatrix = lookAt(this.nowEye, this.at, this.up);
+        }
 
         return ret;
     }

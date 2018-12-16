@@ -6,6 +6,7 @@ import { Ground } from './modules/models/Ground';
 import { House } from './modules/models/House';
 
 var _gl = new GL;
+var choice=true;
 let but=new ButterFly;
 but.translate(10,2);
 but.rotate(90, true, 4);
@@ -35,9 +36,10 @@ let camera = new Vue({
             camera:_gl.cameras[0],
             glOb: _gl,
             theta: 0,
-            phi: 0,
+            phi: 45,
             radius: 50,
-            animeHandle: 0
+            animeHandle: 0,
+            binding:1
         }
     },
     watch: {
@@ -80,7 +82,9 @@ let camera = new Vue({
                 stateButterFly.speedY+=but.fall(lastTime,stateButterFly.speedX);
                 but.moveForward(stateButterFly.speed*lastTime)
 
-                c.translateC();
+                if(camera.binding)
+                   c.translateC(choice);
+                else c.view(camera.radius, camera.theta, camera.phi);
                 _gl.drawScene();
                 then=now;
                 degree+=relatedDegree;
@@ -91,6 +95,12 @@ let camera = new Vue({
         stop() {
             cancelAnimationFrame(this.animeHandle);
             this.animeHandle = 0;
+        },
+        fixation(){
+           this.binding=0;            
+        },
+        switching(){
+           this.binding=1;
         }
     }
 })
@@ -121,12 +131,14 @@ if (ele) {
         switch(e.keyCode){
             case 32://空格
             stateButterFly.speedY+=but.fly(stateButterFly.speedX);
+            //choice=false;
             break;
             case 37://←
               but.rotate(-5, true, 5);
             break;
             case 38://↑
               but.translate(0.3, 0);
+              choice=true;
             break;
             case 39://→
               but.rotate(5, true, 5);
