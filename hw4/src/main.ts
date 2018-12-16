@@ -63,7 +63,7 @@ let camera = new Vue({
             phi: phi,
             radius: radius,
             animeHandle: 0,
-            binding:1
+            binding:true
         }
     },
     watch: {
@@ -83,7 +83,6 @@ let camera = new Vue({
     methods: {
         change() {
             this.camera.view(this.radius, this.theta, this.phi);
-
             this.glOb.drawScene();
 
         },
@@ -105,7 +104,7 @@ let camera = new Vue({
                 }
                 but.flap(relatedDegree);
 
-                //蝴蝶下坠并随时间加速
+                //蝴蝶下坠
                 stateButterFly.speedY += but.fall(lastTime, stateButterFly.speedX);
                 but.moveForward(stateButterFly.speed * lastTime)
 
@@ -120,8 +119,6 @@ let camera = new Vue({
             function _draw2(now: number) {
                 now *= 0.001;
                 let lastTime = now - then;
-                //ball.rotate(15*lastTime,true,2);
-                //ball.rotate(15*lastTime,true,1);
                 //翅膀扇动
                 let relatedDegree = (lastTime * (flap + 2)) * flap * 50;
                 if (Math.abs(degree + relatedDegree) > range / 2) {
@@ -130,9 +127,7 @@ let camera = new Vue({
                 }
                 but.flap(relatedDegree);
 
-               // _gl.currentLight.translate(lastTime * 10, 3);
-                // _gl.currentLight.lightPosition=Util.Mat4Vec(rotateZ(50*lastTime),_gl.currentLight.lightPosition)
-                //but.rotate(lastTime*20);
+                _gl.currentLight.translate(lastTime * 10, 3);
                 _gl.drawScene();
                 then = now;
                 degree += relatedDegree;
@@ -145,10 +140,10 @@ let camera = new Vue({
             this.animeHandle = 0;
         },
         fixation(){
-           this.binding=0;            
+           this.binding=false;
         },
         switching(){
-           this.binding=1;
+           this.binding=true;
         }
     }
 })
@@ -164,7 +159,7 @@ if (ele) {
         mousedown = false;
     }
     ele.onmousemove = function (e) {
-        if (mousedown) {
+        if (mousedown && (!camera.binding || !camera.animeHandle)) {
             camera.theta = ((camera.theta) + (e.movementX) * -0.8) % 360;
             camera.phi = ((camera.phi) + (e.movementY) * 0.8) % 360;
         }

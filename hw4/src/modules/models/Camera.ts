@@ -36,10 +36,13 @@ export default class Camera {
         let at,up,eye;
         if(this.observeObject){
             radius=7.06;
-            at=this.observeObject.position.slice(0,3);
-            up=this.observeObject.direction.slice(0,3);
-            if(phi<-90||phi>90)
-              up=vec3(this.observeObject.direction[0],-this.observeObject.direction[1],this.observeObject.direction[2]);   
+            // at=this.observeObject.position.slice(0,3);
+            // up=this.observeObject.direction.slice(0,3);
+            // if(phi<-90||phi>90)
+            //   up=vec3(this.observeObject.direction[0],-this.observeObject.direction[1],-this.observeObject.direction[2]);
+            at = this.observeObject.position.slice(0,3);
+            up = vec3(0.0, Math.cos(Util.radians(phi)), 0.0);
+
             eye = vec3(radius * Math.sin(Util.radians(theta)) * Math.cos(Util.radians(phi))+this.observeObject.position[0],
             radius * Math.sin(Util.radians(phi))+this.observeObject.position[1],
             radius * Math.cos(Util.radians(theta)) * Math.cos(Util.radians(phi))+this.observeObject.position[2]);
@@ -62,7 +65,7 @@ export default class Camera {
     public surround(){
         if (!this.observeObject)
             throw '摄像机未绑定对象'
-        
+
     }
 
     public translateC(choice=true): boolean {
