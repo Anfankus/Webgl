@@ -39,7 +39,6 @@ export default class GL {
                 diffuseVectorLoc:this.gl.getUniformLocation(shaderPro,'diffuseProduct'),
                 specularVectorLoc:this.gl.getUniformLocation(shaderPro,'specularProduct'),
                 lightVectorLoc:this.gl.getUniformLocation(shaderPro,'lightPosition'),
-                eyeVectorLoc:this.gl.getUniformLocation(shaderPro,'eyePosition'),
                 shininessLoc:this.gl.getUniformLocation(shaderPro,'shininess')
             },
         };
@@ -48,12 +47,6 @@ export default class GL {
         this.objects=[];
         this.lights=[];
         this.cameras=[];
-        /**
-         * 测试用例
-         */
-        let l=new Light;
-        this.currentLight=l;
-        this.lights.push(l);
     }
     public addObjects(...obs: Array<Drawable>) {
         for (let i of obs) {
@@ -69,6 +62,15 @@ export default class GL {
     public switchCamera(camera:Camera){
         this.currentCamera=camera;
     }
+    public addLights(...obs: Array<Light>) {
+        for (let i of obs) {
+            this.addObjects(i);
+            this.lights.push(i);
+        }
+    }
+    public switchLight(light:Light){
+        this.currentLight=light;
+    }
 
     public drawScene() {
         if (this.objects.length <= 0)
@@ -76,14 +78,16 @@ export default class GL {
         else if(this.cameras.length<=0||!this.currentCamera){
             throw '未指定摄像机';
         }
-        else {
+        else if(this.lights.length<=0||!this.currentLight){
+            throw '未指定光源';
+        }{
             this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
             this.gl.clearDepth(1.0);
 
             this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.cameraMatrixLoc, false, flatten(this.currentCamera.cameraMatrix));
             this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrixLoc, false, flatten(this.currentCamera.projectionMatrix));
 
-            this.gl.uniform4fv(this.programInfo.uniformLocations.lightVectorLoc, new Float32Array(this.currentLight.lightPosition));
+            this.gl.uniform4fv(this.programInfo.uniformLocations.lightVectorLoc, new Float32Array(this.currentLight.position));
 
 
             for (let i of this.objects) {

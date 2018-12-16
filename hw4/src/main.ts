@@ -11,24 +11,30 @@ import { Church } from './modules/models/Church';
 import { NoneMaterial } from './modules/materials/NoneMaterial';
 import { MetalMaterial } from './modules/materials/MetalMaterial';
 import { CustomizedMaterial } from './modules/materials/CustomizedMaterial';
+import { Light } from './modules/scene/Light';
 
 var _gl = new GL;
 let but = new ButterFly;
-let ball = new Ellipsoid(30, 50, [0, 0, 0], '0xfffff');ball.setMaterial(new MetalMaterial);
-let ground=new Ground([0,-20, 0], 100);ground.setMaterial(new CustomizedMaterial);
+let ball = new Ellipsoid(30, 50, [0, 0, 0], '0xfffff'); ball.setMaterial(new MetalMaterial);
+let ground = new Ground([0, -20, 0], 100); ground.setMaterial(new CustomizedMaterial);
 // ball.translate(50,1);
 //but.translate(10, 2);
-but.rotate(90, true, 4);//,,ball
+but.rotate(90, true, 4);//,ball,
 
 //初始相机初始化
-let camera1=new Camera;
-let [radius,theta,phi]=[50, 0, 45]
+let camera1 = new Camera;
+let [radius, theta, phi] = [500, 0, 45]
 _gl.addCameras(camera1);
 _gl.switchCamera(camera1);
-camera1.view(radius,theta,phi);
+camera1.view(radius, theta, phi);
+
+//光源
+let l = new Light;
+_gl.addLights(l);
+_gl.switchLight(l);
 
 //场景对象添加
-_gl.addObjects(but,new House([0, -2, 0]),new Church([10,-2,0]),ground);
+_gl.addObjects(but, new House([0, -2, 0]), new Church([10, -2, 0]), ground);
 let stateButterFly = {
     butt: but,
     height: 10,
@@ -62,15 +68,15 @@ let camera = new Vue({
     },
     watch: {
         theta(val) {
-            this.theta=parseInt(val);
+            this.theta = parseInt(val);
             this.change();
         },
         phi(val) {
-            this.phi=parseInt(val);
-           this.change();
+            this.phi = parseInt(val);
+            this.change();
         },
         radius(val) {
-            this.radius=parseFloat(val);
+            this.radius = parseFloat(val);
             this.change();
         }
     },
@@ -78,7 +84,7 @@ let camera = new Vue({
         change() {
             this.camera.view(this.radius, this.theta, this.phi);
 
-                this.glOb.drawScene();
+            this.glOb.drawScene();
 
         },
         play() {
@@ -100,7 +106,6 @@ let camera = new Vue({
                 but.flap(relatedDegree);
 
                 //蝴蝶下坠并随时间加速
-                let speedUp= (now - start) * 0.1;
                 stateButterFly.speedY += but.fall(lastTime, stateButterFly.speedX);
                 but.moveForward(stateButterFly.speed * lastTime)
 
@@ -125,7 +130,7 @@ let camera = new Vue({
                 }
                 but.flap(relatedDegree);
 
-                _gl.currentLight.lightPosition=Util.Mat4Vec(rotateX(50*lastTime),_gl.currentLight.lightPosition)
+               // _gl.currentLight.translate(lastTime * 10, 3);
                 // _gl.currentLight.lightPosition=Util.Mat4Vec(rotateZ(50*lastTime),_gl.currentLight.lightPosition)
                 //but.rotate(lastTime*20);
                 _gl.drawScene();
@@ -165,15 +170,15 @@ if (ele) {
         }
     }
     window.onwheel = function (e) {
-        let temp=0;
-        if(5<camera.radius&&camera.radius<50){
-             temp= (camera.radius) + e.deltaY/50 ;
-        }else if(camera.radius<=5){
-            temp = (camera.radius) + e.deltaY/500 ;
-        }else{
-            temp = (camera.radius) + e.deltaY/5 ;
+        let temp = 0;
+        if (5 < camera.radius && camera.radius < 50) {
+            temp = (camera.radius) + e.deltaY / 50;
+        } else if (camera.radius <= 5) {
+            temp = (camera.radius) + e.deltaY / 500;
+        } else {
+            temp = (camera.radius) + e.deltaY / 5;
         }
-        if (temp <= 0 )
+        if (temp <= 0)
             return;
         camera.radius = temp;
     }
@@ -194,6 +199,27 @@ if (ele) {
             case 40://↓
                 but.translate(-0.3, 0);
                 break;
+        }
+        switch (e.key) {
+            case 'w':
+                _gl.currentLight.translate(20, 3);
+                break;
+            case 's':
+                _gl.currentLight.translate(-20, 3);
+                break;
+            case 'a':
+                _gl.currentLight.translate(-20, 1);
+                break;
+            case 'd':
+                _gl.currentLight.translate(20, 1);
+                break;
+            case 'q':
+                _gl.currentLight.translate(-20, 2);
+                break;
+            case 'e':
+                _gl.currentLight.translate(20, 2);
+                break;
+
         }
     };
 }
