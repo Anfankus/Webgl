@@ -34,7 +34,7 @@ _gl.addLights(l);
 _gl.switchLight(l);
 
 //场景对象添加
-_gl.addObjects(but, new House([0, -2, 0]), new Church([10, -2, 0]), ground);
+_gl.addObjects(but, new House([0, -20, 0]), new Church([10, -20, 0]), ground);
 let stateButterFly = {
     butt: but,
     height: 10,
