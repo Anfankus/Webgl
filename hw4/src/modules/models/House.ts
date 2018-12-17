@@ -5,11 +5,12 @@ import { Cube, Tri_prism } from "./Basis/Basis";
 import {Material} from "../interface/Material";
 import {Util} from "../Util";
 import {NoneMaterial} from "../materials/NoneMaterial";
+import { Translatable } from "../interface/Translatable";
 
-export class House implements Drawable{//size = 9*7
+export class House extends Translatable implements Drawable{//size = 9*7
   material: Material;
   setMaterial(m: Material) {
-        throw new Error("Method not implemented.");
+        this.material=m;
     }
     buffers: any;
     public building:Array<Cube>;
@@ -19,6 +20,7 @@ export class House implements Drawable{//size = 9*7
     public wall:Array<Cube>;
 
     constructor(position:Array<number>){
+        super();
         let [x,y,z] = position;
         this.material = new NoneMaterial;
         this.building = [
@@ -42,55 +44,90 @@ export class House implements Drawable{//size = 9*7
             new Cube(6.2,2,0.2,[x-1,y,z+1]),
             new Cube(0.2,2,6,[x-0.9999,y+0.00001,z+0.9999]),
             new Cube(9,2,0.2,[x-1,y,z-5]),
-            new Cube(0.2,2,6,[x+7.9999,y+0.00001,z+0.9999]),
+            new Cube(0.2,2,6,[x+7.7999,y+0.00001,z+0.9999]),
         ];
-    } 
+    }
     initBuffer(gl: GL): void {
         let _gl = gl.gl;
         this.buffers={
-            positions:{}
+            positions:{},
+            normals:{}
         }
         //building
         this.buffers.positions.building = [];
+        this.buffers.normals.building=[];
         for(let i in this.building){
             let tempPBuf = _gl.createBuffer();
             this.buffers.positions.building.push(tempPBuf);
             _gl.bindBuffer(_gl.ARRAY_BUFFER, tempPBuf);
             _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.building[i].vertices), _gl.STATIC_DRAW);
+            let tempNBuf = _gl.createBuffer();
+            this.buffers.normals.building.push(tempNBuf);
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, tempNBuf);
+            _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.building[i].normals), _gl.STATIC_DRAW);
+
         }
         //roof
         this.buffers.positions.roof = [];
+        this.buffers.normals.roof=[];
+
         for(let i in this.roof){
             let tempPBuf = _gl.createBuffer();
             this.buffers.positions.roof.push(tempPBuf);
             _gl.bindBuffer(_gl.ARRAY_BUFFER, tempPBuf);
             _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.roof[i].vertices), _gl.STATIC_DRAW);
+            let tempNBuf = _gl.createBuffer();
+            this.buffers.normals.roof.push(tempNBuf);
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, tempNBuf);
+            _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.roof[i].normals), _gl.STATIC_DRAW);
+
         }
         //door
         this.buffers.positions.door = [];
+        this.buffers.normals.door=[];
+
         for(let i in this.door){
             let tempPBuf = _gl.createBuffer();
             this.buffers.positions.door.push(tempPBuf);
             _gl.bindBuffer(_gl.ARRAY_BUFFER, tempPBuf);
             _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.door[i].vertices), _gl.STATIC_DRAW);
+            let tempNBuf = _gl.createBuffer();
+            this.buffers.normals.door.push(tempNBuf);
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, tempNBuf);
+            _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.door[i].normals), _gl.STATIC_DRAW);
+
         }
         //window
         this.buffers.positions.window = [];
+        this.buffers.normals.window=[];
+
         for(let i in this.window){
             let tempPBuf = _gl.createBuffer();
             this.buffers.positions.window.push(tempPBuf);
             _gl.bindBuffer(_gl.ARRAY_BUFFER, tempPBuf);
             _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.window[i].vertices), _gl.STATIC_DRAW);
+            let tempNBuf = _gl.createBuffer();
+            this.buffers.normals.window.push(tempNBuf);
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, tempNBuf);
+            _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.window[i].normals), _gl.STATIC_DRAW);
+
         }
         //wall
         this.buffers.positions.wall = [];
+        this.buffers.normals.wall=[];
+
         for(let i in this.wall){
             let tempPBuf = _gl.createBuffer();
             this.buffers.positions.wall.push(tempPBuf);
             _gl.bindBuffer(_gl.ARRAY_BUFFER, tempPBuf);
             _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.wall[i].vertices), _gl.STATIC_DRAW);
+            let tempNBuf = _gl.createBuffer();
+            this.buffers.normals.wall.push(tempNBuf);
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, tempNBuf);
+            _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.wall[i].normals), _gl.STATIC_DRAW);
+
         }
-   
+
     }
 
   draw(gl: GL, self: boolean = true): void {
@@ -105,40 +142,53 @@ export class House implements Drawable{//size = 9*7
     _gl.uniform4fv(gl.programInfo.uniformLocations.specularVectorLoc, new Float32Array(specularProduct));
     _gl.uniform1f(gl.programInfo.uniformLocations.shininessLoc, this.material.materialShininess);
 
-    _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(mat4()));
+    _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));
+    _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.normalMatrixLoc, false, flatten(this.rotateMatrix));
         //building
         _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
+        _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexNormal);
         for (let i in this.building) {
             _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.building[i]);
             _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-            _gl.drawArrays(_gl.TRIANGLE_FAN, 0, this.building[i].vertices.length / 3)
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.normals.building[i]);
+            _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexNormal, 3, _gl.FLOAT, false, 0, 0);
+            _gl.drawArrays(_gl.TRIANGLES, 0, this.building[i].vertices.length / 3)
         }
         //roof
         for (let i in this.roof) {
             _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.roof[i]);
             _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-            _gl.drawArrays(_gl.TRIANGLE_FAN, 0, this.roof[i].vertices.length / 3)
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.normals.roof[i]);
+            _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexNormal, 3, _gl.FLOAT, false, 0, 0);
+            _gl.drawArrays(_gl.TRIANGLES, 0, this.roof[i].vertices.length / 3)
         }
         //door
         for (let i in this.door) {
             _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.door[i]);
             _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-            _gl.drawArrays(_gl.TRIANGLE_FAN, 0, this.door[i].vertices.length / 3)
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.normals.door[i]);
+            _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexNormal, 3, _gl.FLOAT, false, 0, 0);
+            _gl.drawArrays(_gl.TRIANGLES, 0, this.door[i].vertices.length / 3)
         }
         //window
         for (let i in this.window) {
             _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.window[i]);
             _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-            _gl.drawArrays(_gl.TRIANGLE_FAN, 0, this.window[i].vertices.length / 3)
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.normals.window[i]);
+            _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexNormal, 3, _gl.FLOAT, false, 0, 0);
+            _gl.drawArrays(_gl.TRIANGLES, 0, this.window[i].vertices.length / 3)
         }
          //wall
          for (let i in this.wall) {
              _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.wall[i]);
              _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-             _gl.drawArrays(_gl.TRIANGLE_FAN, 0, this.wall[i].vertices.length / 3)
+             _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.normals.wall[i]);
+             _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexNormal, 3, _gl.FLOAT, false, 0, 0);
+              _gl.drawArrays(_gl.TRIANGLES, 0, this.wall[i].vertices.length / 3)
          }
 
          _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
+         _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexNormal);
 
     }
 }

@@ -18,6 +18,8 @@ let but = new ButterFly;
 but.translate(3,2);
 let ball = new Ellipsoid(30, 50, [0, 0, 0], '0xfffff'); ball.setMaterial(new MetalMaterial);
 let ground = new Ground([0, -20, 0], 100); ground.setMaterial(new CustomizedMaterial);
+let church=new Church([10, -20, 0]);church.setMaterial(new MetalMaterial);
+let house=new House([0, -20, 0]);house.setMaterial(new MetalMaterial);
 // ball.translate(50,1);
 //but.translate(10, 2);
 but.rotate(90, true, 4);//,ball,
@@ -35,7 +37,7 @@ _gl.addLights(l);
 _gl.switchLight(l);
 
 //场景对象添加
-_gl.addObjects(but, new House([0, -20, 0]), new Church([10, -20, 0]), ground);
+_gl.addObjects(but,church , house, ground);
 let stateButterFly = {
     butt: but,
     height: 10,
@@ -108,7 +110,7 @@ let camera = new Vue({
                 //蝴蝶下坠
                 if(camera.move){
                     stateButterFly.speedY += but.fall(lastTime, stateButterFly.speedX);
-                    but.moveForward(stateButterFly.speed * lastTime)    
+                    but.moveForward(stateButterFly.speed * lastTime)
                 }
                 if (camera.binded&&camera.fixed) {
                         c.translateC();
