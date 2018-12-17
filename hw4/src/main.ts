@@ -15,6 +15,7 @@ import { Light } from './modules/scene/Light';
 
 var _gl = new GL;
 let but = new ButterFly;
+but.translate(3,2);
 let ball = new Ellipsoid(30, 50, [0, 0, 0], '0xfffff'); ball.setMaterial(new MetalMaterial);
 let ground = new Ground([0, -20, 0], 100); ground.setMaterial(new CustomizedMaterial);
 // ball.translate(50,1);
@@ -23,7 +24,7 @@ but.rotate(90, true, 4);//,ball,
 
 //初始相机初始化
 let camera1 = new Camera;
-let [radius, theta, phi] = [500, 0, 45]
+let [radius, theta, phi] = [10, 0, 45]
 _gl.addCameras(camera1);
 _gl.switchCamera(camera1);
 camera1.view(radius, theta, phi);
@@ -62,8 +63,9 @@ let camera = new Vue({
             theta: theta,
             phi: phi,
             radius: radius,
-            animeHandle: 0,
-            binding:true
+            move:false,
+            fixed:false,
+            binded:false
         }
     },
     watch: {
@@ -92,7 +94,6 @@ let camera = new Vue({
             let degree = 0, flap = 1;
 
             let c = this.camera;
-            c.bind(but);
             function _draw(now: number) {
                 now *= 0.001;
                 let lastTime = now - then;
@@ -105,16 +106,20 @@ let camera = new Vue({
                 but.flap(relatedDegree);
 
                 //蝴蝶下坠
-                stateButterFly.speedY += but.fall(lastTime, stateButterFly.speedX);
-                but.moveForward(stateButterFly.speed * lastTime)
+                if(camera.move){
+                    stateButterFly.speedY += but.fall(lastTime, stateButterFly.speedX);
+                    but.moveForward(stateButterFly.speed * lastTime)    
+                }
+                if (camera.binded&&camera.fixed) {
+                        c.translateC();
+                }
+                else
+                    c.view(camera.radius, camera.theta, camera.phi);
 
-                if(camera.binding)
-                   c.translateC();
-                else c.view(camera.radius, camera.theta, camera.phi);
                 _gl.drawScene();
                 then = now;
                 degree += relatedDegree;
-                camera.animeHandle = requestAnimationFrame(_draw);
+                requestAnimationFrame(_draw);
             }
             function _draw2(now: number) {
                 now *= 0.001;
@@ -133,22 +138,32 @@ let camera = new Vue({
                 degree += relatedDegree;
                 camera.animeHandle = requestAnimationFrame(_draw2);
             }
-            this.animeHandle = requestAnimationFrame(_draw);
+            requestAnimationFrame(_draw);
+        },
+        move2(){
+            this.move=true;
         },
         stop() {
-            cancelAnimationFrame(this.animeHandle);
-            this.animeHandle = 0;
+            this.move = false;
         },
-        fixation(){
-           this.binding=false;
+        fix(){
+           this.fixed=true;
         },
-        switching(){
-           this.binding=true;
+        unfix(){
+           this.fixed=false;
+        },
+        bind(){
+            this.camera.bind(but);
+            this.binded=true;
+        },
+        unbind(){
+            this.camera.release();
+            this.binded=false;
         }
     }
 })
 // but.rotate(-30, true, 4);
-//camera.play();
+camera.play();
 let mousedown = false;
 let ele = document.getElementById('gl-canvas');
 if (ele) {

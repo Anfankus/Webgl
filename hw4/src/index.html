@@ -136,16 +136,18 @@ void main()
 </head>
 
 <body>
-    <canvas id="gl-canvas" width="1024" height="1024" style="border: 1px solid black;float: left;">
+    <canvas id="gl-canvas" width="800" height="800" style="border: 1px solid black;float: left;">
         Oops ... your browser doesn't support the HTML5 canvas element
     </canvas>
     <div id="camera" class="app">
         <div>
             <strong>视图</strong>
-            <button v-if="!animeHandle" @click="play">播放</button>
-            <button v-else @click="stop">停止</button>
-            <button v-if="binding" @click="fixation">移动视角</button>
-            <button v-else @click="switching">固定视角</button>
+            <button v-if="move" @click="stop">停止</button>
+            <button v-else @click="move2">运动</button>
+            <button v-if="binded" @click="unbind">解绑</button>
+            <button v-else @click="bind">绑定</button>
+            <button v-if="fixed" @click="unfix">移动视角</button>
+            <button v-else @click="fix">固定视角</button>
         </div>
         <div>
             <span>左右</span>
