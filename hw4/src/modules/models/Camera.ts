@@ -37,11 +37,7 @@ export default class Camera {
 
         let at,up,eye;
         if(this.observeObject){
-            radius=7.06;
-            // at=this.observeObject.position.slice(0,3);
-            // up=this.observeObject.direction.slice(0,3);
-            // if(phi<-90||phi>90)
-            //   up=vec3(this.observeObject.direction[0],-this.observeObject.direction[1],-this.observeObject.direction[2]);
+            radius=10;
             at = this.observeObject.position.slice(0,3);
             up = vec3(0.0, Math.cos(Util.radians(phi)), 0.0);
 
@@ -61,7 +57,7 @@ export default class Camera {
     public bind(ob: Translatable) {
         this.ret=true;
         this.observeObject = ob;
-        this.baseEye=vec4(ob.position[0],ob.position[1]-5,ob.position[2]-5,1);
+        this.baseEye=vec4(ob.position[0],ob.position[1]-10,ob.position[2]-10,1);
         this.at=vec3(ob.position[0],ob.position[1],ob.position[2]);
     }
     public release(){

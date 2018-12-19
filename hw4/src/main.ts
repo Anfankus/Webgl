@@ -12,14 +12,14 @@ import { NoneMaterial } from './modules/materials/NoneMaterial';
 import { MetalMaterial } from './modules/materials/MetalMaterial';
 import { CustomizedMaterial } from './modules/materials/CustomizedMaterial';
 import { Light } from './modules/scene/Light';
+import { Sky } from './modules/models/Sky';
 
-var _gl = new GL;
-let but = new ButterFly;
-but.translate(3,2);
+let but = new ButterFly;but.translate(3,2);
 let ball = new Ellipsoid(30, 50, [0, 0, 0], '0xfffff'); ball.setMaterial(new MetalMaterial);
-let ground = new Ground([0, -20, 0], 100); ground.setMaterial(new CustomizedMaterial);
+let ground = new Ground([0, -20, 0], 300); ground.setMaterial(new CustomizedMaterial);
 let church=new Church([10, -20, 0]);church.setMaterial(new MetalMaterial);
 let house=new House([0, -20, 0]);house.setMaterial(new MetalMaterial);
+let sky=new Sky;
 // ball.translate(50,1);
 //but.translate(10, 2);
 but.rotate(90, true, 4);//,ball,
@@ -27,21 +27,14 @@ but.rotate(90, true, 4);//,ball,
 //初始相机初始化
 let camera1 = new Camera;
 let [radius, theta, phi] = [10, 0, 45]
-_gl.addCameras(camera1);
-_gl.switchCamera(camera1);
 camera1.view(radius, theta, phi);
 
-//光源
-let l = new Light;
-_gl.addLights(l);
-_gl.switchLight(l);
 
 //场景对象添加
-_gl.addObjects(but,church , house, ground);
 let stateButterFly = {
     butt: but,
     height: 10,
-    speedX: 5,
+    speedX: 2,
     speedY: 0,
     get speed(): number {
         return Math.sqrt(this.speedX ** 2 + this.speedY ** 2)
@@ -58,16 +51,29 @@ let stateButterFly = {
 }
 let camera = new Vue({
     el: '#camera',
+    mounted(){
+        //构造画布
+        var _gl = new GL;
+        _gl.addCameras(camera1);
+        _gl.switchCamera(camera1);
+        //光源
+        let l = new Light;
+        _gl.addLights(l);
+        _gl.switchLight(l);
+        _gl.addObjects(but,church , house, ground,sky);
+        this.glOb=_gl;
+        this.play();
+    },
     data() {
         return {
             camera: camera1,
-            glOb: _gl,
+            glOb: null,
             theta: theta,
             phi: phi,
             radius: radius,
             move:false,
             fixed:false,
-            binded:false
+            bound:false
         }
     },
     watch: {
@@ -94,6 +100,7 @@ let camera = new Vue({
             let then = performance.now() * 0.001, start = then;
             let range = 45 * 2;
             let degree = 0, flap = 1;
+            let gl=this.glOb;
 
             let c = this.camera;
             function _draw(now: number) {
@@ -112,13 +119,17 @@ let camera = new Vue({
                     stateButterFly.speedY += but.fall(lastTime, stateButterFly.speedX);
                     but.moveForward(stateButterFly.speed * lastTime)
                 }
-                if (camera.binded&&camera.fixed) {
+                if (camera.bound&&camera.fixed) {
                         c.translateC();
                 }
                 else
                     c.view(camera.radius, camera.theta, camera.phi);
 
-                _gl.drawScene();
+                //太阳运动
+                gl.currentLight.rotate(lastTime*10,true,7)
+                sky.sunset(now*10);
+
+                gl.drawScene();
                 then = now;
                 degree += relatedDegree;
                 requestAnimationFrame(_draw);
@@ -134,38 +145,30 @@ let camera = new Vue({
                 }
                 but.flap(relatedDegree);
 
-                _gl.currentLight.translate(lastTime * 10, 3);
-                _gl.drawScene();
+                gl.currentLight.translate(lastTime * 10, 3);
+                gl.drawScene();
                 then = now;
                 degree += relatedDegree;
                 camera.animeHandle = requestAnimationFrame(_draw2);
             }
             requestAnimationFrame(_draw);
         },
-        move2(){
-            this.move=true;
+        switchState() {
+            this.move = !this.move;
         },
-        stop() {
-            this.move = false;
+        switchFixed(){
+           this.fixed=!this.fixed;
         },
-        fix(){
-           this.fixed=true;
-        },
-        unfix(){
-           this.fixed=false;
-        },
-        bind(){
-            this.camera.bind(but);
-            this.binded=true;
-        },
-        unbind(){
-            this.camera.release();
-            this.binded=false;
+        switchBound(){
+            if(this.bound){
+                this.camera.release();
+            }else{
+                this.camera.bind(but);
+            }
+            this.bound=!this.bound;
         }
     }
 })
-// but.rotate(-30, true, 4);
-camera.play();
 let mousedown = false;
 let ele = document.getElementById('gl-canvas');
 if (ele) {
@@ -214,25 +217,33 @@ if (ele) {
         }
         switch (e.key) {
             case 'w':
-                _gl.currentLight.translate(20, 3);
+            camera.glOb.currentLight.translate(20, 3);
                 break;
             case 's':
-                _gl.currentLight.translate(-20, 3);
+            camera.glOb.currentLight.translate(-20, 3);
                 break;
             case 'a':
-                _gl.currentLight.translate(-20, 1);
+            camera.glOb.currentLight.translate(-20, 1);
                 break;
             case 'd':
-                _gl.currentLight.translate(20, 1);
+            camera.glOb.currentLight.translate(20, 1);
                 break;
             case 'q':
-                _gl.currentLight.translate(-20, 2);
+            camera.glOb.currentLight.translate(-20, 2);
                 break;
             case 'e':
-                _gl.currentLight.translate(20, 2);
+            camera.glOb.currentLight.translate(20, 2);
                 break;
+            case 'p':
+            camera.switchState();
+            break;
+            case 'b':
+            camera.switchBound();
+            break;
+            case 'f':
+            camera.switchFixed()
 
         }
     };
 }
-_gl.drawScene();
+camera.glOb.drawScene();

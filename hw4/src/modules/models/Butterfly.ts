@@ -102,7 +102,7 @@ export class ButterFly extends Translatable implements Drawable {
         this.RightWing.rotate(-degree, true, 5, false)
     }
     public fall(lastTime: number, speedX: number): number {
-        let decrease = -9.8 * lastTime;
+        let decrease = -9.8 * lastTime/5;
         let x = Math.sqrt(this.direction[0] ** 2 + this.direction[2] ** 2);
         let y = this.direction[1];
         let a = speedX;
@@ -117,7 +117,7 @@ export class ButterFly extends Translatable implements Drawable {
         this.translate(distance, 0);
     }
     public fly(speedX: number): number {
-        let decrease = 5;
+        let decrease = 5/5;
         let x = Math.sqrt(this.direction[0] ** 2 + this.direction[2] ** 2);
         let y = this.direction[1];
         let a = speedX
@@ -141,8 +141,8 @@ export class ButterFly extends Translatable implements Drawable {
             _gl.gl.texParameteri( _gl.gl.TEXTURE_2D, _gl.gl.TEXTURE_MAG_FILTER, _gl.gl.NEAREST );
             _gl.gl.bindTexture(_gl.gl.TEXTURE_2D,null);
         }
-        
+
     }
-    
+
 
 }

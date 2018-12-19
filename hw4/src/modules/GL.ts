@@ -1,4 +1,4 @@
-import {flatten} from './MV'
+import { flatten } from './MV'
 import Drawable from './interface/Drawable';
 import Camera from './models/Camera';
 import { Light } from './scene/Light';
@@ -9,44 +9,43 @@ export default class GL {
 
     public objects: Array<Drawable>;
     public cameras: Array<Camera>;
-    public lights:Array<Light>;
+    public lights: Array<Light>;
 
-    public currentCamera:Camera;
-    public currentLight:Light;
+    public currentCamera: Camera;
+    public currentLight: Light;
 
     constructor() {
         let canvas = document.getElementById("gl-canvas");
         this.gl = WebGLUtils.setupWebGL(canvas);
         if (!this.gl) { alert("WebGL isn't available"); }
-        this.gl.viewport(0, 0, canvas.offsetWidth, canvas.offsetHeight);
         this.gl.clearColor(1.0, 1.0, 1.0, 1.0);
         this.gl.enable(this.gl.DEPTH_TEST);
-        
+
         let shaderPro = initShaders(this.gl, "vertex-shader", "fragment-shader");
         this.programInfo = {
             program: shaderPro,
             attribLocations: {
                 vertexPosition: this.gl.getAttribLocation(shaderPro, 'vPosition'),
-                vertexNormal:this.gl.getAttribLocation(shaderPro,'vNormal')
+                vertexNormal: this.gl.getAttribLocation(shaderPro, 'vNormal')
             },
             uniformLocations: {
                 modelViewMatrix: this.gl.getUniformLocation(shaderPro, 'uModelMatrix'),
                 cameraMatrixLoc: this.gl.getUniformLocation(shaderPro, 'uCameraMatrix'),
                 projectionMatrixLoc: this.gl.getUniformLocation(shaderPro, 'uProjectionMatrix'),
-                normalMatrixLoc:this.gl.getUniformLocation(shaderPro,'uNormalMatrix'),
+                normalMatrixLoc: this.gl.getUniformLocation(shaderPro, 'uNormalMatrix'),
 
-                ambientVectorLoc:this.gl.getUniformLocation(shaderPro,'ambientProduct'),
-                diffuseVectorLoc:this.gl.getUniformLocation(shaderPro,'diffuseProduct'),
-                specularVectorLoc:this.gl.getUniformLocation(shaderPro,'specularProduct'),
-                lightVectorLoc:this.gl.getUniformLocation(shaderPro,'lightPosition'),
-                shininessLoc:this.gl.getUniformLocation(shaderPro,'shininess')
+                ambientVectorLoc: this.gl.getUniformLocation(shaderPro, 'ambientProduct'),
+                diffuseVectorLoc: this.gl.getUniformLocation(shaderPro, 'diffuseProduct'),
+                specularVectorLoc: this.gl.getUniformLocation(shaderPro, 'specularProduct'),
+                lightVectorLoc: this.gl.getUniformLocation(shaderPro, 'lightPosition'),
+                shininessLoc: this.gl.getUniformLocation(shaderPro, 'shininess')
             },
         };
         this.gl.useProgram(this.programInfo.program);
 
-        this.objects=[];
-        this.lights=[];
-        this.cameras=[];
+        this.objects = [];
+        this.lights = [];
+        this.cameras = [];
     }
     public addObjects(...obs: Array<Drawable>) {
         for (let i of obs) {
@@ -59,8 +58,8 @@ export default class GL {
             this.cameras.push(i);
         }
     }
-    public switchCamera(camera:Camera){
-        this.currentCamera=camera;
+    public switchCamera(camera: Camera) {
+        this.currentCamera = camera;
     }
     public addLights(...obs: Array<Light>) {
         for (let i of obs) {
@@ -68,19 +67,20 @@ export default class GL {
             this.lights.push(i);
         }
     }
-    public switchLight(light:Light){
-        this.currentLight=light;
+    public switchLight(light: Light) {
+        this.currentLight = light;
     }
 
     public drawScene() {
         if (this.objects.length <= 0)
             throw '场景内没有物体';
-        else if(this.cameras.length<=0||!this.currentCamera){
+        else if (this.cameras.length <= 0 || !this.currentCamera) {
             throw '未指定摄像机';
         }
-        else if(this.lights.length<=0||!this.currentLight){
+        else if (this.lights.length <= 0 || !this.currentLight) {
             throw '未指定光源';
-        }{
+        } {
+            this.resize();
             this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
             this.gl.clearDepth(1.0);
 
@@ -91,9 +91,21 @@ export default class GL {
 
 
             for (let i of this.objects) {
-              i.draw(this, true);
+                i.draw(this, true);
             }
         }
+    }
+    private resize() {
+        var displayWidth = this.gl.canvas.clientWidth;
+        var displayHeight = this.gl.canvas.clientHeight;
+        let val=Math.min(displayWidth,displayHeight)
+        if (this.gl.canvas.width != val ||
+            this.gl.canvas.height != val) {
+            this.gl.canvas.width = val;
+            this.gl.canvas.height = val;
+        }
+        this.gl.canvas.style.height=this.gl.canvas.style.width=`${val}px`;
+        this.gl.viewport(0, 0, val, val);
     }
 }
 
