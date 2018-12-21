@@ -95,6 +95,21 @@ export default class GL {
             }
         }
     }
+    public impactChecking(target:Drawable):boolean{
+        if(this.objects.indexOf(target)<0){
+            throw '无法检测到此对象';
+        }
+        let ret=false;
+        for(let i of this.objects){
+            if(i===target){
+                continue
+            }
+            else{
+
+            }
+        }
+        return ret;
+    }
     private resize() {
         var displayWidth = this.gl.canvas.clientWidth;
         var displayHeight = this.gl.canvas.clientHeight;

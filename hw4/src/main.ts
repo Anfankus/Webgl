@@ -16,7 +16,7 @@ import { Sky } from './modules/models/Sky';
 
 let but = new ButterFly;but.translate(3,2);
 let ball = new Ellipsoid(30, 50, [0, 0, 0], '0xfffff'); ball.setMaterial(new MetalMaterial);
-let ground = new Ground([0, -20, 0], 300); ground.setMaterial(new CustomizedMaterial);
+let ground = new Ground([0, -20, 0], 500); ground.setMaterial(new CustomizedMaterial);
 let church=new Church([10, -20, 0]);church.setMaterial(new MetalMaterial);
 let house=new House([0, -20, 0]);house.setMaterial(new MetalMaterial);
 let sky=new Sky;
