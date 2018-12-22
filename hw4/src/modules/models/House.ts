@@ -6,10 +6,13 @@ import {Material} from "../interface/Material";
 import {Util} from "../Util";
 import {NoneMaterial} from "../materials/NoneMaterial";
 import { Translatable } from "../interface/Translatable";
+import Collisible from "../interface/Collisible";
+import Collision, { ImpactType } from "../Collision/Collision";
 
-export class House extends Translatable implements Drawable{//size = 9*7
-  material: Material;
-  setMaterial(m: Material) {
+export class House extends Translatable implements Drawable,Collisible{//size = 9*7
+    collision:Collision;
+    material: Material;
+    setMaterial(m: Material) {
         this.material=m;
     }
     buffers: any;
@@ -46,6 +49,8 @@ export class House extends Translatable implements Drawable{//size = 9*7
             new Cube(9,2,0.2,[x-1,y,z-5]),
             new Cube(0.2,2,6,[x+7.7999,y+0.00001,z+0.9999]),
         ];
+        this.collision=new Collision(ImpactType.ball,4);
+        this.collision.setPosition(position);
     }
     initBuffer(gl: GL): void {
         let _gl = gl.gl;

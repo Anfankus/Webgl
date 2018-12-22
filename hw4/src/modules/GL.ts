@@ -2,12 +2,14 @@ import { flatten } from './MV'
 import Drawable from './interface/Drawable';
 import Camera from './models/Camera';
 import { Light } from './scene/Light';
+import Collisible from './interface/Collisible';
 
 export default class GL {
     public gl: WebGLRenderingContext;
     public programInfo: any;
 
     public objects: Array<Drawable>;
+    public collisions:Collisible[];
     public cameras: Array<Camera>;
     public lights: Array<Light>;
 
@@ -46,12 +48,16 @@ export default class GL {
         this.objects = [];
         this.lights = [];
         this.cameras = [];
+        this.collisions=[];
     }
     public addObjects(...obs: Array<Drawable>) {
         for (let i of obs) {
             this.objects.push(i);
             i.initBuffer(this);
         }
+    }
+    public addCollisible(...obs:Collisible[]){
+        this.collisions.push(...obs);
     }
     public addCameras(...obs: Array<Camera>) {
         for (let i of obs) {
@@ -95,17 +101,18 @@ export default class GL {
             }
         }
     }
-    public impactChecking(target:Drawable):boolean{
-        if(this.objects.indexOf(target)<0){
+    public impactChecking(target:Collisible):boolean{
+        if(this.collisions.indexOf(target)<0){
             throw '无法检测到此对象';
         }
         let ret=false;
-        for(let i of this.objects){
+        for(let i of this.collisions){
             if(i===target){
                 continue
             }
-            else{
-
+            else if(target.collision.ifCollide(i.collision)){
+                ret=true;
+                break;
             }
         }
         return ret;

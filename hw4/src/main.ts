@@ -13,16 +13,13 @@ import { MetalMaterial } from './modules/materials/MetalMaterial';
 import { CustomizedMaterial } from './modules/materials/CustomizedMaterial';
 import { Light } from './modules/scene/Light';
 import { Sky } from './modules/models/Sky';
-
-let but = new ButterFly;but.translate(3,2);
+//
+let but = new ButterFly;but.translate(-10,1);but.translate(5,2);but.translate(-2,3);but.rotate(90,true,5);but.rotate(90, true, 4);
 let ball = new Ellipsoid(30, 50, [0, 0, 0], '0xfffff'); ball.setMaterial(new MetalMaterial);
 let ground = new Ground([0, -20, 0], 500); ground.setMaterial(new CustomizedMaterial);
 let church=new Church([10, -20, 0]);church.setMaterial(new MetalMaterial);
 let house=new House([0, -20, 0]);house.setMaterial(new MetalMaterial);
 let sky=new Sky;
-// ball.translate(50,1);
-//but.translate(10, 2);
-but.rotate(90, true, 4);//,ball,
 
 //初始相机初始化
 let camera1 = new Camera;
@@ -56,11 +53,12 @@ let camera = new Vue({
         var _gl = new GL;
         _gl.addCameras(camera1);
         _gl.switchCamera(camera1);
-        //光源
+        //光源,groundchurch
         let l = new Light;
         _gl.addLights(l);
         _gl.switchLight(l);
         _gl.addObjects(but,church , house, ground,sky);
+        _gl.addCollisible(but,house,church,ground);
         this.glOb=_gl;
         this.play();
     },
@@ -97,6 +95,7 @@ let camera = new Vue({
 
         },
         play() {
+            let self=this;
             let then = performance.now() * 0.001, start = then;
             let range = 45 * 2;
             let degree = 0, flap = 1;
@@ -114,7 +113,7 @@ let camera = new Vue({
                 }
                 but.flap(relatedDegree);
 
-                //蝴蝶下坠
+                //蝴蝶下坠并前进
                 if(camera.move){
                     stateButterFly.speedY += but.fall(lastTime, stateButterFly.speedX);
                     but.moveForward(stateButterFly.speed * lastTime)
@@ -129,27 +128,14 @@ let camera = new Vue({
                 gl.currentLight.rotate(lastTime*10,true,7)
                 sky.sunset(now*10);
 
+                //碰撞检测
+                if(gl.impactChecking(but)){
+                    self.move?self.switchState():true;
+                }
                 gl.drawScene();
                 then = now;
                 degree += relatedDegree;
                 requestAnimationFrame(_draw);
-            }
-            function _draw2(now: number) {
-                now *= 0.001;
-                let lastTime = now - then;
-                //翅膀扇动
-                let relatedDegree = (lastTime * (flap + 2)) * flap * 50;
-                if (Math.abs(degree + relatedDegree) > range / 2) {
-                    relatedDegree *= -1;
-                    flap *= -1;
-                }
-                but.flap(relatedDegree);
-
-                gl.currentLight.translate(lastTime * 10, 3);
-                gl.drawScene();
-                then = now;
-                degree += relatedDegree;
-                camera.animeHandle = requestAnimationFrame(_draw2);
             }
             requestAnimationFrame(_draw);
         },
@@ -246,4 +232,3 @@ if (ele) {
         }
     };
 }
-camera.glOb.drawScene();

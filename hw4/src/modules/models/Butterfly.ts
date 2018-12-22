@@ -9,8 +9,12 @@ import { NoneMaterial } from '../materials/NoneMaterial';
 import { Ellipsoid } from './Basis/Ellipsoid';
 import { HalfWing } from './Basis/HalfWing';
 import { ButterFlyBodyMaterial } from '../materials/ButterFlyBodyMaterial';
+import Collision, { ImpactType } from '../Collision/Collision';
+import Collisible from '../interface/Collisible';
 
-export class ButterFly extends Translatable implements Drawable {
+export class ButterFly extends Translatable implements Drawable,Collisible {
+
+    collision:Collision;
     material: Material;
     setMaterial(m: Material) {
         this.material = m;
@@ -39,6 +43,7 @@ export class ButterFly extends Translatable implements Drawable {
             -0.008, 0.3, 0, -0.15, 0.6, 0,
             0.008, 0.3, 0, 0.15, 0.6, 0
         ];
+        this.collision=new Collision(ImpactType.ball,1,this);
     }
     public initBuffer(gl: GL) {
         let _gl = gl.gl;

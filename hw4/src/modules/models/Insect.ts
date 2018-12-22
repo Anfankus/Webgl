@@ -4,7 +4,10 @@ import {flatten} from '../MV'
 import Drawable from '../interface/Drawable';
 import { Material } from '../interface/Material';
 import { Ellipsoid } from './Basis/Ellipsoid';
-export class Insect extends Translatable implements Drawable{
+import Collision from '../Collision/Collision';
+import Collisible from '../interface/Collisible';
+export class Insect extends Translatable implements Drawable,Collisible{
+    collision:Collision;
     material:Material;
     setMaterial(m: Material) {
         throw new Error("Method not implemented.");

@@ -6,7 +6,10 @@ import { NoneMaterial } from "../materials/NoneMaterial";
 import {Util} from "../Util";
 import {CustomizedMaterial} from "../materials/CustomizedMaterial";
 import { MetalMaterial } from "../materials/MetalMaterial";
-export class Ground implements Drawable {
+import Collisible from "../interface/Collisible";
+import Collision, { ImpactType } from "../Collision/Collision";
+export class Ground implements Drawable,Collisible{
+    collision:Collision;
     material: Material;
     buffers: any;
 
@@ -31,6 +34,8 @@ export class Ground implements Drawable {
             0,1,0,
             0,1,0
         ];
+        this.collision=new Collision(ImpactType.flat,size);
+        this.collision.setPosition(position);
     }
     setMaterial(m:Material) {
         this.material=m;

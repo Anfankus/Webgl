@@ -7,7 +7,10 @@ import { Util } from "../Util";
 import { CustomizedMaterial } from "../materials/CustomizedMaterial";
 import { Cube, Tri_prism, Rect_pyramid, HalfCircle3D } from "./Basis/Basis";
 import { Translatable } from "../interface/Translatable";
-export class Church extends Translatable implements Drawable {
+import Collision, { ImpactType } from "../Collision/Collision";
+import Collisible from "../interface/Collisible";
+export class Church extends Translatable implements Drawable,Collisible {
+    collision:Collision;
     material: Material;
     setMaterial(m: Material) {
         this.material = m;
@@ -53,6 +56,8 @@ export class Church extends Translatable implements Drawable {
             new Cube(0.6, 0.8, 0.01, [x + 3.95, y + 4, z + 1.0005]),
             new HalfCircle3D(0.3, 0.3, [x + 3.95, y + 4.8, z + 1.000001]),
         ]
+        this.collision=new Collision(ImpactType.ball,3);
+        this.collision.setPosition(position);
     }
     initBuffer(gl: GL): void {
         let _gl = gl.gl;
