@@ -11,6 +11,7 @@ uniform mat4 uCameraMatrix;
 uniform mat4 uProjectionMatrix;
 uniform mat4 uModelMatrix;
 uniform mat4 uNormalMatrix;
+uniform int ifNormalize;
 
 uniform vec4 lightPosition;
 void main()
@@ -19,7 +20,10 @@ void main()
     vec4 EyePosition= uCameraMatrix *ModelPosition;
     L = normalize( lightPosition.xyz - ModelPosition.xyz );
     E =  -normalize(EyePosition.xyz);
-    N = normalize( (uNormalMatrix*vNormal).xyz);
+    if(ifNormalize==1)
+        N = normalize( (uNormalMatrix*vNormal).xyz);
+    else
+        N = (uNormalMatrix*vNormal).xyz;
 
     gl_Position = uProjectionMatrix *EyePosition;
 
@@ -136,6 +140,8 @@ void main()
         #gl-canvas {
             display: block;
             margin: 0 auto;
+            min-width: 1200px;
+            min-height: 675px;
             width: 100vw;
             height:100vh;
         }

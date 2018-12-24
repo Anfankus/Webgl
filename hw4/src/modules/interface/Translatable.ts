@@ -5,7 +5,8 @@ export enum transType {
     rotateX, rotateY, rotateZ,
     rotateSelfX, rotateSelfY, rotateSelfZ,
     rotateMain, rotateSec, rotateDir, rotateFall,
-    translateX, translateY, translateZ, translateMain,
+    translateX, translateY, translateZ,
+    translateMain,translateSecondary,
     zoom
 }
 export abstract class Translatable {
@@ -128,12 +129,17 @@ export abstract class Translatable {
     /**
      *
      * @param distance 距离
-     * @param direction 0：主方向；1：x轴方向；2：y轴方向；3：z轴方向
+     * @param direction 0：主方向；1：x轴方向；2：y轴方向；3：z轴方向 ;4:副轴方向
      * @param related 平移是否相对于上次绘制
      */
     public translate(distance: number, direction: number, related = true) {
         let x_dis, y_dis, z_dis;
-        let currentTrans = [transType.translateMain, transType.translateX, transType.translateY, transType.translateZ][direction];
+        let currentTrans = [
+            transType.translateMain,
+            transType.translateX,
+            transType.translateY,
+            transType.translateZ,
+            transType.translateSecondary][direction];
         let ret = false;
         if (related || this.lastTrans !== currentTrans && this.lastTrans !== transType.none) {
             ret = true;
@@ -144,14 +150,23 @@ export abstract class Translatable {
             this.basePosition = this.position;
         }
         switch (currentTrans) {
+            case transType.translateSecondary:
+                let eachStepSecondary = distance / Math.sqrt(
+                    this.axisSecondary[0] * this.axisSecondary[0]
+                    + this.axisSecondary[1] * this.axisSecondary[1]
+                    + this.axisSecondary[2] * this.axisSecondary[2])
+                x_dis = eachStepSecondary * this.axisSecondary[0];
+                y_dis = eachStepSecondary * this.axisSecondary[1];
+                z_dis = eachStepSecondary * this.axisSecondary[2];
+                break;
             case transType.translateMain:
-                let eachStep = distance / Math.sqrt(
+                let eachStepMain = distance / Math.sqrt(
                     this.direction[0] * this.direction[0]
                     + this.direction[1] * this.direction[1]
                     + this.direction[2] * this.direction[2])
-                x_dis = eachStep * this.direction[0];
-                y_dis = eachStep * this.direction[1];
-                z_dis = eachStep * this.direction[2];
+                x_dis = eachStepMain * this.direction[0];
+                y_dis = eachStepMain * this.direction[1];
+                z_dis = eachStepMain * this.direction[2];
                 break;
             case transType.translateX:
                 x_dis = distance;

@@ -1,6 +1,6 @@
 import { Translatable } from '../interface/Translatable';
 import Drawable from '../interface/Drawable'
-import { flatten, vec4, mult } from '../MV'
+import { flatten, vec4, mult, mat4, translate } from '../MV'
 import GL from '../GL';
 import { Util } from '../Util';
 import { Light } from '../scene/Light';
@@ -11,9 +11,10 @@ import { HalfWing } from './Basis/HalfWing';
 import { ButterFlyBodyMaterial } from '../materials/ButterFlyBodyMaterial';
 import Collision, { ImpactType } from '../Collision/Collision';
 import Collisible from '../interface/Collisible';
+import Shaded from '../interface/Shaded';
 
-export class ButterFly extends Translatable implements Drawable,Collisible {
-
+export class ButterFly extends Translatable implements Drawable,Collisible,Shaded {
+    shaded: boolean;
     collision:Collision;
     material: Material;
     setMaterial(m: Material) {
@@ -81,15 +82,49 @@ export class ButterFly extends Translatable implements Drawable,Collisible {
 
         //body
         this.body.draw(gl);
-        //_gl.drawArrays(_gl.LINES, 0, this.body.vertices.length / 3)
-        //_gl.drawArrays(_gl.TRIANGLE_STRIP, 0, this.body.vertices.length / 3)
+        //eyes
         for (let i of this.eyes) {
             i.draw(gl, false);
         }
         //wings
         this.LeftWing.draw(gl);
         this.RightWing.draw(gl);
+        if(this.shaded){
+            this.drawShadow(gl);
+        }
+
     }
+    setShaded(): void {
+        this.shaded=true;
+    }
+    clearShaded():void{
+        this.shaded=false;
+    }
+    drawShadow(gl: GL): void {
+        let _gl=gl.gl;
+        let transMatrix = mat4();
+        transMatrix =mult(translate(...Util.Mat4Vec(mat4(-1),gl.currentLight.position)),this.modelMatrix);
+        let m=mat4();
+        m[3][3]=0;
+        m[3][1]=-1/(gl.currentLight.position[1]-0.01);
+        transMatrix=mult(m,transMatrix);
+        transMatrix = mult(translate(...gl.currentLight.position), transMatrix);
+        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(transMatrix));
+
+        _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.lines);
+        _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
+        _gl.drawArrays(_gl.LINES, 0, this.lines.length / 3);
+        _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
+
+        //body
+        this.body.drawShadow(gl);
+        //wings
+        this.LeftWing.drawShadow(gl);
+        this.RightWing.drawShadow(gl);
+
+    }
+
     public rotate(delta: number, related = true, axisType = 0): boolean {
         this.body.rotate(delta, related, axisType);
         this.LeftWing.rotate(delta, related, axisType);

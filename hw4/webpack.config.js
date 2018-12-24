@@ -4,7 +4,7 @@ module.exports = {
     mode: 'development',
     entry: './src/main.ts',
     output: {
-        filename: 'main.js',
+        filename: 'main.[hash].js',
         path: path.resolve(__dirname, 'dist')
     },
     devtool:'source-map',
@@ -23,7 +23,7 @@ module.exports = {
         rules: [{
             test: /\.ts$/,
             exclude: /node_modules/,
-            use: "awesome-typescript-loader"  
+            use: "awesome-typescript-loader"
         }]
     },
     resolve: {

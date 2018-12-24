@@ -4,7 +4,7 @@ import { mat4, flatten } from "../MV";
 import { Material } from "../interface/Material";
 import { NoneMaterial } from "../materials/NoneMaterial";
 import {Util} from "../Util";
-import {CustomizedMaterial} from "../materials/CustomizedMaterial";
+import {GroundMaterial} from "../materials/GroundMaterial";
 import { MetalMaterial } from "../materials/MetalMaterial";
 import Collisible from "../interface/Collisible";
 import Collision, { ImpactType } from "../Collision/Collision";

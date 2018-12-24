@@ -3,6 +3,7 @@ import Drawable from './interface/Drawable';
 import Camera from './models/Camera';
 import { Light } from './scene/Light';
 import Collisible from './interface/Collisible';
+import Shaded from './interface/Shaded';
 
 export default class GL {
     public gl: WebGLRenderingContext;
@@ -10,6 +11,7 @@ export default class GL {
 
     public objects: Array<Drawable>;
     public collisions:Collisible[];
+    public shaded:Shaded[];
     public cameras: Array<Camera>;
     public lights: Array<Light>;
 
@@ -22,6 +24,7 @@ export default class GL {
         if (!this.gl) { alert("WebGL isn't available"); }
         this.gl.clearColor(1.0, 1.0, 1.0, 1.0);
         this.gl.enable(this.gl.DEPTH_TEST);
+        this.resize();
 
         let shaderPro = initShaders(this.gl, "vertex-shader", "fragment-shader");
         this.programInfo = {
@@ -40,7 +43,9 @@ export default class GL {
                 diffuseVectorLoc: this.gl.getUniformLocation(shaderPro, 'diffuseProduct'),
                 specularVectorLoc: this.gl.getUniformLocation(shaderPro, 'specularProduct'),
                 lightVectorLoc: this.gl.getUniformLocation(shaderPro, 'lightPosition'),
-                shininessLoc: this.gl.getUniformLocation(shaderPro, 'shininess')
+                shininessLoc: this.gl.getUniformLocation(shaderPro, 'shininess'),
+
+                ifNormalizeLoc:this.gl.getUniformLocation(shaderPro, 'ifNormalize')
             },
         };
         this.gl.useProgram(this.programInfo.program);
@@ -49,6 +54,7 @@ export default class GL {
         this.lights = [];
         this.cameras = [];
         this.collisions=[];
+        this.shaded=[];
     }
     public addObjects(...obs: Array<Drawable>) {
         for (let i of obs) {
@@ -58,6 +64,9 @@ export default class GL {
     }
     public addCollisible(...obs:Collisible[]){
         this.collisions.push(...obs);
+    }
+    public addShaded(...obs:Shaded[]){
+        this.shaded.push(...obs);
     }
     public addCameras(...obs: Array<Camera>) {
         for (let i of obs) {
@@ -76,7 +85,6 @@ export default class GL {
     public switchLight(light: Light) {
         this.currentLight = light;
     }
-
     public drawScene() {
         if (this.objects.length <= 0)
             throw '场景内没有物体';
@@ -86,7 +94,7 @@ export default class GL {
         else if (this.lights.length <= 0 || !this.currentLight) {
             throw '未指定光源';
         } {
-            this.resize();
+            //this.resize();
             this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
             this.gl.clearDepth(1.0);
 
@@ -94,7 +102,7 @@ export default class GL {
             this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrixLoc, false, flatten(this.currentCamera.projectionMatrix));
 
             this.gl.uniform4fv(this.programInfo.uniformLocations.lightVectorLoc, new Float32Array(this.currentLight.position));
-
+            this.setNormalize();
 
             for (let i of this.objects) {
                 i.draw(this, true);
@@ -117,17 +125,21 @@ export default class GL {
         }
         return ret;
     }
+    public setNormalize() {
+        this.gl.uniform1i(this.programInfo.uniformLocations.ifNormalizeLoc,1);
+    }
+    public clearNormalize(){
+        this.gl.uniform1i(this.programInfo.uniformLocations.ifNormalizeLoc,0);
+    }
     private resize() {
         var displayWidth = this.gl.canvas.clientWidth;
         var displayHeight = this.gl.canvas.clientHeight;
-        let val=Math.min(displayWidth,displayHeight)
-        if (this.gl.canvas.width != val ||
-            this.gl.canvas.height != val) {
-            this.gl.canvas.width = val;
-            this.gl.canvas.height = val;
+        if (this.gl.canvas.width != displayWidth ||this.gl.canvas.height != displayHeight) {
+            this.gl.canvas.width = displayWidth;
+            this.gl.canvas.height = displayHeight;
         }
-        this.gl.canvas.style.height=this.gl.canvas.style.width=`${val}px`;
-        this.gl.viewport(0, 0, val, val);
+//        this.gl.canvas.style.height=this.gl.canvas.style.width=`${val}px`;
+        this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
     }
 }
 
