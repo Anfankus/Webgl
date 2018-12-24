@@ -1,17 +1,11 @@
 const path = require('path');
 const HtmlWebpackPlugin=require('html-webpack-plugin')
 module.exports = {
-    mode: 'development',
+    mode: 'production',
     entry: './src/main.ts',
     output: {
         filename: 'main.[hash].js',
-        path: path.resolve(__dirname, 'dev')
-    },
-    devtool:'source-map',
-    devServer:{
-        watchOptions:{
-            ignored: /node_modules/
-        }
+        path: path.resolve(__dirname, 'dist')
     },
     plugins:[
         new HtmlWebpackPlugin({

@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack-dev-server --open --color"
+    "start": "webpack-dev-server --open --color",
+    "build": "npx webpack --config ./webpack.build.js"
   },
   "keywords": [],
   "author": "",
