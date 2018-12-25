@@ -24,14 +24,9 @@ module.exports = {
             test: /\.ts$/,
             exclude: /node_modules/,
             use: "awesome-typescript-loader"  
-        },{
-            test:/\.(jpg|png|gif|bmp|svg)/,
-            exclude: /node_modules/,
-            include:path.join(__dirname,'image'),
-            use:"url-loader"
         }]
     },
     resolve: {
-        extensions: ['.ts','.js','.json','.html','.jpg']
+        extensions: ['.ts','.js','.json','.html']
     }
 };

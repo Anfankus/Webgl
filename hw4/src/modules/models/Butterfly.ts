@@ -44,6 +44,8 @@ export class ButterFly extends Translatable implements Drawable,Collisible {
             0.008, 0.3, 0, 0.15, 0.6, 0
         ];
         this.collision=new Collision(ImpactType.ball,1,this);
+
+        this.body.setChoice(2);
     }
     public initBuffer(gl: GL) {
         let _gl = gl.gl;
@@ -68,8 +70,9 @@ export class ButterFly extends Translatable implements Drawable,Collisible {
         this.body.setMaterial(new ButterFlyBodyMaterial);
     }
 
-    public draw(gl: GL, self: boolean = true): void {
+    public draw(gl: GL, self: boolean = true): void {        
         let _gl = gl.gl;
+        _gl.uniform1i(gl.programInfo.uniformLocations.bTexCoordLocation, 0);
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));
         _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
         //lines
@@ -134,20 +137,4 @@ export class ButterFly extends Translatable implements Drawable,Collisible {
         this.rotate(deflection, true, 4);
         return decrease;
     }
-
-    public initTexture(_gl:GL){
-        this.texture=_gl.gl.createTexture();
-        this.texture.image=new Image();
-        this.texture.image.onload=function(){
-            _gl.gl.bindTexture(_gl.gl.TEXTURE_2D,this.texture);
-            _gl.gl.pixelStorei(_gl.gl.UNPACK_FLIP_Y_WEBGL,Number(true));
-            _gl.gl.texImage2D(_gl.gl.TEXTURE_2D,0,_gl.gl.RGBA,_gl.gl.RGBA,_gl.gl.UNSIGNED_BYTE,this.texture.image);
-            _gl.gl.texParameteri( _gl.gl.TEXTURE_2D, _gl.gl.TEXTURE_MIN_FILTER,_gl.gl.NEAREST_MIPMAP_LINEAR );
-            _gl.gl.texParameteri( _gl.gl.TEXTURE_2D, _gl.gl.TEXTURE_MAG_FILTER, _gl.gl.NEAREST );
-            _gl.gl.bindTexture(_gl.gl.TEXTURE_2D,null);
-        }
-
-    }
-
-
 }

@@ -12,6 +12,9 @@ uniform mat4 uProjectionMatrix;
 uniform mat4 uModelMatrix;
 uniform mat4 uNormalMatrix;
 
+attribute vec2 a_texcoord;
+varying vec2 v_texcoord;
+
 uniform vec4 lightPosition;
 void main()
 {
@@ -23,6 +26,8 @@ void main()
 
     gl_Position = uProjectionMatrix *EyePosition;
 
+    // 传递纹理坐标到片元着色器
+    v_texcoord = a_texcoord;
 }
 </script>
 
@@ -33,6 +38,15 @@ void main()
         uniform vec4 specularProduct;
         uniform float shininess;
         varying vec3 N, L, E;
+
+        // 从顶点着色器中传入的值
+        varying vec2 v_texcoord;
+        uniform int bTexCoord;
+        // 纹理
+        uniform sampler2D u_texture;
+        uniform sampler2D u_texture1;
+        uniform sampler2D u_texture2;
+        uniform sampler2D u_texture3;
 
         void main()
         {
@@ -52,7 +66,16 @@ void main()
             fColor = ambient + diffuse +specular;
             fColor.a = 1.0;
 
-            gl_FragColor = fColor;
+            //gl_FragColor = fColor;
+            if(bTexCoord==1)
+               gl_FragColor = texture2D(u_texture, v_texcoord);//地面的纹理
+            else if(bTexCoord==2)
+               gl_FragColor = texture2D(u_texture1, v_texcoord);//
+            else if(bTexCoord==3)
+               gl_FragColor = texture2D(u_texture2,v_texcoord);
+            else if(bTexCoord==4)
+               gl_FragColor = texture2D(u_texture3,v_texcoord);
+            else gl_FragColor = fColor;
         }
 
 </script>

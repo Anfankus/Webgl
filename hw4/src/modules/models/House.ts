@@ -137,6 +137,8 @@ export class House extends Translatable implements Drawable,Collisible{//size = 
 
   draw(gl: GL, self: boolean = true): void {
         let _gl = gl.gl;
+        _gl.uniform1i(gl.programInfo.uniformLocations.bTexCoordLocation, 0);
+
     //光照处理
     let lt = gl.currentLight;
     let ambientProduct = Util.Vec4Mult(lt.lightAmbient, this.material.materialAmbient);

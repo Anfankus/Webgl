@@ -7,18 +7,22 @@ import GL from "../../GL";
 import { flatten, normalize, add, scale, cross, subtract, dot, negate } from "../../MV";
 import { NoneMaterial } from "../../materials/NoneMaterial";
 import { CustomizedMaterial } from "../../materials/CustomizedMaterial";
+import { Texture } from "../../texture/Textrue";
 
 export class Ellipsoid extends Translatable implements Drawable {
     buffers: any;
     material: Material;
+    choice:number;
     public vertices: Array<number>;
     public normals: Array<number>;
     public baseCircle: Circle3D;
+    public texVertice:Array<number>;
     constructor(a, b, position, color: string | Array<number>) {
         super();
         this.baseCircle = new Circle3D(a, b);
         this.vertices = [];
         this.normals = [];
+        this.choice=0;
         this.material = new CustomizedMaterial;
         let lastVer = this.baseCircle.vertices;
         let lastNor=this.baseCircle.normals;
@@ -27,14 +31,20 @@ export class Ellipsoid extends Translatable implements Drawable {
         let [xp, yp, zp] = position;
         let eachDegree = 190 / frag;
         let rotateM = Util.rotateY(eachDegree);
-
+        //this.texture.textureVertic=[];
+        this.texVertice=[];
         for (let i = 0; i < frag; i++) {
             let newVer = [];
             let newNor=[];
             for (let j = 0; j < this.baseCircle.vertices.length; j += 3) {
                 this.vertices.push(lastVer[j] + xp, lastVer[j + 1] + yp, lastVer[j + 2] + zp);
                 //this.normals.push(...normalize(lastVer.slice(j, j + 3)));
-                this.normals.push(...normalize(lastNor.slice(j, j + 3)));
+                let normaldata=normalize(lastNor.slice(j, j + 3));
+                this.normals.push(...normaldata);
+                let u=normaldata[0];
+                let v=normaldata[1];
+                this.texVertice.push(u*0.5+0.5,v*0.5+0.5);
+                //this.normals.push(...normalize(lastNor.slice(j, j + 3)));
                 let newEle = Util.Mat3Vec(rotateM, lastVer.slice(j, j + 3));
                 let newNorEle=Util.Mat3Vec(rotateM, lastNor.slice(j, j + 3));
                 newEle.pop();
@@ -45,7 +55,12 @@ export class Ellipsoid extends Translatable implements Drawable {
                     this.vertices.push(newEle[index] + position[index]);
                 }
                 //this.normals.push(...normalize(newEle));
-                this.normals.push(...normalize(newNorEle));
+                normaldata=normalize(newNorEle);
+                this.normals.push(...normaldata);
+                u=normaldata[0];
+                v=normaldata[1];
+                this.texVertice.push(u*0.5+0.5,v*0.5+0.5);
+                //this.normals.push(...normaldata);
 
             }
             lastVer = newVer;
@@ -56,7 +71,8 @@ export class Ellipsoid extends Translatable implements Drawable {
         let _gl = gl.gl;
         this.buffers = {
             position: _gl.createBuffer(),
-            normal: _gl.createBuffer()
+            normal: _gl.createBuffer(),
+            texture:_gl.createBuffer()
         }
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.position);
         _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.vertices), _gl.STATIC_DRAW);
@@ -64,10 +80,15 @@ export class Ellipsoid extends Translatable implements Drawable {
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.normal);
         _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.normals), _gl.STATIC_DRAW);
 
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.texture);
+        _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.texVertice), _gl.STATIC_DRAW);
+
     }
 
     draw(gl: GL, self: boolean = true): void {
         let _gl = gl.gl;
+        _gl.uniform1i(gl.programInfo.uniformLocations.bTexCoordLocation, this.choice);
+
         //光照处理
         let lt = gl.currentLight;
         let ambientProduct = Util.Vec4Mult(lt.lightAmbient, this.material.materialAmbient);
@@ -90,16 +111,26 @@ export class Ellipsoid extends Translatable implements Drawable {
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.normal);
         _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexNormal, 3, _gl.FLOAT, false, 0, 0);
 
+        //纹理
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.texture);
+        _gl.enableVertexAttribArray(gl.programInfo.attribLocations.texcoordLocation);
+        _gl.vertexAttribPointer(gl.programInfo.attribLocations.texcoordLocation, 2, _gl.FLOAT, false, 0, 0);
+
         _gl.drawArrays(_gl.TRIANGLE_STRIP, 0, this.vertices.length / 3)
 
         _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexNormal);
 
         //this.drawNormals(gl);
         _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
+        _gl.disableVertexAttribArray(gl.programInfo.attribLocations.texcoordLocation);
+
 
     }
     setMaterial(m: Material) {
         this.material = m;
+    }
+    setChoice(c:number) {
+        this.choice=c;
     }
     drawNormals(gl: GL): void {
         let _gl = gl.gl;

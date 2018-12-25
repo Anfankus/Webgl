@@ -40,18 +40,20 @@ class FlatHalfWing {
     public flag:number;
     public vertices: Array<number>;
     public normals:Array<number>;
+    public texVertice:Array<number>;
+
     //flag: 0--线 1--面
     constructor(size = 0.5,isLeft=true, z = 0, frag = 90, flag = 0) {
         let wingCount = 2;
 
         this.vertices = [];
         this.normals=[];
+        this.texVertice=[];
         this.flag = flag;
 
         let offset=Math.PI/2;
         let start=isLeft?0:Math.PI;
         let radian = isLeft?Math.PI:2 * Math.PI;
-
         let eachDegree = radian / frag;
         for (let i = start+offset; i <= radian+offset; i += eachDegree) {
             let length = size * Math.sin(wingCount * i);
@@ -59,6 +61,7 @@ class FlatHalfWing {
                 length*=0.85;
             }
             let x=Math.sin(i) * length,y=Math.cos(i) * length;
+            this.texVertice.push(Math.abs(x),Math.abs(y));
             this.vertices.push(x,y, z);
             let nor=[
                 sin(wingCount * i)*sin(i)-wingCount*cos(wingCount*i)*cos(i),

@@ -96,6 +96,9 @@ export class Util {
         return radians/Math.PI*180;
     }
 
+    public static isPowerOf2(value){
+        return (value &(value-1))==0;
+    }
     public static rotateY(theta: number, arar = false){
         var c = Math.cos(Util.radians(theta));
         var s = Math.sin(Util.radians(theta));
