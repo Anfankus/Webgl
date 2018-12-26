@@ -10,14 +10,14 @@ export class Light extends Ellipsoid {
     public lightSpecular: Array<number>;
     constructor() {
         super(20,20,[0,0,0],'');
-        this.translate(50,1);
-        this.translate(300,2);
-        this.translate(50,3);
-        this.setChoice(2);
+        //this.translate(300,1);
+        //this.translate(300,2);
+        this.translate(300,3);
         this.lightAmbient = Util.Hex2Vec4('0x202020');
         this.lightDiffuse = Util.Hex2Vec4('0xffffff');
         this.lightSpecular = Util.Hex2Vec4('0xffffff');
         this.material=new SunMaterial;
+        this.setChoice(0);
         for(let i in this.normals){
             this.normals[i]=-this.normals[i];
         }

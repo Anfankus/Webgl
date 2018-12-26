@@ -3,6 +3,7 @@ import Drawable from './interface/Drawable';
 import Camera from './models/Camera';
 import { Light } from './scene/Light';
 import Collisible from './interface/Collisible';
+import Shaded from './interface/Shaded';
 import { Util } from './Util';
 
 export default class GL {
@@ -11,6 +12,7 @@ export default class GL {
 
     public objects: Array<Drawable>;
     public collisions:Collisible[];
+    public shaded:Shaded[];
     public cameras: Array<Camera>;
     public lights: Array<Light>;
 
@@ -24,6 +26,7 @@ export default class GL {
         if (!this.gl) { alert("WebGL isn't available"); }
         this.gl.clearColor(1.0, 1.0, 1.0, 1.0);
         this.gl.enable(this.gl.DEPTH_TEST);
+        this.resize();
 
         let shaderPro = initShaders(this.gl, "vertex-shader", "fragment-shader");
         this.programInfo = {
@@ -49,7 +52,9 @@ export default class GL {
                 textureLocation:this.gl.getUniformLocation(shaderPro,'u_texture'),
                 texture1Location:this.gl.getUniformLocation(shaderPro,'u_texture1'),
                 texture2Location:this.gl.getUniformLocation(shaderPro,'u_texture2'),
-                texture3Location:this.gl.getUniformLocation(shaderPro,'u_texture3')
+                texture3Location:this.gl.getUniformLocation(shaderPro,'u_texture3'),
+                texture4Location:this.gl.getUniformLocation(shaderPro,'u_texture4'),
+                ifNormalizeLoc:this.gl.getUniformLocation(shaderPro, 'ifNormalize')
             },
         };
         this.gl.useProgram(this.programInfo.program);
@@ -58,17 +63,20 @@ export default class GL {
         this.lights = [];
         this.cameras = [];
         this.collisions=[];
+        this.shaded=[];
         this.ready=0;
 
         //加载纹理图片
-        let p1="../../../image/grass.jpg";
-        let p2="../../../image/starspace-2.png";
-        let p3="../../../image/vn.jpg";
-        let p4="../../../image/globe.jpg";
-        this.initTexture(this.programInfo.uniformLocations.textureLocation,p1,0);
+        let p1="../../../image/grass2.jpg";
+        let p2="../../../image/sun.jpg";
+        let p3="../../../image/sky.jpg";
+        let p4="../../../image/huaw-2.jpg";
+        let p5="../../../image/strip.png";
+        this.initTexture(this.programInfo.uniformLocations.textureLocation,p1,0,1);
         this.initTexture(this.programInfo.uniformLocations.texture1Location,p2,1);
-        this.initTexture(this.programInfo.uniformLocations.texture2Location,p3,2);
+        this.initTexture(this.programInfo.uniformLocations.texture2Location,p3,2,1);
         this.initTexture(this.programInfo.uniformLocations.texture3Location,p4,3);
+        this.initTexture(this.programInfo.uniformLocations.texture4Location,p5,4);
     }
     public addObjects(...obs: Array<Drawable>) {
         for (let i of obs) {
@@ -78,6 +86,9 @@ export default class GL {
     }
     public addCollisible(...obs:Collisible[]){
         this.collisions.push(...obs);
+    }
+    public addShaded(...obs:Shaded[]){
+        this.shaded.push(...obs);
     }
     public addCameras(...obs: Array<Camera>) {
         for (let i of obs) {
@@ -96,7 +107,6 @@ export default class GL {
     public switchLight(light: Light) {
         this.currentLight = light;
     }
-
     public drawScene() {
         if (this.objects.length <= 0)
             throw '场景内没有物体';
@@ -106,7 +116,7 @@ export default class GL {
         else if (this.lights.length <= 0 || !this.currentLight) {
             throw '未指定光源';
         } {
-            this.resize();
+            //this.resize();
             this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
             this.gl.clearDepth(1.0);
 
@@ -114,7 +124,7 @@ export default class GL {
             this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrixLoc, false, flatten(this.currentCamera.projectionMatrix));
 
             this.gl.uniform4fv(this.programInfo.uniformLocations.lightVectorLoc, new Float32Array(this.currentLight.position));
-
+            this.setNormalize();
 
             for (let i of this.objects) {
                 i.draw(this, true);
@@ -137,20 +147,24 @@ export default class GL {
         }
         return ret;
     }
+    public setNormalize() {
+        this.gl.uniform1i(this.programInfo.uniformLocations.ifNormalizeLoc,1);
+    }
+    public clearNormalize(){
+        this.gl.uniform1i(this.programInfo.uniformLocations.ifNormalizeLoc,0);
+    }
     private resize() {
         var displayWidth = this.gl.canvas.clientWidth;
         var displayHeight = this.gl.canvas.clientHeight;
-        let val=Math.min(displayWidth,displayHeight)
-        if (this.gl.canvas.width != val ||
-            this.gl.canvas.height != val) {
-            this.gl.canvas.width = val;
-            this.gl.canvas.height = val;
+        if (this.gl.canvas.width != displayWidth ||this.gl.canvas.height != displayHeight) {
+            this.gl.canvas.width = displayWidth;
+            this.gl.canvas.height = displayHeight;
         }
-        this.gl.canvas.style.height=this.gl.canvas.style.width=`${val}px`;
-        this.gl.viewport(0, 0, val, val);
+//        this.gl.canvas.style.height=this.gl.canvas.style.width=`${val}px`;
+        this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
     }
 
-    public initTexture(location:any,path:any,num:number){
+    public initTexture(location:any,path:any,num:number,paraChoice=0){
         let self=this;
         let gl = this.gl;
         var texture0 = gl.createTexture();     
@@ -166,7 +180,9 @@ export default class GL {
                 gl.activeTexture(gl.TEXTURE2);
             }else if(num == 3){
                 gl.activeTexture(gl.TEXTURE3);
-            }         
+            }else if(num == 4){
+                gl.activeTexture(gl.TEXTURE4);
+            }             
             gl.bindTexture(gl.TEXTURE_2D, texture0);  //创建纹理对象
              //对纹理图像进行y轴反转
              gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, Number(true));
@@ -176,78 +192,24 @@ export default class GL {
              gl.generateMipmap( gl.TEXTURE_2D );
             }else{
             //配置纹理参数
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                 if (paraChoice == 0) {
+                     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+                     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+                     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                 }else if(paraChoice==1){
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+                 }
         }
             //将纹理传递给着色器
             gl.uniform1i(location, num);
             self.ready++;
         });
     }
-
-    public initTexture1(){
-        let gl=this.gl;
-        var texture = gl.createTexture();//创建纹理对象
-        var texture1 = gl.createTexture();
-        if(!texture || !texture1){
-            console.log("无法创建纹理对象");
-            return;
-        }
-           let ch1=false;
-            let ch2=false;
-         function loadTexture(gl:any,texture:any,location:any,image:any,num:number){
-            
-            gl.bindTexture(gl.TEXTURE_2D, texture);  //创建纹理对象
-                 //对纹理图像进行y轴反转
-                 gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, Number(true));
-                 //配置纹理图像
-                 gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-                 gl.generateMipmap( gl.TEXTURE_2D );
-                //配置纹理参数
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-                // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-                // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-                if(num == 0){
-                    gl.activeTexture(gl.TEXTURE0);
-                    ch1=true;
-                }else if(num == 1){
-                    gl.activeTexture(gl.TEXTURE1);
-                    ch2=true;
-                }
-                //将纹理传递给着色器
-                gl.uniform1i(location, num);
-    
-                if(ch1&&ch2){
-                    gl.clearColor(0.0,0.0,0.0,1.0);
-                    gl.clear(gl.COLOR_BUFFER_BIT);
-                }
-        }
-
-        //获取u_Sampler的存储位置
-        var u_Sampler = this.programInfo.uniformLocations.textureLocation;
-        var u_Sampler1 = this.programInfo.uniformLocations.texture1Location;
-        if(u_Sampler < 0 || u_Sampler1 < 0){
-            console.log("无法获取变量的存储位置");
-            return;
-        }
-        //创建Image对象，并绑定加载完成事件
-        let p="../../../image/texImageBackGround.jpg";
-        let p2="../../../image/SA2011_black.gif";
-        var image = new Image();
-        image.src=p;
-        var image1 = new Image();
-        image1.src=p2;
-        image.onload = function () {
-            loadTexture(gl,texture,u_Sampler,image,0);
-        };
-        image1.onload = function () {
-            loadTexture(gl,texture1,u_Sampler1,image1,1);
-        };
-    }
-    
+   
 }
 
 //=======================================================================================

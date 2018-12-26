@@ -4,8 +4,8 @@ module.exports = {
     mode: 'development',
     entry: './src/main.ts',
     output: {
-        filename: 'main.js',
-        path: path.resolve(__dirname, 'dist')
+        filename: 'main.[hash].js',
+        path: path.resolve(__dirname, 'dev')
     },
     devtool:'source-map',
     devServer:{

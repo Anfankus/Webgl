@@ -5,9 +5,11 @@ import { NoneMaterial } from "../../materials/NoneMaterial";
 import { FlatHalfWing } from "./Basis";
 import { Util } from "../../Util";
 import GL from "../../GL";
-import { flatten, add, scale } from "../../MV";
+import { flatten, add, scale, mat4, mult, translate } from "../../MV";
+import Shaded from "../../interface/Shaded";
 
-export class HalfWing extends Translatable implements Drawable {
+export class HalfWing extends Translatable implements Drawable,Shaded {
+    shaded: boolean;
     buffers: any;
     material:Material;
     public arcVertices: Array<number>;
@@ -106,7 +108,7 @@ export class HalfWing extends Translatable implements Drawable {
 
   draw(gl: GL, self: boolean = true): void {
         let _gl = gl.gl;
-        _gl.uniform1i(gl.programInfo.uniformLocations.bTexCoordLocation, 3);
+        _gl.uniform1i(gl.programInfo.uniformLocations.bTexCoordLocation, 4);
         //光照处理
         let lt=gl.currentLight;
         let ambientProduct = Util.Vec4Mult(lt.lightAmbient, this.material.materialAmbient);
@@ -149,6 +151,35 @@ export class HalfWing extends Translatable implements Drawable {
         //this.drawNormals(gl);
         _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
 
+    }
+    setShaded(): void {
+        this.shaded=true;
+    }
+    clearShaded():void{
+        this.shaded=false;
+    }
+    drawShadow(gl: GL): void {
+        let _gl=gl.gl;
+        let transMatrix = mat4();
+        transMatrix =mult(translate(...Util.Mat4Vec(mat4(-1),gl.currentLight.position)),this.modelMatrix);
+        let m=mat4();
+        m[3][3]=0;
+        m[3][1]=-1/(gl.currentLight.position[1]-0.01);
+        transMatrix=mult(m,transMatrix);
+        transMatrix = mult(translate(...gl.currentLight.position), transMatrix);
+        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(transMatrix));
+
+        _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
+        for (let i in this.flats) {
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.flatWings[i]);
+            _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
+            _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.normals.flatWings[i]);
+            _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexNormal, 3, _gl.FLOAT, false, 0, 0);
+
+            _gl.drawArrays(_gl.TRIANGLE_FAN, 0, this.flats[i].length / 3)
+
+        }
+        _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
     }
     drawNormals(gl: GL): void {
         let _gl = gl.gl;

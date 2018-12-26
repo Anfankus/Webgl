@@ -4,12 +4,13 @@ import { Material } from "../../interface/Material";
 import { Circle3D } from "./Basis";
 import { Util } from "../../Util";
 import GL from "../../GL";
-import { flatten, normalize, add, scale, cross, subtract, dot, negate } from "../../MV";
+import { flatten, normalize, add, scale, cross, subtract, dot, negate, translate, mat4, mult } from "../../MV";
 import { NoneMaterial } from "../../materials/NoneMaterial";
-import { CustomizedMaterial } from "../../materials/CustomizedMaterial";
-import { Texture } from "../../texture/Textrue";
+import { GroundMaterial } from "../../materials/GroundMaterial";
+import Shaded from "../../interface/Shaded";
 
-export class Ellipsoid extends Translatable implements Drawable {
+export class Ellipsoid extends Translatable implements Drawable,Shaded {
+    shaded: boolean;
     buffers: any;
     material: Material;
     choice:number;
@@ -23,7 +24,8 @@ export class Ellipsoid extends Translatable implements Drawable {
         this.vertices = [];
         this.normals = [];
         this.choice=0;
-        this.material = new CustomizedMaterial;
+        this.shaded=false;
+        this.material = new GroundMaterial;
         let lastVer = this.baseCircle.vertices;
         let lastNor=this.baseCircle.normals;
         let frag = 50;
@@ -124,13 +126,39 @@ export class Ellipsoid extends Translatable implements Drawable {
         _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
         _gl.disableVertexAttribArray(gl.programInfo.attribLocations.texcoordLocation);
 
-
+        if(this.shaded){
+            this.drawShadow(gl);
+        }
     }
+    drawShadow(gl: GL): void {
+        let _gl=gl.gl;
+        let transMatrix = mat4();
+        transMatrix =mult(translate(...Util.Mat4Vec(mat4(-1),gl.currentLight.position)),this.modelMatrix);
+        let m=mat4();
+        m[3][3]=0;
+        m[3][1]=-1/(gl.currentLight.position[1]-0.01);
+        transMatrix=mult(m,transMatrix);
+        transMatrix = mult(translate(...gl.currentLight.position), transMatrix);
+        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(transMatrix));
+
+        _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.position);
+        _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
+        _gl.drawArrays(_gl.TRIANGLE_STRIP, 0, this.vertices.length / 3)
+        _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
+    }
+
     setMaterial(m: Material) {
         this.material = m;
     }
     setChoice(c:number) {
         this.choice=c;
+    }
+    setShaded(): void {
+        this.shaded=true;
+    }
+    clearShaded():void{
+        this.shaded=false;
     }
     drawNormals(gl: GL): void {
         let _gl = gl.gl;

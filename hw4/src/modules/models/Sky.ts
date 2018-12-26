@@ -2,6 +2,7 @@ import { Ellipsoid } from "../models/Basis/Ellipsoid";
 import { SkyMaterial } from "../materials/SkyMaterial";
 import { Util } from "../Util";
 import { rotateX } from "../MV";
+import GL from "../GL";
 
 export class Sky extends Ellipsoid {
     constructor() {
@@ -13,6 +14,18 @@ export class Sky extends Ellipsoid {
         this.setChoice(3);
     }
     public sunset(degree:number){
-        this.rotateMatrix=rotateX(degree)
+        let t=Math.sin((degree%36)/36*2*Math.PI)+0.2;
+        //let rotate=(degree+18)%36-18;
+        this.rotateMatrix=[
+            [t,0,0,0],
+            [0,t,0,0],
+            [0,0,t,0],
+            [0,0,0,1]
+        ]
+    }
+    draw(gl: GL): void {
+        gl.clearNormalize();
+        super.draw(gl);
+        gl.setNormalize();
     }
 }

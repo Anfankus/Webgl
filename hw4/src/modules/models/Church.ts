@@ -4,7 +4,7 @@ import { mat4, flatten } from "../MV";
 import { Material } from "../interface/Material";
 import { NoneMaterial } from "../materials/NoneMaterial";
 import { Util } from "../Util";
-import { CustomizedMaterial } from "../materials/CustomizedMaterial";
+import { GroundMaterial } from "../materials/GroundMaterial";
 import { Cube, Tri_prism, Rect_pyramid, HalfCircle3D } from "./Basis/Basis";
 import { Translatable } from "../interface/Translatable";
 import Collision, { ImpactType } from "../Collision/Collision";

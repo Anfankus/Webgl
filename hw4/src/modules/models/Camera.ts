@@ -27,17 +27,18 @@ export default class Camera {
         this.nowEye = vec3();
         //this.at = vec3(0, 0, 0);
         //this.up = vec3(0, 1, 0);
-        const far = 1000, near = 0.1, aspect = 1, fovy = 60;
-        this.projectionMatrix = perspective(fovy, aspect, near, far);
         this.ret=false;
 
     }
-
+    public setCanvas(canvas){
+        const far = 1000, near = 0.1, aspect = canvas.clientWidth / canvas.clientHeight, fovy = 60;
+        this.projectionMatrix = perspective(fovy, aspect, near, far);
+    }
     public view(radius, theta, phi) {
 
         let at,up,eye;
         if(this.observeObject){
-            radius=10;
+            //radius=10;
             at = this.observeObject.position.slice(0,3);
             up = vec3(0.0, Math.cos(Util.radians(phi)), 0.0);
 

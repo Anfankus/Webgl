@@ -10,21 +10,27 @@ import { Util } from './modules/Util';
 import { Church } from './modules/models/Church';
 import { NoneMaterial } from './modules/materials/NoneMaterial';
 import { MetalMaterial } from './modules/materials/MetalMaterial';
-import { CustomizedMaterial } from './modules/materials/CustomizedMaterial';
+import { GroundMaterial } from './modules/materials/GroundMaterial';
 import { Light } from './modules/scene/Light';
 import { Sky } from './modules/models/Sky';
+import { Translatable } from './modules/interface/Translatable';
+import Void from './modules/models/Void';
 //
-let but = new ButterFly;but.translate(-10,1);but.translate(5,2);but.translate(-2,3);but.rotate(90,true,5);but.rotate(90, true, 4);
-//let ball = new Ellipsoid(30, 50, [0, 0, 0], '0xfffff'); ball.setMaterial(new MetalMaterial);
-let ground = new Ground([0, -20, 0], 500); ground.setMaterial(new CustomizedMaterial);
-let church=new Church([10, -20, 0]);church.setMaterial(new MetalMaterial);
-let house=new House([0, -20, 0]);house.setMaterial(new MetalMaterial);
-let sky=new Sky;
+alert(' 使用提示：\n 开始游戏：p  视角切换：b  视角锁定：f \n 向上运动：space  左：←  右：→\n 用鼠标选中界面并拖动即可切换视角，滑动滚轮即可放大和缩小\n 未绑定视角时可以使用w,a,s,d移动视野中心\n 如果你已了解，那么请开始吧！');
+
+let but = new ButterFly; but.translate(-10, 1); but.translate(5, 2); but.translate(-2, 3); but.rotate(90, true, 5); but.rotate(90, true, 4);
+let ball = new Ellipsoid(30, 50, [0, 0, 0], '0xfffff'); ball.setMaterial(new MetalMaterial); ball.translate(150, 2);
+let ground = new Ground([0, 0, 0], 500); ground.setMaterial(new GroundMaterial);
+let church = new Church([10, -20, 0]); church.setMaterial(new MetalMaterial);
+let house = new House([0, -20, 0]); house.setMaterial(new MetalMaterial);
+let VoidObj = new Void; VoidObj.rotate(-90, true, 4);
+let sky = new Sky;
 
 //初始相机初始化
 let camera1 = new Camera;
 let [radius, theta, phi] = [10, 0, 45]
 camera1.view(radius, theta, phi);
+camera1.bind(VoidObj);
 
 
 //场景对象添加
@@ -46,20 +52,23 @@ let stateButterFly = {
         }
     }
 }
-let camera = new Vue({
+let vue = new Vue({
     el: '#camera',
-    mounted(){
+    mounted() {
         //构造画布
         var _gl = new GL;
+        camera1.setCanvas(_gl.gl.canvas);
         _gl.addCameras(camera1);
         _gl.switchCamera(camera1);
-        //光源,groundchurch
+        //光源ball,church,ground
         let l = new Light;
         _gl.addLights(l);
         _gl.switchLight(l);
-        _gl.addObjects(but,church , house, ground,sky);
-        _gl.addCollisible(but,house,church,ground);
-        this.glOb=_gl;
+        _gl.addObjects(but, church, house, ground, sky);
+        _gl.addCollisible(but, house, church, ground);
+        _gl.addShaded(but);
+        this.glOb = _gl;
+        this.bound = VoidObj;
         this.play();
     },
     data() {
@@ -69,18 +78,18 @@ let camera = new Vue({
             theta: theta,
             phi: phi,
             radius: radius,
-            move:false,
-            fixed:false,
-            bound:false
+            move: false,
+            fixed: false,
+            bound: null
         }
     },
     watch: {
         theta(val) {
-            this.theta = parseInt(val);
+            this.theta = parseFloat(val);
             this.change();
         },
         phi(val) {
-            this.phi = parseInt(val);
+            this.phi = parseFloat(val);
             this.change();
         },
         radius(val) {
@@ -94,17 +103,18 @@ let camera = new Vue({
             this.glOb.drawScene();
 
         },
-         play() {
-            let self=this;
+        play() {
+            let self = this;
             let then = performance.now() * 0.001, start = then;
             let range = 45 * 2;
             let degree = 0, flap = 1;
-            let gl=this.glOb;
+            let gl = this.glOb;
 
             let c = this.camera;
             function _draw(now: number) {
-                if (gl.ready>=4) {
-                    now *= 0.001;
+                now *= 0.001;
+
+                if (gl.ready >= 4) {
                     let lastTime = now - then;
                     //翅膀扇动
                     let relatedDegree = (lastTime * (flap + 2)) * flap * 50;
@@ -115,28 +125,44 @@ let camera = new Vue({
                     but.flap(relatedDegree);
 
                     //蝴蝶下坠并前进
-                    if (camera.move) {
+                    if (vue.move) {
                         stateButterFly.speedY += but.fall(lastTime, stateButterFly.speedX);
                         but.moveForward(stateButterFly.speed * lastTime)
                     }
-                    if (camera.bound && camera.fixed) {
+                    if (vue.bound && vue.fixed) {
                         c.translateC();
                     }
                     else
-                        c.view(camera.radius, camera.theta, camera.phi);
+                        c.view(vue.radius, vue.theta, vue.phi);
 
                     //太阳运动
-                    gl.currentLight.rotate(lastTime * 10, true, 7)
-                    sky.sunset(now * 10);
+                    gl.currentLight.rotate(lastTime * 10, true, 7);
+                    sky.sunset(now - start);
 
+                    //阴影设置
+                    if (gl.currentLight.position[1] <= 0) {
+                        for (let i of gl.shaded) {
+                            i.clearShaded();
+                        }
+                    } else {
+                        for (let i of gl.shaded) {
+                            i.setShaded();
+                        }
+                    }
                     //碰撞检测
                     if (gl.impactChecking(but)) {
                         self.move ? self.switchState() : true;
-                    }
-                    gl.drawScene();
-                    then = now;
+                        confirm("你可爱的小蝴蝶撞到了建筑物，请刷新界面重新开始吧！");
+                        window.location.reload();
+                       // });
+                           // window.location.reload();        
+                        }             
                     degree += relatedDegree;
+                    gl.drawScene();
+
                 }
+                then = now;
+
                 requestAnimationFrame(_draw);
             }
             requestAnimationFrame(_draw);
@@ -144,16 +170,15 @@ let camera = new Vue({
         switchState() {
             this.move = !this.move;
         },
-        switchFixed(){
-           this.fixed=!this.fixed;
+        switchFixed() {
+            this.fixed = !this.fixed;
         },
-        switchBound(){
-            if(this.bound){
-                this.camera.release();
-            }else{
+        switchBound() {
+            if (this.bound !== VoidObj) {
+                this.camera.bind(VoidObj);
+            } else {
                 this.camera.bind(but);
             }
-            this.bound=!this.bound;
         }
     }
 })
@@ -167,23 +192,25 @@ if (ele) {
         mousedown = false;
     }
     ele.onmousemove = function (e) {
-        if (mousedown && (!camera.binding || !camera.animeHandle)) {
-            camera.theta = ((camera.theta) + (e.movementX) * -0.8) % 360;
-            camera.phi = ((camera.phi) + (e.movementY) * 0.8) % 360;
+        if (mousedown && (!vue.binding || !vue.animeHandle)) {
+            vue.theta = ((vue.theta) + (e.movementX) * -0.8) % 360;
+            if (e.movementY >= 0 || vue.phi > 0) {
+                vue.phi = ((vue.phi) + (e.movementY) * 0.8) % 360;
+            }
         }
     }
     window.onwheel = function (e) {
         let temp = 0;
-        if (5 < camera.radius && camera.radius < 50) {
-            temp = (camera.radius) + e.deltaY / 50;
-        } else if (camera.radius <= 5) {
-            temp = (camera.radius) + e.deltaY / 500;
+        if (5 < vue.radius && vue.radius < 50) {
+            temp = (vue.radius) + e.deltaY / 50;
+        } else if (vue.radius <= 5) {
+            temp = (vue.radius) + e.deltaY / 500;
         } else {
-            temp = (camera.radius) + e.deltaY / 5;
+            temp = (vue.radius) + e.deltaY / 5;
         }
         if (temp <= 0)
             return;
-        camera.radius = temp;
+        vue.radius = temp;
     }
     window.onkeydown = function (e) {
         switch (e.keyCode) {
@@ -205,31 +232,25 @@ if (ele) {
         }
         switch (e.key) {
             case 'w':
-            camera.glOb.currentLight.translate(20, 3);
+                VoidObj.translate(2, 0);
                 break;
             case 's':
-            camera.glOb.currentLight.translate(-20, 3);
+                VoidObj.translate(-2, 0);
                 break;
             case 'a':
-            camera.glOb.currentLight.translate(-20, 1);
+                VoidObj.translate(-2, 4);
                 break;
             case 'd':
-            camera.glOb.currentLight.translate(20, 1);
-                break;
-            case 'q':
-            camera.glOb.currentLight.translate(-20, 2);
-                break;
-            case 'e':
-            camera.glOb.currentLight.translate(20, 2);
+                VoidObj.translate(2, 4);
                 break;
             case 'p':
-            camera.switchState();
-            break;
+                vue.switchState();
+                break;
             case 'b':
-            camera.switchBound();
-            break;
+                vue.switchBound();
+                break;
             case 'f':
-            camera.switchFixed()
+                vue.switchFixed()
 
         }
     };

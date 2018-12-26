@@ -4,16 +4,15 @@ import { mat4, flatten } from "../MV";
 import { Material } from "../interface/Material";
 import { NoneMaterial } from "../materials/NoneMaterial";
 import {Util} from "../Util";
-import {CustomizedMaterial} from "../materials/CustomizedMaterial";
+import {GroundMaterial} from "../materials/GroundMaterial";
 import { MetalMaterial } from "../materials/MetalMaterial";
 import Collisible from "../interface/Collisible";
-import {Texture} from "../texture/Textrue";
 import Collision, { ImpactType } from "../Collision/Collision";
 export class Ground implements Drawable,Collisible{
     collision:Collision;
     material: Material;
     buffers: any;
-    texture:Texture;
+    texture:Array<number>;
 
     vertices:Array<number>;
     normals:Array<number>;
@@ -36,15 +35,16 @@ export class Ground implements Drawable,Collisible{
             0,1,0,
             0,1,0
         ];
-        this.texture=new Texture;
+        this.texture=[];
         //this.texture.imagepath="../../../image/texImageBackGround.jpg";
-        this.texture.textureVertic=[
-            0,0,
-            0,1,
-            1,1,
-            0,1,
-            1,1,
-            1,0
+        this.texture=[
+            -size+x,y,-size+z,
+            size+x,y,-size+z,
+            -size+x,y,size+z,
+
+            size+x,y,-size+z,
+            -size+x,y,size+z,         
+            size+x,y,size+z,
         ]
         
         this.collision=new Collision(ImpactType.flat,size);
@@ -66,7 +66,7 @@ export class Ground implements Drawable,Collisible{
         _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.normals), _gl.STATIC_DRAW);
 
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.tex);
-        _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.texture.textureVertic), _gl.STATIC_DRAW);
+        _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.texture), _gl.STATIC_DRAW);
     }
 
     draw(gl: GL, self: boolean = true): void {
