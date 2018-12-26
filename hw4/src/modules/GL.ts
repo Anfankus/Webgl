@@ -6,6 +6,12 @@ import Collisible from './interface/Collisible';
 import Shaded from './interface/Shaded';
 import { Util } from './Util';
 
+
+import p1 from "../../image/grass2.jpg";
+import p2 from "../../image/sun.jpg";
+import p3 from "../../image/sky.jpg";
+import p4 from "../../image/huaw-2.jpg";
+import p5 from "../../image/strip.png";
 export default class GL {
     public gl: WebGLRenderingContext;
     public programInfo: any;
@@ -67,11 +73,6 @@ export default class GL {
         this.ready=0;
 
         //加载纹理图片
-        let p1="../../../image/grass2.jpg";
-        let p2="../../../image/sun.jpg";
-        let p3="../../../image/sky.jpg";
-        let p4="../../../image/huaw-2.jpg";
-        let p5="../../../image/strip.png";
         this.initTexture(this.programInfo.uniformLocations.textureLocation,p1,0,1);
         this.initTexture(this.programInfo.uniformLocations.texture1Location,p2,1);
         this.initTexture(this.programInfo.uniformLocations.texture2Location,p3,2,1);
@@ -167,7 +168,7 @@ export default class GL {
     public initTexture(location:any,path:any,num:number,paraChoice=0){
         let self=this;
         let gl = this.gl;
-        var texture0 = gl.createTexture();     
+        var texture0 = gl.createTexture();
         //gl.activeTexture(gl.TEXTURE0);      //激活0号理单元
         var image = new Image();
         image.src = path;
@@ -182,7 +183,7 @@ export default class GL {
                 gl.activeTexture(gl.TEXTURE3);
             }else if(num == 4){
                 gl.activeTexture(gl.TEXTURE4);
-            }             
+            }
             gl.bindTexture(gl.TEXTURE_2D, texture0);  //创建纹理对象
              //对纹理图像进行y轴反转
              gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, Number(true));
@@ -209,7 +210,7 @@ export default class GL {
             self.ready++;
         });
     }
-   
+
 }
 
 //=======================================================================================
