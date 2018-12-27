@@ -15,8 +15,9 @@ import { Light } from './modules/scene/Light';
 import { Sky } from './modules/models/Sky';
 import { Translatable } from './modules/interface/Translatable';
 import Void from './modules/models/Void';
+
 //
-alert(' 使用提示：\n 开始游戏：p  视角切换：b  视角锁定：f \n 向上运动：space  左：←  右：→\n 用鼠标选中界面并拖动即可切换视角，滑动滚轮即可放大和缩小\n 未绑定视角时可以使用w,a,s,d移动视野中心\n 如果你已了解，那么请开始吧！');
+alert(' 使用提示：\n 开始游戏：p  视角切换：b  视角锁定：f \n 向上运动：space  左：←  右：→\n 用鼠标选中界面并拖动即可切换视角，滑动滚轮即可放大和缩小\n 未绑定视角时可以使用w,a,s,d移动视野中心\n 如果你已了解，那么请开始吧！💪');
 
 let but = new ButterFly; but.translate(-10, 1); but.translate(5, 2); but.translate(-2, 3); but.rotate(90, true, 5); but.rotate(90, true, 4);
 let ball = new Ellipsoid(30, 50, [0, 0, 0], '0xfffff'); ball.setMaterial(new MetalMaterial); ball.translate(150, 2);
@@ -151,12 +152,10 @@ let vue = new Vue({
                     }
                     //碰撞检测
                     if (gl.impactChecking(but)) {
-                        self.move ? self.switchState() : true;
-                        confirm("你可爱的小蝴蝶撞到了建筑物，请刷新界面重新开始吧！");
+                        prompt("你可爱的小蝴蝶🦋撞到了建筑物，请刷新界面重新开始吧！\n(如果点击刷新页面没有反应，再点一下确定就可以啦！）\n如果有什么问题，可以向我们提出😁\n联系方式：QQ:2466526388");
                         window.location.reload();
-                       // });
-                           // window.location.reload();        
-                        }             
+                        self.move ? self.switchState() : true;                      
+                    }             
                     degree += relatedDegree;
                     gl.drawScene();
 
