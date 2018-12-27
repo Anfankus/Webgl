@@ -247,4 +247,4 @@ class Rect_pyramid{
         ]
     }
 }
-export {Circle3D,FlatHalfWing,Cube,Tri_prism,Cir_cone,Rect_pyramid,HalfCircle3D}
+export {Circle3D,FlatHalfWing}

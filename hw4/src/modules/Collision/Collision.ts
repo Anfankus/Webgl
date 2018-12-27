@@ -14,6 +14,9 @@ export default class Collision{
         this.size=s;
         this.bind=bind;
     }
+    public zoom(size:number){
+        this.size*=size;
+    }
     public getSize():number{
         if(this.type==ImpactType.flat){
             return 0;

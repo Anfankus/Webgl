@@ -4,11 +4,13 @@ import { mat4, flatten } from "../MV";
 import { Material } from "../interface/Material";
 import { NoneMaterial } from "../materials/NoneMaterial";
 import { Util } from "../Util";
-import { GroundMaterial } from "../materials/GroundMaterial";
-import { Cube, Tri_prism, Rect_pyramid, HalfCircle3D } from "./Basis/Basis";
 import { Translatable } from "../interface/Translatable";
 import Collision, { ImpactType } from "../Collision/Collision";
 import Collisible from "../interface/Collisible";
+import { Cube } from "./Basis/Cube";
+import { Tri_prism } from "./Basis/Tri_prism";
+import { Rect_pyramid } from "./Basis/Rect_pyramid";
+import { HalfCircle3D } from "./Basis/HalfCircle3D";
 export class Church extends Translatable implements Drawable,Collisible {
     collision:Collision;
     material: Material;
@@ -20,180 +22,136 @@ export class Church extends Translatable implements Drawable,Collisible {
     public roof: Array<any>;
     public door: Array<any>;
     public window: Array<any>;
-    constructor(position: Array<number>) {//size = 6*6
+    constructor() {//size = 6*6
         super();
-        let [x, y, z] = position;
+        //let [x, y, z] = position;
         this.material = new NoneMaterial;
         this.building = [
-            new Cube(4, 5, 4, [x, y, z]),
-            new Cube(1.5, 6, 1.5, [x - 1, y, z + 1]),
-            new Cube(1.5, 6, 1.5, [x + 3.5, y, z + 1]),
-            new Cube(1.5, 6, 1.5, [x - 1, y, z - 3.5]),
-            new Cube(1.5, 6, 1.5, [x + 3.5, y, z - 3.5])
+            new Cube(4, 5, 4, [0, 0, 0],null),
+            new Cube(1.5, 6, 1.5, [- 1, 0,  1],null),
+            new Cube(1.5, 6, 1.5, [3.5, 0,  1],null),
+            new Cube(1.5, 6, 1.5, [- 1, 0,  - 3.5],null),
+            new Cube(1.5, 6, 1.5, [ 3.5, 0, - 3.5],null)
         ];
         this.roof = [
-            new Tri_prism(4, 0.8, 4, [x, y + 4.9999, z]),
-            new Rect_pyramid(1.5, 1.2, [x - 1, y + 5.9999, z + 1]),
-            new Rect_pyramid(1.5, 1.2, [x + 3.5, y + 5.9999, z + 1]),
-            new Rect_pyramid(1.5, 1.2, [x - 1, y + 5.9999, z - 3.5]),
-            new Rect_pyramid(1.5, 1.2, [x + 3.5, y + 5.9999, z - 3.5])
+            new Tri_prism(4, 0.8, 4, [0, 0 + 4.9999, 0],null),
+            new Rect_pyramid(1.5, 1.2, [ - 1,  5.9999,  + 1],null),
+            new Rect_pyramid(1.5, 1.2, [ + 3.5,  + 5.9999,  + 1],null),
+            new Rect_pyramid(1.5, 1.2, [ - 1,  + 5.9999,  - 3.5],null),
+            new Rect_pyramid(1.5, 1.2, [ + 3.5,  + 5.9999,  - 3.5],null)
         ];
         this.door = [
-            new Cube(1.8, 2, 0.01, [x + 1.1, y + 0, z + 0.005]),
-            new HalfCircle3D(0.9, 0.9, [x + 1.1, y + 2, z + 0.00001]),
+            new Cube(1.8, 2, 0.01, [ + 1.1,  + 0,  + 0.005],null),
+            new HalfCircle3D(0.9, 0.9, [ + 1.1,  + 2,  + 0.00001],30,null),
         ];
         this.window = [
-            new Cube(0.6, 0.8, 0.01, [x - 0.55, y, z + 1.0005]),
-            new HalfCircle3D(0.3, 0.3, [x - 0.55, y + 0.8, z + 1.000001]),
-            new Cube(0.6, 0.8, 0.01, [x - 0.55, y + 2, z + 1.0005]),
-            new HalfCircle3D(0.3, 0.3, [x - 0.55, y + 2.8, z + 1.000001]),
-            new Cube(0.6, 0.8, 0.01, [x - 0.55, y + 4, z + 1.0005]),
-            new HalfCircle3D(0.3, 0.3, [x - 0.55, y + 4.8, z + 1.000001]),
-            new Cube(0.6, 0.8, 0.01, [x + 3.95, y, z + 1.0005]),
-            new HalfCircle3D(0.3, 0.3, [x + 3.95, y + 0.8, z + 1.000001]),
-            new Cube(0.6, 0.8, 0.01, [x + 3.95, y + 2, z + 1.0005]),
-            new HalfCircle3D(0.3, 0.3, [x + 3.95, y + 2.8, z + 1.000001]),
-            new Cube(0.6, 0.8, 0.01, [x + 3.95, y + 4, z + 1.0005]),
-            new HalfCircle3D(0.3, 0.3, [x + 3.95, y + 4.8, z + 1.000001]),
+            new Cube(0.6, 0.8, 0.01, [ - 0.55, 0,  + 1.0005],null),
+            new HalfCircle3D(0.3, 0.3, [ - 0.55,  + 0.8,  + 1.000001],30,null),
+            new Cube(0.6, 0.8, 0.01, [ - 0.55,  + 2,  + 1.0005],null),
+            new HalfCircle3D(0.3, 0.3, [ - 0.55,  + 2.8,  + 1.000001],30,null),
+            new Cube(0.6, 0.8, 0.01, [ - 0.55,  + 4,  + 1.0005],null),
+            new HalfCircle3D(0.3, 0.3, [ - 0.55,  + 4.8,  + 1.000001],30,null),
+            new Cube(0.6, 0.8, 0.01, [ + 3.95, 0,  + 1.0005],null),
+            new HalfCircle3D(0.3, 0.3, [ + 3.95,  + 0.8,  + 1.000001],30,null),
+            new Cube(0.6, 0.8, 0.01, [ + 3.95,  + 2,  + 1.0005],null),
+            new HalfCircle3D(0.3, 0.3, [ + 3.95,  + 2.8,  + 1.000001],30,null),
+            new Cube(0.6, 0.8, 0.01, [ + 3.95,  + 4,  + 1.0005],null),
+            new HalfCircle3D(0.3, 0.3, [ + 3.95,  + 4.8,  + 1.000001],30,null),
         ]
         this.collision=new Collision(ImpactType.ball,3);
-        this.collision.setPosition(position);
+        this.collision.setPosition(this.position);
     }
     initBuffer(gl: GL): void {
-        let _gl = gl.gl;
-        this.buffers = {
-            positions: {},
-            normals: {}
-        }
+
         //building
-        this.buffers.positions.building = [];
-        this.buffers.normals.building = [];
         for (let i in this.building) {
-            let tempPBuf = _gl.createBuffer();
-            this.buffers.positions.building.push(tempPBuf);
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, tempPBuf);
-            _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.building[i].vertices), _gl.STATIC_DRAW);
-            let tempNBuf = _gl.createBuffer();
-            this.buffers.normals.building.push(tempNBuf);
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, tempNBuf);
-            _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.building[i].normals), _gl.STATIC_DRAW);
+            this.building[i].initBuffer(gl)
         }
         //roof
-        this.buffers.positions.roof = [];
-        this.buffers.normals.roof = [];
-
         for (let i in this.roof) {
-            let tempPBuf = _gl.createBuffer();
-            this.buffers.positions.roof.push(tempPBuf);
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, tempPBuf);
-            _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.roof[i].vertices), _gl.STATIC_DRAW);
-            let tempNBuf = _gl.createBuffer();
-            this.buffers.normals.roof.push(tempNBuf);
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, tempNBuf);
-            _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.roof[i].normals), _gl.STATIC_DRAW);
+            this.roof[i].initBuffer(gl)   
         }
         //door
-        this.buffers.positions.door = [];
-        this.buffers.normals.door = [];
-
         for (let i in this.door) {
-            let tempPBuf = _gl.createBuffer();
-            this.buffers.positions.door.push(tempPBuf);
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, tempPBuf);
-            _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.door[i].vertices), _gl.STATIC_DRAW);
-            let tempNBuf = _gl.createBuffer();
-            this.buffers.normals.door.push(tempNBuf);
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, tempNBuf);
-            _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.door[i].normals), _gl.STATIC_DRAW);
+            this.door[i].initBuffer(gl)
         }
         //window
-        this.buffers.positions.window = [];
-        this.buffers.normals.window = [];
         for (let i in this.window) {
-            let tempPBuf = _gl.createBuffer();
-            this.buffers.positions.window.push(tempPBuf);
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, tempPBuf);
-            _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.window[i].vertices), _gl.STATIC_DRAW);
-            let tempNBuf = _gl.createBuffer();
-            this.buffers.normals.window.push(tempNBuf);
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, tempNBuf);
-            _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.window[i].normals), _gl.STATIC_DRAW);
+            this.window[i].initBuffer(gl)
         }
-        //wall
-        // this.buffers.positions.wall = [];
-        // for(let i in this.wall){
-        //     let tempPBuf = _gl.createBuffer();
-        //     this.buffers.positions.wall.push(tempPBuf);
-        //     _gl.bindBuffer(_gl.ARRAY_BUFFER, tempPBuf);
-        //     _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.wall[i].vertices), _gl.STATIC_DRAW);
-        // }
+        
 
     }
     draw(gl: GL, self: boolean = true): void {
         let _gl = gl.gl;
         _gl.uniform1i(gl.programInfo.uniformLocations.bTexCoordLocation, 0);
-
-        //光照处理
-        let lt = gl.currentLight;
-        let ambientProduct = Util.Vec4Mult(lt.lightAmbient, this.material.materialAmbient);
-        let diffuseProduct = Util.Vec4Mult(lt.lightDiffuse, this.material.materialDiffuse);
-        let specularProduct = Util.Vec4Mult(lt.lightSpecular, this.material.materialSpecular);
-        _gl.uniform4fv(gl.programInfo.uniformLocations.ambientVectorLoc, new Float32Array(ambientProduct));
-        _gl.uniform4fv(gl.programInfo.uniformLocations.diffuseVectorLoc, new Float32Array(diffuseProduct));
-        _gl.uniform4fv(gl.programInfo.uniformLocations.specularVectorLoc, new Float32Array(specularProduct));
-        _gl.uniform1f(gl.programInfo.uniformLocations.shininessLoc, this.material.materialShininess);
-
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));
-        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.normalMatrixLoc, false, flatten(this.rotateMatrix));
 
         //building
-        _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
-        _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexNormal);
-
         for (let i in this.building) {
-
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.building[i]);
-            _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.normals.building[i]);
-            _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexNormal, 3, _gl.FLOAT, false, 0, 0);
-            _gl.drawArrays(_gl.TRIANGLES, 0, this.building[i].vertices.length / 3)
-
+            this.building[i].draw(gl,false);
         }
         //roof
         for (let i in this.roof) {
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.roof[i]);
-            _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.normals.roof[i]);
-            _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexNormal, 3, _gl.FLOAT, false, 0, 0);
-            _gl.drawArrays(_gl.TRIANGLES, 0, this.roof[i].vertices.length / 3)
+            this.roof[i].draw(gl,false)
         }
         //door
         for (let i in this.door) {
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.door[i]);
-            _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.normals.door[i]);
-            _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexNormal, 3, _gl.FLOAT, false, 0, 0);
-            _gl.drawArrays(_gl.TRIANGLES, 0, this.door[i].vertices.length / 3)
+            this.door[i].draw(gl,false)
         }
         //window
         for (let i in this.window) {
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.window[i]);
-            _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-            _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.normals.window[i]);
-            _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexNormal, 3, _gl.FLOAT, false, 0, 0);
-            _gl.drawArrays(_gl.TRIANGLES, 0, this.window[i].vertices.length / 3)
+            this.window[i].draw(gl,false)
         }
-        //wall
-        //  for (let i in this.wall) {
-        //      _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.wall[i]);
-        //      _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
-        //      _gl.drawArrays(_gl.TRIANGLE_FAN, 0, this.wall[i].vertices.length / 3)
-        //  }
-
-        _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
-        _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexNormal);
+    }
+    public rotate(delta: number, related = true, axisType = 0): boolean {
+        for(let i in this.window){
+            this.window[i].rotate(delta,related,axisType)
+        }
+        for(let i in this.building){
+            this.building[i].rotate(delta,related,axisType)
+        }
+        for(let i in this.roof){
+            this.roof[i].rotate(delta,related,axisType)
+        }
+        for(let i in this.door){
+            this.door[i].rotate(delta,related,axisType)
+        }
+        
+        return super.rotate(delta, related, axisType);
 
     }
+    public translate(distance: number, direction: number, related = true) {
+        for(let i in this.window){
+            this.window[i].translate(distance, direction, related)
+        }
+        for(let i in this.building){
+            this.building[i].translate(distance, direction, related)
+        }
+        for(let i in this.roof){
+            this.roof[i].translate(distance, direction, related)
+        }
+        for(let i in this.door){
+            this.door[i].translate(distance, direction, related)
+        }
+        
+        return super.translate(distance, direction, related);
+    }
+    public zoom(size: number, related: boolean){
+        for(let i in this.window){
+            this.window[i].zoom(size,related)
+        }
+        for(let i in this.building){
+            this.building[i].zoom(size,related)
+        }
+        for(let i in this.roof){
+            this.roof[i].zoom(size,related)
+        }
+        for(let i in this.door){
+            this.door[i].zoom(size,related)
+        }
+        this.collision.zoom(size);
+        return super.zoom(size,related);
 
+    }
 }
