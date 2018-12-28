@@ -100,13 +100,14 @@ export class Ellipsoid extends Translatable implements Drawable,Shaded {
         _gl.uniform4fv(gl.programInfo.uniformLocations.diffuseVectorLoc, new Float32Array(diffuseProduct));
         _gl.uniform4fv(gl.programInfo.uniformLocations.specularVectorLoc, new Float32Array(specularProduct));
         _gl.uniform1f(gl.programInfo.uniformLocations.shininessLoc, this.material.materialShininess);
-        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.normalMatrixLoc, false, flatten(this.rotateMatrix));
 
         if (self) {
+            _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.normalMatrixLoc, false, flatten(this.rotateMatrix));
             _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));
         }
         _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
         _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexNormal);
+        _gl.enableVertexAttribArray(gl.programInfo.attribLocations.texcoordLocation);
 
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.position);
         _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
@@ -115,32 +116,32 @@ export class Ellipsoid extends Translatable implements Drawable,Shaded {
 
         //纹理
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.texture);
-        _gl.enableVertexAttribArray(gl.programInfo.attribLocations.texcoordLocation);
         _gl.vertexAttribPointer(gl.programInfo.attribLocations.texcoordLocation, 2, _gl.FLOAT, false, 0, 0);
 
         _gl.drawArrays(_gl.TRIANGLE_STRIP, 0, this.vertices.length / 3)
 
-        _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexNormal);
 
         //this.drawNormals(gl);
+        _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexNormal);
         _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
         _gl.disableVertexAttribArray(gl.programInfo.attribLocations.texcoordLocation);
 
         if(this.shaded){
-            this.drawShadow(gl);
+            this.drawShadow(gl,self);
         }
     }
-    drawShadow(gl: GL): void {
+    drawShadow(gl: GL,self:boolean): void {
         let _gl=gl.gl;
-        let transMatrix = mat4();
-        transMatrix =mult(translate(...Util.Mat4Vec(mat4(-1),gl.currentLight.position)),this.modelMatrix);
-        let m=mat4();
-        m[3][3]=0;
-        m[3][1]=-1/(gl.currentLight.position[1]-0.01);
-        transMatrix=mult(m,transMatrix);
-        transMatrix = mult(translate(...gl.currentLight.position), transMatrix);
-        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(transMatrix));
-
+        if (self) {
+            let transMatrix = mat4();
+            transMatrix = mult(translate(...Util.Mat4Vec(mat4(-1), gl.currentLight.position)), this.modelMatrix);
+            let m = mat4();
+            m[3][3] = 0;
+            m[3][1] = -1 / (gl.currentLight.position[1] - 0.01);
+            transMatrix = mult(m, transMatrix);
+            transMatrix = mult(translate(...gl.currentLight.position), transMatrix);
+            _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(transMatrix));
+        }
         _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.position);
         _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);

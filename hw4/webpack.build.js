@@ -25,11 +25,6 @@ module.exports = {
             exclude: /node_modules/,
             include:path.join(__dirname,'image'),
             use:"url-loader"
-        },{
-            test:/\.(jpg|png|gif|bmp|svg)$/,
-            exclude: /node_modules/,
-            include:path.join(__dirname,'image'),
-            use:"file-loader"
         }]
     },
     resolve: {

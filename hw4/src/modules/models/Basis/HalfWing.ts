@@ -130,7 +130,7 @@ export class HalfWing extends Translatable implements Drawable,Shaded {
         for (let i in this.flats) {
             _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.texture.flats[i]);
             _gl.vertexAttribPointer(gl.programInfo.attribLocations.texcoordLocation, 2, _gl.FLOAT, false, 0, 0);
-     
+
             _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.flatWings[i]);
             _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
             _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.normals.flatWings[i]);
@@ -141,7 +141,7 @@ export class HalfWing extends Translatable implements Drawable,Shaded {
         }
         _gl.disableVertexAttribArray(gl.programInfo.attribLocations.texcoordLocation);
 
-        
+
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.positions.ringWing);
         _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.normals.ringWing);
@@ -158,16 +158,18 @@ export class HalfWing extends Translatable implements Drawable,Shaded {
     clearShaded():void{
         this.shaded=false;
     }
-    drawShadow(gl: GL): void {
+    drawShadow(gl: GL,self:boolean): void {
         let _gl=gl.gl;
-        let transMatrix = mat4();
-        transMatrix =mult(translate(...Util.Mat4Vec(mat4(-1),gl.currentLight.position)),this.modelMatrix);
-        let m=mat4();
-        m[3][3]=0;
-        m[3][1]=-1/(gl.currentLight.position[1]-0.01);
-        transMatrix=mult(m,transMatrix);
-        transMatrix = mult(translate(...gl.currentLight.position), transMatrix);
-        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(transMatrix));
+        if (self) {
+            let transMatrix = mat4();
+            transMatrix = mult(translate(...Util.Mat4Vec(mat4(-1), gl.currentLight.position)), this.modelMatrix);
+            let m = mat4();
+            m[3][3] = 0;
+            m[3][1] = -1 / (gl.currentLight.position[1] - 0.01);
+            transMatrix = mult(m, transMatrix);
+            transMatrix = mult(translate(...gl.currentLight.position), transMatrix);
+            _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(transMatrix));
+        }
 
         _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
         for (let i in this.flats) {

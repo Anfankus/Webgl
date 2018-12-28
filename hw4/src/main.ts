@@ -15,16 +15,18 @@ import { Light } from './modules/scene/Light';
 import { Sky } from './modules/models/Sky';
 import { Translatable } from './modules/interface/Translatable';
 import Void from './modules/models/Void';
-
+import { Tri_prism } from './modules/models/Basis/Tri_prism';
+import { Rect_pyramid } from './modules/models/Basis/Rect_pyramid';
 //
 alert(' 使用提示：\n 开始游戏：p  视角切换：b  视角锁定：f \n 向上运动：space  左：←  右：→\n 用鼠标选中界面并拖动即可切换视角，滑动滚轮即可放大和缩小\n 未绑定视角时可以使用w,a,s,d移动视野中心\n 如果你已了解，那么请开始吧！💪');
 
 let but = new ButterFly; but.translate(-10, 1); but.translate(5, 2); but.translate(-2, 3); but.rotate(180, true, 5); but.rotate(90, true, 4);
 let ball = new Ellipsoid(30, 50, [0, 0, 0], '0xfffff'); ball.setMaterial(new MetalMaterial); ball.translate(150, 2);
 let ground = new Ground([0, 0, 0], 500); ground.setMaterial(new GroundMaterial);
-//let church = new Church([10, -20, 0]); church.setMaterial(new MetalMaterial);
+// let church =new Rect_pyramid(1.5, 1.2, [ - 1-2,  5.9999, + 1+2],null); church.setMaterial(new MetalMaterial);
 //let house = new House([0, -20, 0]); house.setMaterial(new MetalMaterial);
-let VoidObj = new Void; VoidObj.rotate(-90, true, 4);
+let VoidObj = new Void; VoidObj.rotate(-90, true, 4);VoidObj.translate(-10, 1); VoidObj.translate(2, 2); VoidObj.translate(-2, 3);
+let l = new Light;l.translate(150,1);
 let sky = new Sky;
 let x = -105;
 let z = -105;
@@ -33,7 +35,7 @@ let building=[];
 for(;z <= 89;z = z+35){
     for(;x <= 80;){
         let num = Math.floor(Math.random()*10+1);
-      
+
         if(num <=7){//house 22.5
             temp = new House()
             temp.zoom(2.5);temp.translate(x+2.5,1);temp.translate(z-2.5,3);
@@ -53,6 +55,16 @@ for(;z <= 89;z = z+35){
         else{//church 15
             temp = new Church()
             temp.zoom(2.5);temp.translate(x+2.5,1);temp.translate(z-2,3)
+            let r = Math.floor(Math.random()*4+1);
+            if(r == 1){
+                temp.rotate(90,true,2);//temp.translate(z+22.5,3);
+            }
+            else if(r == 2){
+                temp.rotate(180,true,2);//temp.translate(x+22.5,1);temp.translate(z+18,3)
+            }
+            else if(r == 3){
+                temp.rotate(270,true,2);//temp.translate(x+18,1);
+            }
             building.push(temp)
             x = x+35
         }
@@ -61,60 +73,53 @@ for(;z <= 89;z = z+35){
 }
 
 //初始相机初始化
-let camera1 = new Camera;
+let camera = new Camera;
 let [radius, theta, phi] = [10, 0, 45]
-camera1.view(radius, theta, phi);
-camera1.bind(VoidObj);
+camera.view(radius, theta, phi);
+camera.bind(VoidObj);
 
 
 //场景对象添加
 let stateButterFly = {
     butt: but,
     height: 10,
-    speedX: 2,
+    speedX: 5,
     speedY: 0,
     get speed(): number {
         return Math.sqrt(this.speedX ** 2 + this.speedY ** 2)
-    },
-    turn: {
-        state: 0,
-        $degree: 0,
-        set degree(val) {
-            if (!this.state) {
-
-            }
-        }
     }
 }
 let vue = new Vue({
-    el: '#camera',
+    el: '#app',
     mounted() {
         //构造画布
         var _gl = new GL;
-        camera1.setCanvas(_gl.gl.canvas);
-        _gl.addCameras(camera1);
-        _gl.switchCamera(camera1);
-        //光源ball,church,groundchurch, househouse, church
-        let l = new Light;
+        camera.setCanvas(_gl.gl.canvas);
+        _gl.addCameras(camera);
+        _gl.switchCamera(camera);
+        //光源ball,church,groundchurch, househouse,,church, church
         _gl.addLights(l);
         _gl.switchLight(l);
-        _gl.addObjects(but,...building , ground, sky);
+        _gl.addObjects(but,...building, ground, sky );
         _gl.addCollisible(but,...building , ground);
-        _gl.addShaded(but);
+        _gl.addShaded(but,...building);
         this.glOb = _gl;
         this.bound = VoidObj;
         this.play();
     },
     data() {
         return {
-            camera: camera1,
+            camera: camera,
             glOb: null,
+
             theta: theta,
             phi: phi,
             radius: radius,
             move: false,
             fixed: false,
-            bound: null
+            bound: null,
+
+            frames:0
         }
     },
     watch: {
@@ -150,14 +155,16 @@ let vue = new Vue({
 
                 if (gl.ready >= 4) {
                     let lastTime = now - then;
+                    self.frames=Math.floor(1/lastTime);
                     //翅膀扇动
                     let relatedDegree = (lastTime * (flap + 2)) * flap * 50;
-                    let n=Math.abs((degree + relatedDegree+90)%180-90)
-                    if (n> range / 2) {
+                    let nextDegree=Math.abs((degree + relatedDegree+90)%180-90);
+                    if ( nextDegree> range / 2) {
                         relatedDegree *= -1;
                         flap *= -1;
                     }
                     but.flap(relatedDegree);
+                    degree += relatedDegree;
 
                     //蝴蝶下坠并前进
                     if (vue.move) {
@@ -204,13 +211,18 @@ let vue = new Vue({
             this.move = !this.move;
         },
         switchFixed() {
+            if (this.bound === VoidObj) {
+                return;
+            }
             this.fixed = !this.fixed;
         },
         switchBound() {
             if (this.bound !== VoidObj) {
                 this.camera.bind(VoidObj);
+                this.bound=VoidObj;
             } else {
                 this.camera.bind(but);
+                this.bound=but;
             }
         }
     }
@@ -233,6 +245,9 @@ if (ele) {
         }
     }
     window.onwheel = function (e) {
+        if(vue.bound&&vue.fixed){
+            return;
+        }
         let temp = 0;
         if (5 < vue.radius && vue.radius < 50) {
             temp = (vue.radius) + e.deltaY / 50;
@@ -262,6 +277,25 @@ if (ele) {
             case 40://↓
                 but.translate(-0.3, 0);
                 break;
+            case 104:
+                l.translate(8, 2);
+                break;
+            case 98:
+                l.translate(-8, 2);
+            break;
+            case 100:
+                l.translate(-8, 1);
+            break;
+            case 102:
+                l.translate(8, 1);
+                break;
+            case 103:
+                l.translate(8, 3);
+                break;
+            case 105:
+                l.translate(-8, 3);
+                break;
+
         }
         switch (e.key) {
             case 'w':

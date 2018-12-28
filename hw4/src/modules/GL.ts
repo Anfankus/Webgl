@@ -11,7 +11,6 @@ import p1 from "../../image/grass2.jpg";
 import p2 from "../../image/sun.jpg";
 import p3 from "../../image/sky.jpg";
 import p4 from "../../image/huaw-2.jpg";
-import p5 from "../../image/strip.png";
 export default class GL {
     public gl: WebGLRenderingContext;
     public programInfo: any;
@@ -77,7 +76,6 @@ export default class GL {
         this.initTexture(this.programInfo.uniformLocations.texture1Location,p2,1);
         this.initTexture(this.programInfo.uniformLocations.texture2Location,p3,2,1);
         this.initTexture(this.programInfo.uniformLocations.texture3Location,p4,3);
-        this.initTexture(this.programInfo.uniformLocations.texture4Location,p5,4);
     }
     public addObjects(...obs: Array<Drawable>) {
         for (let i of obs) {
