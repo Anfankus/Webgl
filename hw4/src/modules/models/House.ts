@@ -12,11 +12,17 @@ import { Tri_prism } from "./Basis/Tri_prism";
 import { SunMaterial } from "../materials/SunMaterial";
 import { SkyMaterial } from "../materials/SkyMaterial";
 import Shaded from "../interface/Shaded";
+import { WindowMaterial } from "../materials/WindowMaterial";
+import { HouseMaterial } from "../materials/HouseMaterial";
+import { HouseRoofMaterial } from "../materials/HouseRoofMaterial";
+import { GateMaterial } from "../materials/GateMaterial";
+import { WallMaterial } from "../materials/WallMaterial";
 
 export class House extends Translatable implements Drawable,Collisible,Shaded{//size = 9*7 center(3.5,-2.5)
+    shaded: boolean
     collision:Collision;
     material: Material;
-    shaded:boolean;
+
     buffers: any;
     public building:Array<Cube>;
     public roof:Array<Tri_prism>;
@@ -35,13 +41,15 @@ export class House extends Translatable implements Drawable,Collisible,Shaded{//
         ];
         this.roof = [
             new Tri_prism(6,0.8,4,[-0.5-3.5,2.9998,0+2.5],null),
-            new Tri_prism(3.5,0.5,2.5,[-0.25-3.5,5.6999,-1.5+2.5],null)
+            new Tri_prism(3.5,0.5,2.5,[-0.25-3.5,5.6999,-1.5+2.5],null),
+            new Tri_prism(3,0.5,2.5,[4.9999-4,2.9998,-1.5+2.5],null)
         ];
+
         this.door = [
-            new Cube(1,1.8,0.1,[+5.5-3.5,0,-1.55+2.5],null)
+            new Cube(1,1.8,0.1,[+5.5-3.5,0,-1.49+2.5],null)
         ];
         this.window = [//数据有点问题，等加了纹理再调
-            new Cube(2,1.5,0.06,[1.5-3.5,0.8,-0.05+2.5],null),
+            new Cube(2,1.5,0.06,[1.5-3.5,0.8,0.01+2.5],null),
             new Cube(0.06,1.5,2,[-0.01-3.5,0.8,-1+2.5],null),
             new Cube(0.06,1.3,1.5,[-0.01-3.5,3.7,-2+2.5],null),
         ];
@@ -51,6 +59,21 @@ export class House extends Translatable implements Drawable,Collisible,Shaded{//
             new Cube(9,2,0.2,[-1-3.5,0,-5+2.5],null),
             new Cube(0.2,2,6,[7.7999-3.5,0.00001,0.9999+2.5],null),
         ];
+        for(let i in this.roof){
+            this.roof[i].setMaterial(new HouseRoofMaterial)
+        }
+        for(let i in this.wall){
+            this.wall[i].setMaterial(new WallMaterial)
+        }
+        for(let i in this.door){
+            this.door[i].setMaterial(new GateMaterial)
+        }
+        for(let i in this.building){
+            this.building[i].setMaterial(new HouseMaterial)
+        }
+        for(let i in this.window){
+            this.window[i].setMaterial(new WindowMaterial)
+        }
         this.collision=new Collision(ImpactType.ball,4);
         this.collision.setPosition(this.position);
     }
@@ -79,7 +102,7 @@ export class House extends Translatable implements Drawable,Collisible,Shaded{//
 
     }
 
-  draw(gl: GL, self: boolean = true): void {
+    draw(gl: GL, self: boolean = true): void {
         let _gl = gl.gl;
         _gl.uniform1i(gl.programInfo.uniformLocations.bTexCoordLocation, 0);
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.normalMatrixLoc, false, flatten(this.rotateMatrix));
@@ -102,7 +125,7 @@ export class House extends Translatable implements Drawable,Collisible,Shaded{//
             this.window[i].draw(gl,false)
         }
          //wall
-         for (let i in this.wall) {
+        for (let i in this.wall) {
              this.wall[i].draw(gl,false)
          }
          if(this.shaded){

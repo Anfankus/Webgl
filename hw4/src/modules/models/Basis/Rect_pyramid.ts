@@ -3,13 +3,14 @@ import Drawable from "../../interface/Drawable";
 import { Material } from "../../interface/Material";
 import GL from "../../GL";
 import { Util } from "../../Util";
-import { flatten, mat4, mult, translate } from "../../MV";
+import { flatten, mat4, translate, mult, subtract, cross, dot, negate, normalize, add, scale } from "../../MV";
 import { SunMaterial } from "../../materials/SunMaterial";
 import Shaded from "../../interface/Shaded";
-export class Rect_pyramid extends Translatable implements Drawable,Shaded {
+export class Rect_pyramid extends Translatable implements Shaded,Drawable {
+    shaded: boolean
+    choice: number
     buffers: any;
     material: Material;
-    shaded:boolean;
     public vertices: Array<number>;
     public normals: Array<number>;
     constructor(l = 3 , h, a = [0,0,0],color: string | Array<number>){
@@ -51,7 +52,7 @@ export class Rect_pyramid extends Translatable implements Drawable,Shaded {
             0,Math.sqrt(1/((4*h**2/l**2)+1)),-2*h/l*Math.sqrt(1/((4*h**2/l**2)+1)),
             0,Math.sqrt(1/((4*h**2/l**2)+1)),-2*h/l*Math.sqrt(1/((4*h**2/l**2)+1)),
             0,Math.sqrt(1/((4*h**2/l**2)+1)),-2*h/l*Math.sqrt(1/((4*h**2/l**2)+1)),
-        ]
+        ];
     }
     initBuffer(gl:GL):void{
         let _gl = gl.gl;
@@ -89,10 +90,10 @@ export class Rect_pyramid extends Translatable implements Drawable,Shaded {
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.normal);
         _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexNormal, 3, _gl.FLOAT, false, 0, 0);
 
-        _gl.drawArrays(_gl.TRIANGLE_STRIP, 0, this.vertices.length / 3)
+        _gl.drawArrays(_gl.TRIANGLES, 0, this.vertices.length / 3)
 
         _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexNormal);
-         //this.drawNormals(gl);
+        //  this.drawNormals(gl);
          _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
          if(this.shaded){
             this.drawShadow(gl,self);

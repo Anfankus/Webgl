@@ -15,16 +15,18 @@ import { Light } from './modules/scene/Light';
 import { Sky } from './modules/models/Sky';
 import { Translatable } from './modules/interface/Translatable';
 import Void from './modules/models/Void';
-//alert(' 使用提示：\n 开始游戏：p  视角切换：b  视角锁定：f \n 向上运动：space  左：←  右：→\n 用鼠标选中界面并拖动即可切换视角，滑动滚轮即可放大和缩小\n 未绑定视角时可以使用w,a,s,d移动视野中心\n 如果你已了解，那么请开始吧！');
+import { Tri_prism } from './modules/models/Basis/Tri_prism';
+import { Rect_pyramid } from './modules/models/Basis/Rect_pyramid';
+//
+alert(' 使用提示：\n 开始游戏：p  视角切换：b  视角锁定：f \n 向上运动：space  左：←  右：→\n 用鼠标选中界面并拖动即可切换视角，滑动滚轮即可放大和缩小\n 未绑定视角时可以使用w,a,s,d移动视野中心\n 如果你已了解，那么请开始吧！');
 
 let but = new ButterFly; but.translate(-10, 1); but.translate(5, 2); but.translate(-2, 3); but.rotate(180, true, 5); but.rotate(90, true, 4);
 let ball = new Ellipsoid(30, 50, [0, 0, 0], '0xfffff'); ball.setMaterial(new MetalMaterial); ball.translate(150, 2);
 let ground = new Ground([0, 0, 0], 500); ground.setMaterial(new GroundMaterial);
-let church = new Church(); church.setMaterial(new MetalMaterial);church.translate(-3,1);church.rotate(45,true,2);
+// let church =new Rect_pyramid(1.5, 1.2, [ - 1-2,  5.9999, + 1+2],null); church.setMaterial(new MetalMaterial);
 //let house = new House([0, -20, 0]); house.setMaterial(new MetalMaterial);
-let VoidObj = new Void; VoidObj.rotate(-90, true, 4);
-let l = new Light;l.translate(100,1);
-
+let VoidObj = new Void; VoidObj.rotate(-90, true, 4);VoidObj.translate(-10, 1); VoidObj.translate(2, 2); VoidObj.translate(-2, 3);
+let l = new Light;l.translate(150,1);
 let sky = new Sky;
 let x = -105;
 let z = -105;
@@ -53,6 +55,16 @@ for(;z <= 89;z = z+35){
         else{//church 15
             temp = new Church()
             temp.zoom(2.5);temp.translate(x+2.5,1);temp.translate(z-2,3)
+            let r = Math.floor(Math.random()*4+1);
+            if(r == 1){
+                temp.rotate(90,true,2);//temp.translate(z+22.5,3);
+            }
+            else if(r == 2){
+                temp.rotate(180,true,2);//temp.translate(x+22.5,1);temp.translate(z+18,3)
+            }
+            else if(r == 3){
+                temp.rotate(270,true,2);//temp.translate(x+18,1);
+            }
             building.push(temp)
             x = x+35
         }

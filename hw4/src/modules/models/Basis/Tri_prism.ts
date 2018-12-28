@@ -3,13 +3,14 @@ import Drawable from "../../interface/Drawable";
 import { Material } from "../../interface/Material";
 import GL from "../../GL";
 import { Util } from "../../Util";
-import { flatten, mult, mat4, translate } from "../../MV";
+import { flatten, mat4, mult, translate, subtract, cross, dot, negate, normalize, add, scale } from "../../MV";
 import { NoneMaterial } from "../../materials/NoneMaterial";
 import Shaded from "../../interface/Shaded";
 export class Tri_prism extends Translatable implements Drawable,Shaded {
+    shaded: boolean
+    choice: number
     buffers: any;
     material: Material;
-    shaded:boolean;
     public vertices: Array<number>;
     public normals: Array<number>;
     //color用处
@@ -36,11 +37,9 @@ export class Tri_prism extends Translatable implements Drawable,Shaded {
             ...a,...b,...c,
             ...a,...d,...c,
         ];
-        this.normals = [
+        this.normals = [//da[0,0,-l]ae[s/2,-h,0]
             0,0,1, 0,0,1, 0,0,1,
-
             0,0,-1, 0,0,-1, 0,0,-1,
-
             2*h/Math.sqrt(4*h**2+s**2),s/Math.sqrt(4*h**2+s**2),0,
             2*h/Math.sqrt(4*h**2+s**2),s/Math.sqrt(4*h**2+s**2),0,
             2*h/Math.sqrt(4*h**2+s**2),s/Math.sqrt(4*h**2+s**2),0,
@@ -58,6 +57,7 @@ export class Tri_prism extends Translatable implements Drawable,Shaded {
             0,-1,0, 0,-1,0, 0,-1,0,
             0,-1,0, 0,-1,0, 0,-1,0,
         ];
+
     }
     initBuffer(gl:GL):void{
         let _gl = gl.gl;
@@ -95,7 +95,7 @@ export class Tri_prism extends Translatable implements Drawable,Shaded {
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.normal);
         _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexNormal, 3, _gl.FLOAT, false, 0, 0);
 
-        _gl.drawArrays(_gl.TRIANGLE_STRIP, 0, this.vertices.length / 3)
+        _gl.drawArrays(_gl.TRIANGLES, 0, this.vertices.length / 3)
 
         _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexNormal);
          //this.drawNormals(gl);

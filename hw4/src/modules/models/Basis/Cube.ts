@@ -12,7 +12,6 @@ export class Cube extends Translatable implements Drawable,Shaded {
     shaded:boolean;
     public vertices: Array<number>;
     public normals: Array<number>;
-    //color用处
     constructor(l = 5,h = 5,w = 5,center = [0,0,0],color: string | Array<number>){
         super();
         this.material = new SkyMaterial;
@@ -76,9 +75,11 @@ export class Cube extends Translatable implements Drawable,Shaded {
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.normal);
         _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(this.normals), _gl.STATIC_DRAW);
     }
-
     draw(gl:GL, self: boolean = true): void{
         let _gl = gl.gl;
+        //_gl.uniform1i(gl.programInfo.uniformLocations.bTexCoordLocation, this.choice);
+
+
         //光照处理
         let lt = gl.currentLight;
         let ambientProduct = Util.Vec4Mult(lt.lightAmbient, this.material.materialAmbient);
@@ -100,7 +101,7 @@ export class Cube extends Translatable implements Drawable,Shaded {
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.normal);
         _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexNormal, 3, _gl.FLOAT, false, 0, 0);
 
-        _gl.drawArrays(_gl.TRIANGLE_STRIP, 0, this.vertices.length / 3)
+        _gl.drawArrays(_gl.TRIANGLES, 0, this.vertices.length / 3)
 
         _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexNormal);
          //this.drawNormals(gl);
@@ -136,5 +137,4 @@ export class Cube extends Translatable implements Drawable,Shaded {
     clearShaded():void{
         this.shaded=false;
     }
-
 }
