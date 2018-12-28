@@ -1,7 +1,7 @@
 import { flatten } from './MV'
 import Drawable from './interface/Drawable';
 import Camera from './models/Camera';
-import { Light } from './scene/Light';
+import { Sun } from './scene/Sun';
 import Collisible from './interface/Collisible';
 import Shaded from './interface/Shaded';
 import { Util } from './Util';
@@ -11,6 +11,7 @@ import p1 from "../../image/grass2.jpg";
 import p2 from "../../image/sun.jpg";
 import p3 from "../../image/sky.jpg";
 import p4 from "../../image/huaw-2.jpg";
+import { Light } from './scene/Light';
 export default class GL {
     public gl: WebGLRenderingContext;
     public programInfo: any;
@@ -99,7 +100,7 @@ export default class GL {
     }
     public addLights(...obs: Array<Light>) {
         for (let i of obs) {
-            this.addObjects(i);
+            i.initBuffer(this);
             this.lights.push(i);
         }
     }
@@ -112,7 +113,7 @@ export default class GL {
         else if (this.cameras.length <= 0 || !this.currentCamera) {
             throw '未指定摄像机';
         }
-        else if (this.lights.length <= 0 || !this.currentLight) {
+        else if (!this.currentLight) {
             throw '未指定光源';
         } {
             //this.resize();
@@ -128,6 +129,7 @@ export default class GL {
             for (let i of this.objects) {
                 i.draw(this, true);
             }
+            this.currentLight.draw(this,true);
         }
     }
     public impactChecking(target:Collisible):boolean{

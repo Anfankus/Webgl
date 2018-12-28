@@ -11,12 +11,13 @@ import { Church } from './modules/models/Church';
 import { NoneMaterial } from './modules/materials/NoneMaterial';
 import { MetalMaterial } from './modules/materials/MetalMaterial';
 import { GroundMaterial } from './modules/materials/GroundMaterial';
-import { Light } from './modules/scene/Light';
+import { Sun } from './modules/scene/Sun';
 import { Sky } from './modules/models/Sky';
 import { Translatable } from './modules/interface/Translatable';
 import Void from './modules/models/Void';
 import { Tri_prism } from './modules/models/Basis/Tri_prism';
 import { Rect_pyramid } from './modules/models/Basis/Rect_pyramid';
+import { Moon } from './modules/scene/Moon';
 //
 alert(' 使用提示：\n 开始游戏：p  视角切换：b  视角锁定：f \n 向上运动：space  左：←  右：→\n 用鼠标选中界面并拖动即可切换视角，滑动滚轮即可放大和缩小\n 未绑定视角时可以使用w,a,s,d移动视野中心\n 如果你已了解，那么请开始吧！');
 
@@ -26,7 +27,7 @@ let ground = new Ground([0, 0, 0], 500); ground.setMaterial(new GroundMaterial);
 // let church =new Rect_pyramid(1.5, 1.2, [ - 1-2,  5.9999, + 1+2],null); church.setMaterial(new MetalMaterial);
 //let house = new House([0, -20, 0]); house.setMaterial(new MetalMaterial);
 let VoidObj = new Void; VoidObj.rotate(-90, true, 4);VoidObj.translate(-10, 1); VoidObj.translate(2, 2); VoidObj.translate(-2, 3);
-let l = new Light;l.translate(150,1);
+let s=new Sun,m=new Moon;
 let sky = new Sky;
 let x = -105;
 let z = -105;
@@ -98,8 +99,8 @@ let vue = new Vue({
         _gl.addCameras(camera);
         _gl.switchCamera(camera);
         //光源ball,church,groundchurch, househouse,,church, church
-        _gl.addLights(l);
-        _gl.switchLight(l);
+        _gl.addLights(s,m);
+        _gl.switchLight(s);
         _gl.addObjects(but,...building, ground, sky );
         _gl.addCollisible(but,...building , ground);
         _gl.addShaded(but,...building);
@@ -155,7 +156,10 @@ let vue = new Vue({
 
                 if (gl.ready >= 4) {
                     let lastTime = now - then;
+                    let pastTime=now-start;
+                    //计算帧数
                     self.frames=Math.floor(1/lastTime);
+
                     //翅膀扇动
                     let relatedDegree = (lastTime * (flap + 2)) * flap * 50;
                     let nextDegree=Math.abs((degree + relatedDegree+90)%180-90);
@@ -178,15 +182,20 @@ let vue = new Vue({
                         c.view(vue.radius, vue.theta, vue.phi);
 
                     //太阳运动
-                    gl.currentLight.rotate(lastTime * 10, true, 7);
-                    sky.sunset(now - start);
+                    let riseSpeed=pastTime * 5
+                    for(let u of gl.lights){
+                        u.rotate(riseSpeed, false, 7);
+                    }
+                    sky.sunset(riseSpeed/10);
 
                     //阴影设置
-                    if (gl.currentLight.position[1] <= 0) {
+                    if (gl.lights[0].position[1] <= 1) {
+                        gl.switchLight(m);
                         for (let i of gl.shaded) {
-                            i.clearShaded();
+                            //i.clearShaded();
                         }
                     } else {
+                        gl.switchLight(s);
                         for (let i of gl.shaded) {
                             i.setShaded();
                         }
@@ -201,6 +210,8 @@ let vue = new Vue({
                         }
                     gl.drawScene();
 
+                }else{
+                    start=now;
                 }
                 then = now;
 
@@ -279,22 +290,22 @@ if (ele) {
                 but.translate(-0.3, 0);
                 break;
             case 104:
-                l.translate(8, 2);
+                vue.glOb.currentLight.translate(8, 2);
                 break;
             case 98:
-                l.translate(-8, 2);
+                vue.glOb.currentLight.translate(-8, 2);
             break;
             case 100:
-                l.translate(-8, 1);
+                vue.glOb.currentLight.translate(-8, 1);
             break;
             case 102:
-                l.translate(8, 1);
+                vue.glOb.currentLight.translate(8, 1);
                 break;
             case 103:
-                l.translate(8, 3);
+                vue.glOb.currentLight.translate(8, 3);
                 break;
             case 105:
-                l.translate(-8, 3);
+                vue.glOb.currentLight.translate(-8, 3);
                 break;
 
         }

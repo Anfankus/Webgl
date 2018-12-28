@@ -3,7 +3,7 @@ import Drawable from '../interface/Drawable'
 import { flatten, vec4, mult, mat4, translate } from '../MV'
 import GL from '../GL';
 import { Util } from '../Util';
-import { Light } from '../scene/Light';
+import { Sun } from '../scene/Sun';
 import { Material } from '../interface/Material';
 import { NoneMaterial } from '../materials/NoneMaterial';
 import { Ellipsoid } from './Basis/Ellipsoid';
