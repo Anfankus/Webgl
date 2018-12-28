@@ -191,11 +191,13 @@ let vue = new Vue({
                     //阴影设置
                     if (gl.lights[0].position[1] <= 1) {
                         gl.switchLight(m);
+                        sky.setChoice(5);
                         for (let i of gl.shaded) {
                             //i.clearShaded();
                         }
                     } else {
                         gl.switchLight(s);
+                        sky.setChoice(3);
                         for (let i of gl.shaded) {
                             i.setShaded();
                         }

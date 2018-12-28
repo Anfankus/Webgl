@@ -11,7 +11,7 @@ export class Sky extends Ellipsoid {
         for(let i in this.normals){
             this.normals[i]=-this.normals[i];
         }
-        this.setChoice(3);
+        this.setChoice(5);
     }
     public sunset(degree:number){
         let t=Math.sin((degree%36)/36*2*Math.PI)+0.2;
