@@ -54,7 +54,6 @@ export default class Camera {
         }
         this.cameraMatrix = lookAt(eye, at, up);
     }
-
     public bind(ob: Translatable) {
         this.ret=true;
         this.observeObject = ob;
@@ -69,7 +68,6 @@ export default class Camera {
             throw '摄像机未绑定对象'
 
     }
-
     public translateC(choice=true): boolean {
         if (!this.observeObject)
             throw '摄像机未绑定对象'

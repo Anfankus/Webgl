@@ -83,7 +83,7 @@ void main()
             else if(bTexCoord==4)
                gl_FragColor = fColor*texture2D(u_texture3,v_texcoord);
             else if(bTexCoord==5)
-               gl_FragColor = fColor*texture2D(u_texture4,v_texcoord);
+               gl_FragColor = texture2D(u_texture4,v_texcoord);
             else gl_FragColor = fColor;
         }
 
