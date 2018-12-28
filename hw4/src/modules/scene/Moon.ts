@@ -16,6 +16,6 @@ export class Moon extends Light {
         this.lightDiffuse = Util.Hex2Vec4('0x4a4a8f');
         this.lightSpecular = Util.Hex2Vec4('0xbbbbbb');
         this.material=new MoonMaterial;
-        this.setChoice(0);
+        this.setChoice(2);
     }
 }
