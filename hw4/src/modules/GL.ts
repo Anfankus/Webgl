@@ -8,7 +8,7 @@ import { Util } from './Util';
 
 
 import p1 from "../../image/grass2.jpg";
-import p2 from "../../image/sun.jpg";
+import p2 from "../../image/timg.jpg";
 import p3 from "../../image/sky.jpg";
 import p4 from "../../image/huaw-2.jpg";
 import p5 from "../../image/star.jpg";
