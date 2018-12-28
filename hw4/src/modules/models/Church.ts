@@ -77,8 +77,7 @@ export class Church extends Translatable implements Drawable,Collisible,Shaded {
         for(let i in this.building){
             this.building[i].setMaterial(new ChurchMaterial)
         }
-        this.collision=new Collision(ImpactType.ball,3);
-        this.collision.setPosition(this.position);
+        this.collision=new Collision(ImpactType.ball,5,this);
     }
     initBuffer(gl: GL): void {
 
@@ -157,5 +156,8 @@ export class Church extends Translatable implements Drawable,Collisible,Shaded {
     setMaterial(m: Material) {
         this.material = m;
     }
-
+    zoom(size:number){
+        super.zoom(size,true);
+        this.collision.zoom(size);
+    }
 }
