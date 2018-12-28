@@ -204,9 +204,8 @@ let vue = new Vue({
                     if (gl.impactChecking(but)) {
                         prompt("你可爱的小蝴蝶🦋撞到了建筑物，请刷新界面重新开始吧！\n(如果点击刷新页面没有反应，再点一下确定就可以啦！）\n如果有什么问题，可以向我们提出😁\n联系方式：QQ:2466526388");
                         window.location.reload();
-                        self.move ? self.switchState() : true;                      
-                    }             
-                    degree += relatedDegree;
+                        self.move ? self.switchState() : true;
+                    }
                     gl.drawScene();
 
                 }else{
