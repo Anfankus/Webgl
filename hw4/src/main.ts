@@ -19,7 +19,7 @@ import Void from './modules/models/Void';
 //
 alert(' 使用提示：\n 开始游戏：p  视角切换：b  视角锁定：f \n 向上运动：space  左：←  右：→\n 用鼠标选中界面并拖动即可切换视角，滑动滚轮即可放大和缩小\n 未绑定视角时可以使用w,a,s,d移动视野中心\n 如果你已了解，那么请开始吧！💪');
 
-let but = new ButterFly; but.translate(-10, 1); but.translate(5, 2); but.translate(-2, 3); but.rotate(90, true, 5); but.rotate(90, true, 4);
+let but = new ButterFly; but.translate(-10, 1); but.translate(5, 2); but.translate(-2, 3); but.rotate(180, true, 5); but.rotate(90, true, 4);
 let ball = new Ellipsoid(30, 50, [0, 0, 0], '0xfffff'); ball.setMaterial(new MetalMaterial); ball.translate(150, 2);
 let ground = new Ground([0, 0, 0], 500); ground.setMaterial(new GroundMaterial);
 //let church = new Church([10, -20, 0]); church.setMaterial(new MetalMaterial);
@@ -152,7 +152,8 @@ let vue = new Vue({
                     let lastTime = now - then;
                     //翅膀扇动
                     let relatedDegree = (lastTime * (flap + 2)) * flap * 50;
-                    if (Math.abs(degree + relatedDegree) > range / 2) {
+                    let n=Math.abs((degree + relatedDegree+90)%180-90)
+                    if (n> range / 2) {
                         relatedDegree *= -1;
                         flap *= -1;
                     }
