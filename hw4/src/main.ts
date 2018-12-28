@@ -5,10 +5,7 @@ import { ButterFly } from './modules/models/Butterfly';
 import { Ground } from './modules/models/Ground';
 import { House } from './modules/models/House';
 import { Ellipsoid } from './modules/models/Basis/Ellipsoid';
-import { rotateY, rotateX, rotateZ } from './modules/MV';
-import { Util } from './modules/Util';
 import { Church } from './modules/models/Church';
-import { NoneMaterial } from './modules/materials/NoneMaterial';
 import { MetalMaterial } from './modules/materials/MetalMaterial';
 import { GroundMaterial } from './modules/materials/GroundMaterial';
 import { Sun } from './modules/scene/Sun';
@@ -19,9 +16,14 @@ import { Tri_prism } from './modules/models/Basis/Tri_prism';
 import { Rect_pyramid } from './modules/models/Basis/Rect_pyramid';
 import { Moon } from './modules/scene/Moon';
 //
-alert(' 使用提示：\n 开始游戏：p  视角切换：b  视角锁定：f \n 向上运动：space  左：←  右：→\n 用鼠标选中界面并拖动即可切换视角，滑动滚轮即可放大和缩小\n 未绑定视角时可以使用w,a,s,d移动视野中心\n 如果你已了解，那么请开始吧！💪');
+alert(`使用提示:
+开始游戏：p  视角切换：b  视角锁定：f
+向上运动：space  左：←  右：→
+用鼠标选中界面并拖动即可切换视角，滑动滚轮即可放大和缩小
+未绑定视角时可以使用w,a,s,d移动视野中心
+如果你已了解，那么请开始吧！💪`);
 
-let but = new ButterFly; but.translate(-10, 1); but.translate(5, 2); but.translate(-2, 3); but.rotate(180, true, 5); but.rotate(90, true, 4);
+let but = new ButterFly; but.translate(-15, 1); but.translate(5, 2); but.rotate(180, true, 5); but.rotate(90, true, 4);
 let ball = new Ellipsoid(30, 50, [0, 0, 0], '0xfffff'); ball.setMaterial(new MetalMaterial); ball.translate(150, 2);
 let ground = new Ground([0, 0, 0], 500); ground.setMaterial(new GroundMaterial);
 // let church =new Rect_pyramid(1.5, 1.2, [ - 1-2,  5.9999, + 1+2],null); church.setMaterial(new MetalMaterial);
@@ -204,9 +206,10 @@ let vue = new Vue({
                     }
                     //碰撞检测
                     if (gl.impactChecking(but)) {
-                        prompt("你可爱的小蝴蝶🦋撞到了建筑物，请刷新界面重新开始吧！\n(如果点击刷新页面没有反应，再点一下确定就可以啦！）\n如果有什么问题，可以向我们提出😁\n联系方式：QQ:2466526388");
+                        alert("你可爱的小蝴蝶🦋撞到了建筑物，请刷新界面重新开始吧！\n(如果点击刷新页面没有反应，再点一下确定就可以啦！）\n如果有什么问题，可以向我们提出😁\n联系方式：QQ:2466526388");
                         window.location.reload();
                         self.move ? self.switchState() : true;
+                        return;
                     }
                     gl.drawScene();
 
@@ -275,19 +278,16 @@ if (ele) {
     window.onkeydown = function (e) {
         switch (e.keyCode) {
             case 32://空格
-                stateButterFly.speedY += but.fly(stateButterFly.speedX);
+                if(vue.move)
+                    stateButterFly.speedY += but.fly(stateButterFly.speedX);
                 break;
             case 37://←
-                but.rotate(-5, true, 5);
-                break;
-            case 38://↑
-                but.translate(0.3, 0);
+                if(vue.move)
+                    but.rotate(-5, true, 5);
                 break;
             case 39://→
-                but.rotate(5, true, 5);
-                break;
-            case 40://↓
-                but.translate(-0.3, 0);
+                if(vue.move)
+                    but.rotate(5, true, 5);
                 break;
             case 104:
                 vue.glOb.currentLight.translate(8, 2);

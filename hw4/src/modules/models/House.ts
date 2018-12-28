@@ -74,8 +74,7 @@ export class House extends Translatable implements Drawable,Collisible,Shaded{//
         for(let i in this.window){
             this.window[i].setMaterial(new WindowMaterial)
         }
-        this.collision=new Collision(ImpactType.ball,4);
-        this.collision.setPosition(this.position);
+        this.collision=new Collision(ImpactType.ball,4,this);
     }
     initBuffer(gl: GL): void {
 
@@ -166,6 +165,10 @@ export class House extends Translatable implements Drawable,Collisible,Shaded{//
     }
     setMaterial(m: Material) {
         this.material=m;
+    }
+    zoom(size:number){
+        super.zoom(size,true);
+        this.collision.zoom(size);
     }
 
 }
