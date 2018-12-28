@@ -1,6 +1,6 @@
 import Drawable from "../interface/Drawable";
 import GL from '../GL'
-import { mat4, flatten } from "../MV";
+import { mat4, flatten, mult, translate } from "../MV";
 import {Material} from "../interface/Material";
 import {Util} from "../Util";
 import {NoneMaterial} from "../materials/NoneMaterial";
@@ -11,13 +11,12 @@ import { Cube } from "./Basis/Cube";
 import { Tri_prism } from "./Basis/Tri_prism";
 import { SunMaterial } from "../materials/SunMaterial";
 import { SkyMaterial } from "../materials/SkyMaterial";
+import Shaded from "../interface/Shaded";
 
-export class House extends Translatable implements Drawable,Collisible{//size = 9*7 center(3.5,-2.5)
+export class House extends Translatable implements Drawable,Collisible,Shaded{//size = 9*7 center(3.5,-2.5)
     collision:Collision;
     material: Material;
-    setMaterial(m: Material) {
-        this.material=m;
-    }
+    shaded:boolean;
     buffers: any;
     public building:Array<Cube>;
     public roof:Array<Tri_prism>;
@@ -56,7 +55,7 @@ export class House extends Translatable implements Drawable,Collisible{//size = 
         this.collision.setPosition(this.position);
     }
     initBuffer(gl: GL): void {
-       
+
         for(let i in this.building){
             this.building[i].initBuffer(gl)
         }
@@ -83,6 +82,7 @@ export class House extends Translatable implements Drawable,Collisible{//size = 
   draw(gl: GL, self: boolean = true): void {
         let _gl = gl.gl;
         _gl.uniform1i(gl.programInfo.uniformLocations.bTexCoordLocation, 0);
+        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.normalMatrixLoc, false, flatten(this.rotateMatrix));
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));
 
         //building
@@ -105,64 +105,44 @@ export class House extends Translatable implements Drawable,Collisible{//size = 
          for (let i in this.wall) {
              this.wall[i].draw(gl,false)
          }
-
-        
-
-    }
-    public rotate(delta: number, related = true, axisType = 0): boolean {
-        for(let i in this.window){
-            this.window[i].rotate(delta,related,axisType)
+         if(this.shaded){
+            this.drawShadow(gl,false);
         }
-        for(let i in this.building){
-            this.building[i].rotate(delta,related,axisType)
-        }
-        for(let i in this.roof){
-            this.roof[i].rotate(delta,related,axisType)
-        }
-        for(let i in this.door){
-            this.door[i].rotate(delta,related,axisType)
-        }
-        for(let i in this.wall){
-            this.wall[i].rotate(delta,related,axisType)
-        }
-        return super.rotate(delta, related, axisType);
 
     }
-    public translate(distance: number, direction: number, related = true) {
-        for(let i in this.window){
-            this.window[i].translate(distance, direction, related)
-        }
-        for(let i in this.building){
-            this.building[i].translate(distance, direction, related)
-        }
-        for(let i in this.roof){
-            this.roof[i].translate(distance, direction, related)
-        }
-        for(let i in this.door){
-            this.door[i].translate(distance, direction, related)
-        }
-        for(let i in this.wall){
-            this.wall[i].translate(distance, direction, related)
-        }
-        return super.translate(distance, direction, related);
+    setShaded(): void {
+        this.shaded=true;
     }
-    public zoom(size: number, related: boolean){
-        for(let i in this.window){
-            this.window[i].zoom(size,related)
-        }
-        for(let i in this.building){
-            this.building[i].zoom(size,related)
-        }
-        for(let i in this.roof){
-            this.roof[i].zoom(size,related)
-        }
-        for(let i in this.door){
-            this.door[i].zoom(size,related)
-        }
-        for(let i in this.wall){
-            this.wall[i].zoom(size,related)
-        }
-        this.collision.zoom(size);
-        return super.zoom(size,related);
+    clearShaded(): void {
+        this.shaded=false;
     }
+    drawShadow(gl: GL, self: boolean): void {
+        let _gl=gl.gl;
+        let transMatrix = mat4();
+        transMatrix =mult(translate(...Util.Mat4Vec(mat4(-1),gl.currentLight.position)),this.modelMatrix);
+        let m=mat4();
+        m[3][3]=0;
+        m[3][1]=-1/(gl.currentLight.position[1]-0.1);
+        transMatrix=mult(m,transMatrix);
+        transMatrix = mult(translate(...gl.currentLight.position), transMatrix);
+        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(transMatrix));
+        _gl.uniform1i(gl.programInfo.uniformLocations.bTexCoordLocation, -1);
+
+        for (let i in this.building) {
+            this.building[i].drawShadow(gl,false);
+        }
+        //roof
+        for (let i in this.roof) {
+            this.roof[i].drawShadow(gl,false)
+        }
+         //wall
+         for (let i in this.wall) {
+            this.wall[i].drawShadow(gl,false)
+        }
+
+    }
+    setMaterial(m: Material) {
+        this.material=m;
+    }
+
 }

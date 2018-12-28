@@ -58,7 +58,7 @@ export default class Camera {
     public bind(ob: Translatable) {
         this.ret=true;
         this.observeObject = ob;
-        this.baseEye=vec4(ob.position[0],ob.position[1]-10,ob.position[2]-10,1);
+        this.baseEye=vec4(ob.position[0]+10,ob.position[1]-10,ob.position[2]-5,1);
         this.at=vec3(ob.position[0],ob.position[1],ob.position[2]);
     }
     public release(){
@@ -78,7 +78,7 @@ export default class Camera {
             this.at = this.observeObject.position.slice(0, 3);
             this.up = this.observeObject.direction.slice(0, 3);
             let tempVec = Util.Mat4Vec(this.observeObject.modelMatrix, this.baseEye);
-            this.nowEye = vec3(tempVec[0], tempVec[1], tempVec[2]);
+            this.nowEye = vec3(tempVec[0], this.at[1]+5, tempVec[2]);
             this.cameraMatrix = lookAt(this.nowEye, this.at, this.up);
         }
 

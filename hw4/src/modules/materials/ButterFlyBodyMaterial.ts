@@ -10,9 +10,9 @@ export class ButterFlyBodyMaterial implements Material {
 
   constructor() {
     this.materialAmbient = Util.Hex2Vec4('0x202020');
-    this.materialDiffuse = vec4(0.6, 0.4, 0.4,1.0)
-    this.materialSpecular = Util.Hex2Vec4('0x2f2f2f')
-    this.materialShininess = 50.0;
+    this.materialDiffuse = Util.Hex2Vec4('0x030303');
+    this.materialSpecular = Util.Hex2Vec4('0x444444');
+    this.materialShininess = 5.0;
 
   }
 }

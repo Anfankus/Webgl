@@ -1,6 +1,6 @@
 import Drawable from "../interface/Drawable";
 import GL from '../GL'
-import { mat4, flatten } from "../MV";
+import { mat4, flatten, mult, translate } from "../MV";
 import { Material } from "../interface/Material";
 import { NoneMaterial } from "../materials/NoneMaterial";
 import { Util } from "../Util";
@@ -11,12 +11,11 @@ import { Cube } from "./Basis/Cube";
 import { Tri_prism } from "./Basis/Tri_prism";
 import { Rect_pyramid } from "./Basis/Rect_pyramid";
 import { HalfCircle3D } from "./Basis/HalfCircle3D";
-export class Church extends Translatable implements Drawable,Collisible {
+import Shaded from "../interface/Shaded";
+export class Church extends Translatable implements Drawable,Collisible,Shaded {
+    shaded: boolean;
     collision:Collision;
     material: Material;
-    setMaterial(m: Material) {
-        this.material = m;
-    }
     buffers: any;
     public building: Array<Cube>;
     public roof: Array<any>;
@@ -26,6 +25,7 @@ export class Church extends Translatable implements Drawable,Collisible {
         super();
         //let [x, y, z] = position;
         this.material = new NoneMaterial;
+        this.shaded=false;
         this.building = [
             new Cube(4, 5, 4, [0, 0, 0],null),
             new Cube(1.5, 6, 1.5, [- 1, 0,  1],null),
@@ -69,7 +69,7 @@ export class Church extends Translatable implements Drawable,Collisible {
         }
         //roof
         for (let i in this.roof) {
-            this.roof[i].initBuffer(gl)   
+            this.roof[i].initBuffer(gl)
         }
         //door
         for (let i in this.door) {
@@ -79,12 +79,13 @@ export class Church extends Translatable implements Drawable,Collisible {
         for (let i in this.window) {
             this.window[i].initBuffer(gl)
         }
-        
+
 
     }
     draw(gl: GL, self: boolean = true): void {
         let _gl = gl.gl;
         _gl.uniform1i(gl.programInfo.uniformLocations.bTexCoordLocation, 0);
+        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.normalMatrixLoc, false, flatten(this.rotateMatrix));
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));
 
         //building
@@ -103,55 +104,39 @@ export class Church extends Translatable implements Drawable,Collisible {
         for (let i in this.window) {
             this.window[i].draw(gl,false)
         }
-    }
-    public rotate(delta: number, related = true, axisType = 0): boolean {
-        for(let i in this.window){
-            this.window[i].rotate(delta,related,axisType)
+        if(this.shaded){
+            this.drawShadow(gl,false);
         }
-        for(let i in this.building){
-            this.building[i].rotate(delta,related,axisType)
-        }
-        for(let i in this.roof){
-            this.roof[i].rotate(delta,related,axisType)
-        }
-        for(let i in this.door){
-            this.door[i].rotate(delta,related,axisType)
-        }
-        
-        return super.rotate(delta, related, axisType);
 
     }
-    public translate(distance: number, direction: number, related = true) {
-        for(let i in this.window){
-            this.window[i].translate(distance, direction, related)
-        }
-        for(let i in this.building){
-            this.building[i].translate(distance, direction, related)
-        }
-        for(let i in this.roof){
-            this.roof[i].translate(distance, direction, related)
-        }
-        for(let i in this.door){
-            this.door[i].translate(distance, direction, related)
-        }
-        
-        return super.translate(distance, direction, related);
+    setShaded(): void {
+        this.shaded=true;
     }
-    public zoom(size: number, related: boolean){
-        for(let i in this.window){
-            this.window[i].zoom(size,related)
-        }
-        for(let i in this.building){
-            this.building[i].zoom(size,related)
-        }
-        for(let i in this.roof){
-            this.roof[i].zoom(size,related)
-        }
-        for(let i in this.door){
-            this.door[i].zoom(size,related)
-        }
-        this.collision.zoom(size);
-        return super.zoom(size,related);
+    clearShaded(): void {
+        this.shaded=false;
+    }
+    drawShadow(gl: GL, self: boolean): void {
+        let _gl=gl.gl;
+        let transMatrix = mat4();
+        transMatrix =mult(translate(...Util.Mat4Vec(mat4(-1),gl.currentLight.position)),this.modelMatrix);
+        let m=mat4();
+        m[3][3]=0;
+        m[3][1]=-1/(gl.currentLight.position[1]-0.1);
+        transMatrix=mult(m,transMatrix);
+        transMatrix = mult(translate(...gl.currentLight.position), transMatrix);
+        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(transMatrix));
+        _gl.uniform1i(gl.programInfo.uniformLocations.bTexCoordLocation, -1);
 
+        for (let i in this.building) {
+            this.building[i].drawShadow(gl,false);
+        }
+        //roof
+        for (let i in this.roof) {
+            this.roof[i].drawShadow(gl,false)
+        }
     }
+    setMaterial(m: Material) {
+        this.material = m;
+    }
+
 }

@@ -71,12 +71,13 @@ export class ButterFly extends Translatable implements Drawable,Collisible,Shade
 
         this.LeftWing.initBuffer(gl);
         this.RightWing.initBuffer(gl);
-        this.body.setMaterial(new ButterFlyBodyMaterial);
+        this.body.setMaterial(new ButterFlyBodyMaterial);this.body.setChoice(0);
     }
 
-    public draw(gl: GL, self: boolean = true): void {        
+    public draw(gl: GL, self: boolean = true): void {
         let _gl = gl.gl;
         _gl.uniform1i(gl.programInfo.uniformLocations.bTexCoordLocation, 0);
+        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.normalMatrixLoc, false, flatten(this.rotateMatrix));
         _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(this.modelMatrix));
         _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
         //lines
@@ -125,10 +126,10 @@ export class ButterFly extends Translatable implements Drawable,Collisible,Shade
         _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
 
         //body
-        this.body.drawShadow(gl);
+        this.body.drawShadow(gl,false);
         //wings
-        this.LeftWing.drawShadow(gl);
-        this.RightWing.drawShadow(gl);
+        this.LeftWing.drawShadow(gl,true);
+        this.RightWing.drawShadow(gl,true);
 
     }
 
