@@ -3,9 +3,12 @@ import Drawable from "../../interface/Drawable";
 import { Material } from "../../interface/Material";
 import GL from "../../GL";
 import { Util } from "../../Util";
-import { flatten } from "../../MV";
+import { flatten, mat4, mult, translate, subtract, cross, dot, negate, normalize, add, scale } from "../../MV";
 import { NoneMaterial } from "../../materials/NoneMaterial";
-export class Tri_prism extends Translatable implements Drawable {
+import Shaded from "../../interface/Shaded";
+export class Tri_prism extends Translatable implements Drawable,Shaded {
+    shaded: boolean
+    choice: number
     buffers: any;
     material: Material;
     public vertices: Array<number>;
@@ -14,6 +17,8 @@ export class Tri_prism extends Translatable implements Drawable {
     constructor(s = 5,h = 3,l = 5,a = [0,0,0],color: string | Array<number>){
         super();
         this.material = new NoneMaterial
+        this.choice = 0;
+        this.shaded = false
         let b = [a[0]+s,a[1],a[2]];
         let c = [a[0]+s,a[1],a[2]-l];
         let d = [a[0],a[1],a[2]-l];
@@ -33,11 +38,9 @@ export class Tri_prism extends Translatable implements Drawable {
             ...a,...b,...c,
             ...a,...d,...c,
         ];
-        this.normals = [
+        this.normals = [//da[0,0,-l]ae[s/2,-h,0]
             0,0,1, 0,0,1, 0,0,1,
-
             0,0,-1, 0,0,-1, 0,0,-1,
-
             2*h/Math.sqrt(4*h**2+s**2),s/Math.sqrt(4*h**2+s**2),0,
             2*h/Math.sqrt(4*h**2+s**2),s/Math.sqrt(4*h**2+s**2),0,
             2*h/Math.sqrt(4*h**2+s**2),s/Math.sqrt(4*h**2+s**2),0,
@@ -55,6 +58,7 @@ export class Tri_prism extends Translatable implements Drawable {
             0,-1,0, 0,-1,0, 0,-1,0,
             0,-1,0, 0,-1,0, 0,-1,0,
         ];
+        
     }
     initBuffer(gl:GL):void{
         let _gl = gl.gl;
@@ -92,13 +96,59 @@ export class Tri_prism extends Translatable implements Drawable {
         _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.normal);
         _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexNormal, 3, _gl.FLOAT, false, 0, 0);
 
-        _gl.drawArrays(_gl.TRIANGLE_STRIP, 0, this.vertices.length / 3)
+        _gl.drawArrays(_gl.TRIANGLES, 0, this.vertices.length / 3)
 
         _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexNormal);
-         //this.drawNormals(gl);
-         _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
+        //  this.drawNormals(gl);
+        _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
+         
+        if(this.shaded){
+            this.drawShadow(gl);
+        }
     }
     setMaterial(m: Material){
         this.material = m;
     }
+    drawShadow(gl: GL): void {
+        let _gl=gl.gl;
+        let transMatrix = mat4();
+        transMatrix =mult(translate(...Util.Mat4Vec(mat4(-1),gl.currentLight.position)),this.modelMatrix);
+        let m=mat4();
+        m[3][3]=0;
+        m[3][1]=-1/(gl.currentLight.position[1]-0.01);
+        transMatrix=mult(m,transMatrix);
+        transMatrix = mult(translate(...gl.currentLight.position), transMatrix);
+        _gl.uniformMatrix4fv(gl.programInfo.uniformLocations.modelViewMatrix, false, flatten(transMatrix));
+
+        _gl.enableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, this.buffers.position);
+        _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
+        _gl.drawArrays(_gl.TRIANGLE_STRIP, 0, this.vertices.length / 3)
+        _gl.disableVertexAttribArray(gl.programInfo.attribLocations.vertexPosition);
+    }
+    setChoice(c:number) {
+        this.choice=c;
+    }
+    setShaded(): void {
+        this.shaded=true;
+    }
+    clearShaded():void{
+        this.shaded=false;
+    }
+    drawNormals(gl: GL): void {
+        let _gl = gl.gl;
+        let tempbuf = _gl.createBuffer();
+        let v = [];
+        for (let i = 0; i < this.vertices.length; i += 3) {
+            let point = this.vertices.slice(i, i + 3);
+            let vec = this.normals.slice(i, i + 3);
+            v.push(...point, ...add(point, scale(2, vec)));
+        }
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, tempbuf);
+        _gl.bufferData(_gl.ARRAY_BUFFER, new Float32Array(v), _gl.STATIC_DRAW)
+        _gl.vertexAttribPointer(gl.programInfo.attribLocations.vertexPosition, 3, _gl.FLOAT, false, 0, 0);
+        _gl.drawArrays(_gl.LINES, 0, v.length / 3)
+
+    }
+
 }
