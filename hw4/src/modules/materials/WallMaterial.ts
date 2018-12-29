@@ -9,9 +9,9 @@ export class WallMaterial implements Material{
     materialSpecular: number[];
     materialShininess: number;
     constructor(){
-      this.materialAmbient = Util.Hex2Vec4('0x0');
+      this.materialAmbient = Util.Hex2Vec4('0x6f6f6f');
         this.materialDiffuse = Util.Hex2Vec4('0x808080');
         this.materialSpecular = Util.Hex2Vec4('0x0');
-        this.materialShininess = 200.0;
+        this.materialShininess = 5.0;
     }
 }

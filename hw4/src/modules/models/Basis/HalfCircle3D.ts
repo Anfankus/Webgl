@@ -17,15 +17,17 @@ export class HalfCircle3D extends Translatable implements Drawable,Shaded {
     constructor(a = 0.5, b = 0.5, center = [0, 0, 0], frag = 30,color: string | Array<number>) {
         super();
         this.material = new WindowMaterial
-        let radian = Math.PI;
+        let radian = Math.PI+1;
         let eachDegree = radian / frag;
         this.vertices = [];
         this.normals=[];
-        let [, , _z] = center;
+        let [_x, _y, _z] = center;
 
         for (let i = 0; i <= radian; i += eachDegree) {
             let [x,y,z]=[center[0] + Math.cos(i) * a, center[1] + Math.sin(i) * b, _z]
             this.vertices.push(x,y,z);
+            this.vertices.push(_x,_y,_z);
+            this.normals.push(x/a**2,y/b**2,0);
             this.normals.push(x/a**2,y/b**2,0);
         }
     }

@@ -16,6 +16,7 @@ import { WindowMaterial } from "../materials/WindowMaterial";
 import { ChurchMaterial } from "../materials/ChurchMaterial";
 import { HouseRoofMaterial } from "../materials/HouseRoofMaterial";
 import { GateMaterial } from "../materials/GateMaterial";
+import { ChurchRoofMaterial } from "../materials/ChurchRoofMaterial";
 export class Church extends Translatable implements Drawable,Collisible,Shaded {
     collision:Collision;
     material: Material;
@@ -46,27 +47,27 @@ export class Church extends Translatable implements Drawable,Collisible,Shaded {
             new Rect_pyramid(1.5, 1.2, [ + 3.5-2,  + 5.9999,  - 3.5+2],null)
         ];
         this.door = [
-            new Cube(1.8, 2, 0.01, [ + 1.1-2,  + 0,  + 0.005+2],null),
-            new HalfCircle3D(0.9, 0.9, [ + 2-2,  + 2,  + 0.00001+2],30,null),
+            new Cube(1.8, 2, 0.05, [ + 1.1-2,  + 0,  + 0.03+2],null),
+            new HalfCircle3D(0.9, 0.9, [ + 2-2,  + 2,  + 0.01+2],30,null),
         ];
         this.window = [
-            new Cube(0.6, 0.8, 0.01, [ - 0.55-2, 0,  + 1.005+2],null),
-            new HalfCircle3D(0.3, 0.3, [ - 0.25-2,  + 0.8,  + 1.0001+2],30,null),
-            new Cube(0.6, 0.8, 0.01, [ - 0.55-2,  + 2,  + 1.005+2],null),
-            new HalfCircle3D(0.3, 0.3, [ - 0.25-2,  + 2.8,  + 1.0001+2],30,null),
-            new Cube(0.6, 0.8, 0.01, [ - 0.55-2,  + 4,  + 1.005+2],null),
-            new HalfCircle3D(0.3, 0.3, [ - 0.25-2,  + 4.8,  + 1.0001+2],30,null),
-            new Cube(0.6, 0.8, 0.01, [ + 3.95-2, 0,  + 1.005+2],null),
-            new HalfCircle3D(0.3, 0.3, [ + 4.25-2,  + 0.8,  + 1.0001+2],30,null),
-            new Cube(0.6, 0.8, 0.01, [ + 3.95-2,  + 2,  + 1.005+2],null),
-            new HalfCircle3D(0.3, 0.3, [ + 4.25-2,  + 2.8,  + 1.0001+2],30,null),
-            new Cube(0.6, 0.8, 0.01, [ + 3.95-2,  + 4,  + 1.005+2],null),
-            new HalfCircle3D(0.3, 0.3, [ + 4.25-2,  + 4.8,  + 1.0001+2],30,null),
+            new Cube(0.6, 0.8, 0.05, [ - 0.55-2, 0,  + 1.03+2],null),
+            new HalfCircle3D(0.3, 0.3, [ - 0.25-2,  + 0.8,  + 1.01+2],30,null),
+            new Cube(0.6, 0.8, 0.05, [ - 0.55-2,  + 2,  + 1.03+2],null),
+            new HalfCircle3D(0.3, 0.3, [ - 0.25-2,  + 2.8,  + 1.01+2],30,null),
+            new Cube(0.6, 0.8, 0.05, [ - 0.55-2,  + 4,  + 1.03+2],null),
+            new HalfCircle3D(0.3, 0.3, [ - 0.25-2,  + 4.8,  + 1.01+2],30,null),
+            new Cube(0.6, 0.8, 0.05, [ + 3.95-2, 0,  + 1.03+2],null),
+            new HalfCircle3D(0.3, 0.3, [ + 4.25-2,  + 0.8,  + 1.01+2],30,null),
+            new Cube(0.6, 0.8, 0.05, [ + 3.95-2,  + 2,  + 1.03+2],null),
+            new HalfCircle3D(0.3, 0.3, [ + 4.25-2,  + 2.8,  + 1.01+2],30,null),
+            new Cube(0.6, 0.8, 0.05, [ + 3.95-2,  + 4,  + 1.03+2],null),
+            new HalfCircle3D(0.3, 0.3, [ + 4.25-2,  + 4.8,  + 1.01+2],30,null),
         ]
         for(let i in this.roof){
-            this.roof[i].setMaterial(new HouseRoofMaterial)
+            this.roof[i].setMaterial(new ChurchRoofMaterial)
         }
-        this.roof[0].setMaterial(new ChurchMaterial)
+        //this.roof[0].setMaterial(new ChurchMaterial)
         for(let i in this.window){
             this.window[i].setMaterial(new WindowMaterial)
         }

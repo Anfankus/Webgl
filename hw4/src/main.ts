@@ -15,7 +15,6 @@ import Void from './modules/models/Void';
 import { Tri_prism } from './modules/models/Basis/Tri_prism';
 import { Rect_pyramid } from './modules/models/Basis/Rect_pyramid';
 import { Moon } from './modules/scene/Moon';
-//
 alert(`使用提示:
 开始游戏：p  视角切换：b  视角锁定：f
 向上运动：space  左：←  右：→
@@ -242,9 +241,69 @@ let vue = new Vue({
         }
     }
 })
-let mousedown = false;
+let mousedown = false,touched=false,touchNum=0;
+let lastTouch={
+    screenX:[],
+    screenY:[]
+}
 let ele = document.getElementById('gl-canvas');
 if (ele) {
+    ele.ontouchstart=(e)=>{
+        //e.preventDefault();
+        touched=true;
+        touchNum=e.touches.length;
+        for(let i=0;i<e.touches.length;i++){
+            lastTouch.screenX[i]=e.touches[i].screenX;
+            lastTouch.screenY[i]=e.touches[i].screenY;
+        }
+    }
+    ele.ontouchmove=function(e){
+        if(touchNum==2){
+            let touch1=e.touches[0],touch2=e.touches[1];
+            e.preventDefault();
+            let movementX = [touch1.screenX - lastTouch.screenX[0],touch2.screenX - lastTouch.screenX[1]],
+                movementY = [touch1.screenY - lastTouch.screenY[0],touch2.screenY - lastTouch.screenY[1]];
+
+            if(movementX[0]*movementX[1]>0&&movementY[0]*movementY[1]>0){
+                let movX=(movementX[0]+movementX[1])/2,movY=(movementY[0]+movementY[1])/2;
+                vue.theta = ((vue.theta) + (movX) * -0.3) % 360;
+                if (movY >= 0 || vue.phi > 0) {
+                    vue.phi = ((vue.phi) + (movY) * 0.3) % 360;
+                }
+            } else {
+                let relativeDist = Math.sqrt(Math.pow(touch1.screenX - touch2.screenX, 2) + Math.pow(touch1.screenY - touch2.screenY, 2)) -
+                    Math.sqrt(Math.pow(lastTouch.screenX[0] - lastTouch.screenX[1], 2) + Math.pow(lastTouch.screenY[0] - lastTouch.screenY[1], 2))
+                if (vue.bound && vue.fixed) {
+                    return;
+                }
+                let temp = 0;
+                if (5 < vue.radius && vue.radius < 50) {
+                    temp = (vue.radius) - relativeDist / 10;
+                } else if (vue.radius <= 5) {
+                    temp = (vue.radius) - relativeDist / 100;
+                } else {
+                    temp = (vue.radius) - relativeDist;
+                }
+                if (temp <= 0)
+                    return;
+                vue.radius = temp;
+            }
+        }
+        for(let i=0;i<e.touches.length;i++){
+            lastTouch.screenX[i]=(e.touches[i].screenX);
+            lastTouch.screenY[i]=(e.touches[i].screenY);
+        }
+
+    }
+    ele.ontouchend=(e)=>{
+        //e.preventDefault();
+        touched=false;
+        touchNum=0;
+        lastTouch={
+            screenX:[],
+            screenY:[]
+        }
+    }
     ele.onmousedown = function (e) {
         mousedown = true;
     };

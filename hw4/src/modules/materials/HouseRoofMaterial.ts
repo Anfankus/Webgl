@@ -8,9 +8,9 @@ export class HouseRoofMaterial implements Material{
     materialSpecular: number[];
     materialShininess: number;
     constructor(){
-      this.materialAmbient = Util.Hex2Vec4('0x0');
-        this.materialDiffuse = Util.Hex2Vec4('0x642100');
+      this.materialAmbient = Util.Hex2Vec4('0xd3866c');
+        this.materialDiffuse = Util.Hex2Vec4('0xf5a88e');
         this.materialSpecular = Util.Hex2Vec4('0xeeeeee');
-        this.materialShininess = 100.0;
+        this.materialShininess = 5.0;
     }
 }

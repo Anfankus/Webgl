@@ -8,8 +8,8 @@ export class GateMaterial implements Material{
     materialSpecular: number[];
     materialShininess: number;
     constructor(){
-      this.materialAmbient = Util.Hex2Vec4('0x0');
-        this.materialDiffuse = Util.Hex2Vec4('0xBB5E00');
+      this.materialAmbient = Util.Hex2Vec4('0x843f19');
+        this.materialDiffuse = Util.Hex2Vec4('0x95502a');
         this.materialSpecular = Util.Hex2Vec4('0x080808');
         this.materialShininess = 2.0;
     }

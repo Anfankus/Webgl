@@ -35,7 +35,7 @@ export class House extends Translatable implements Drawable,Collisible,Shaded{//
         //let [x,y,z] = position;
         this.material = new SkyMaterial;
         this.building = [
-            new Cube(5,3,4,[-3.5,0,2.5],null),
+            new Cube(5,3,4.5,[-3.5,0,2.5+0.25],null),
             new Cube(2,3,2.5,[4.9999-3.5,0,-1.5+2.5],null),
             new Cube(3,2.7,2.5,[0-3.5,2.9999,-1.5+2.5],null)
         ];
