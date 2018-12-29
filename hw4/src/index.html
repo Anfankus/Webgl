@@ -75,13 +75,13 @@ void main()
             if(bTexCoord==-1)
                 gl_FragColor=vec4(0,0,0,1);
             else if(bTexCoord==1)
-               gl_FragColor = texture2D(u_texture, v_texcoord);
+               gl_FragColor = fColor*texture2D(u_texture, v_texcoord);
             else if(bTexCoord==2)
-               gl_FragColor = texture2D(u_texture1, v_texcoord);
+               gl_FragColor = fColor*texture2D(u_texture1, v_texcoord);
             else if(bTexCoord==3)
-               gl_FragColor = texture2D(u_texture2,v_texcoord);
+               gl_FragColor = fColor*texture2D(u_texture2,v_texcoord);
             else if(bTexCoord==4)
-               gl_FragColor = texture2D(u_texture3,v_texcoord);
+               gl_FragColor = fColor*texture2D(u_texture3,v_texcoord);
             else if(bTexCoord==5)
                gl_FragColor = texture2D(u_texture4,v_texcoord);
             else gl_FragColor = fColor;
