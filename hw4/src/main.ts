@@ -15,12 +15,12 @@ import Void from './modules/models/Void';
 import { Tri_prism } from './modules/models/Basis/Tri_prism';
 import { Rect_pyramid } from './modules/models/Basis/Rect_pyramid';
 import { Moon } from './modules/scene/Moon';
-// alert(`使用提示:
-// 开始游戏：p  视角切换：b  视角锁定：f
-// 向上运动：space  左：←  右：→
-// 用鼠标选中界面并拖动即可切换视角，滑动滚轮即可放大和缩小
-// 未绑定视角时可以使用w,a,s,d移动视野中心
-// 如果你已了解，那么请开始吧！💪`);
+alert(`使用提示:
+开始游戏：p  视角切换：b  视角锁定：f
+向上运动：space  左：←  右：→
+用鼠标选中界面并拖动即可切换视角，滑动滚轮即可放大和缩小
+未绑定视角时可以使用w,a,s,d移动视野中心
+如果你已了解，那么请开始吧！💪`);
 
 let but = new ButterFly; but.translate(-15, 1); but.translate(5, 2); but.rotate(180, true, 5); but.rotate(90, true, 4);
 let ball = new Ellipsoid(30, 50, [0, 0, 0], '0xfffff'); ball.setMaterial(new MetalMaterial); ball.translate(150, 2);
